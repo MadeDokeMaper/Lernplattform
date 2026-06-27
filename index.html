@@ -3,416 +3,132 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Der Aufstieg der Medici – Interaktive Geschichte</title>
-  <script type="text/javascript" src="https://ff.kis.v2.scr.kaspersky-labs.com/FD126C42-EBFA-4E12-B309-BB3FDD723AC1/main.js?attr=vGxEAMgVo2Pf6BzjZ8I2-q7IPrdU-h9xNBhICbEiW1X087vRDkmuA8ql83t9AkdGXJnpiDieHmUlUpPjPtx8bsoKiNRmiDA_Uhwa5UIwh0rHmezL7PYiuK-xILMEYRyo" charset="UTF-8"></script><link rel="stylesheet" crossorigin="anonymous" href="https://ff.kis.v2.scr.kaspersky-labs.com/E3E8934C-235A-4B0E-825A-35A08381A191/abn/main.css?attr=aHR0cHM6Ly9tYW1tb3V0aC5haS9hcGkvYXR0YWNobWVudHMvOGM1YTUyMzYtODQ0ZS00ZWMxLWFmNWQtMDlhNmQ3MzBjM2ExL2ZpbGU"/><style>
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
-    body {
-      font-family: 'Segoe UI', Arial, sans-serif;
-      background: #f0e8d5;
-      color: #2c2c2c;
-      line-height: 1.6;
-    }
-
-    /* ── Header ── */
-    header {
-      background: linear-gradient(135deg, #6b1a1a, #8c2f2f);
-      color: #fff;
-      text-align: center;
-      padding: 2rem 1rem;
-    }
-    header h1 { font-size: 2rem; margin-bottom: 0.4rem; }
-    header p  { font-size: 1.1rem; opacity: 0.9; }
-
-    /* ── Wrapper ── */
-    .wrapper { max-width: 900px; margin: 0 auto; padding: 1.5rem 1rem; }
-
-    /* ── Intro ── */
-    .intro {
-      background: #fff;
-      border-left: 5px solid #8c2f2f;
-      padding: 1rem 1.2rem;
-      border-radius: 0 8px 8px 0;
-      margin-bottom: 2rem;
-      font-size: 1.05rem;
-    }
-
-    /* ── Timeline Navigation ── */
-    .timeline-nav {
-      display: flex;
-      justify-content: center;
-      gap: 0.5rem;
-      flex-wrap: wrap;
-      margin-bottom: 2rem;
-    }
-    .t-btn {
-      background: #8c2f2f;
-      color: #fff;
-      border: none;
-      padding: 0.6rem 1rem;
-      border-radius: 20px;
-      cursor: pointer;
-      font-size: 0.95rem;
-      font-weight: 600;
-      transition: background 0.2s, transform 0.1s;
-    }
-    .t-btn:hover { background: #6b1a1a; transform: translateY(-1px); }
-    .t-btn.active { background: #c0392b; box-shadow: 0 3px 8px rgba(0,0,0,0.25); }
-
-    /* ── Timeline Stage Panel ── */
-    .stage-panel {
-      background: #fff;
-      border-radius: 10px;
-      box-shadow: 0 3px 12px rgba(0,0,0,0.1);
-      padding: 1.5rem;
-      margin-bottom: 2rem;
-      display: none;
-      animation: fadeIn 0.3s ease;
-    }
-    .stage-panel.active { display: block; }
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(6px); }
-      to   { opacity: 1; transform: translateY(0); }
-    }
-
-    .stage-year {
-      display: inline-block;
-      background: #c0392b;
-      color: #fff;
-      padding: 0.2rem 0.7rem;
-      border-radius: 12px;
-      font-size: 0.85rem;
-      font-weight: 700;
-      margin-bottom: 0.6rem;
-    }
-    .stage-panel h2 { font-size: 1.4rem; color: #6b1a1a; margin-bottom: 0.6rem; }
-    .stage-panel p  { margin-bottom: 0.8rem; font-size: 1rem; }
-    .stage-panel ul { padding-left: 1.2rem; margin-bottom: 0.8rem; }
-    .stage-panel li { margin-bottom: 0.3rem; }
-
-    .person-card {
-      display: inline-block;
-      background: #f9f3eb;
-      border: 2px solid #8c2f2f;
-      border-radius: 10px;
-      padding: 0.5rem 0.8rem;
-      margin: 0.3rem 0.3rem 0.3rem 0;
-      font-size: 0.9rem;
-    }
-    .person-card strong { color: #6b1a1a; }
-
-    .stage-img {
-      width: 100%;
-      max-height: 200px;
-      background: #e8dcc8;
-      border-radius: 8px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: #8c2f2f;
-      font-size: 3.5rem;
-      margin-bottom: 0.8rem;
-      overflow: hidden;
-    }
-
-    /* ── Quiz Section ── */
-    .quiz-section {
-      background: linear-gradient(135deg, #6b1a1a, #8c2f2f);
-      border-radius: 12px;
-      padding: 1.8rem;
-      margin-bottom: 2rem;
-    }
-    .quiz-section h2 {
-      color: #fff;
-      font-size: 1.4rem;
-      margin-bottom: 1.2rem;
-      text-align: center;
-    }
-    .quiz-section p.note {
-      color: #f0d5c0;
-      text-align: center;
-      font-size: 0.9rem;
-      margin-bottom: 1.2rem;
-    }
-
-    .q-card {
-      background: rgba(255,255,255,0.12);
-      border-radius: 8px;
-      padding: 1rem;
-      margin-bottom: 1rem;
-      color: #fff;
-    }
-    .q-card h3 {
-      font-size: 1.05rem;
-      margin-bottom: 0.7rem;
-    }
-    .q-card h3 span {
-      background: rgba(255,255,255,0.25);
-      border-radius: 50%;
-      display: inline-block;
-      width: 26px;
-      height: 26px;
-      text-align: center;
-      line-height: 26px;
-      font-size: 0.85rem;
-      margin-right: 0.4rem;
-    }
-    .opt-btn {
-      display: block;
-      width: 100%;
-      background: rgba(255,255,255,0.15);
-      border: 2px solid rgba(255,255,255,0.3);
-      color: #fff;
-      padding: 0.6rem 0.9rem;
-      border-radius: 8px;
-      margin-bottom: 0.4rem;
-      cursor: pointer;
-      text-align: left;
-      font-size: 0.95rem;
-      transition: background 0.15s, border-color 0.15s;
-    }
-    .opt-btn:hover { background: rgba(255,255,255,0.28); }
-    .opt-btn.correct {
-      background: #27ae60;
-      border-color: #27ae60;
-    }
-    .opt-btn.wrong {
-      background: #c0392b;
-      border-color: #c0392b;
-    }
-    .opt-btn:disabled { cursor: default; }
-
-    .feedback {
-      margin-top: 0.5rem;
-      padding: 0.5rem 0.8rem;
-      border-radius: 6px;
-      font-size: 0.9rem;
-      display: none;
-    }
-    .feedback.show { display: block; }
-    .feedback.right  { background: #27ae60; }
-    .feedback.wrong  { background: #c0392b; }
-
-    #quiz-result {
-      text-align: center;
-      font-size: 1.15rem;
-      font-weight: 700;
-      color: #f0d5c0;
-      margin-top: 1rem;
-    }
-
-    /* ── Footer ── */
-    footer {
-      text-align: center;
-      padding: 1rem;
-      font-size: 0.85rem;
-      color: #777;
-    }
-  </style>
-</head>
+  <meta name="description" content="Geschichte Klasse 8 – Themen nach Rahmenplan Mecklenburg-Vorpommern. Interaktive Materialien und Übungen für Schülerinnen und Schüler.">
+  <title>Geschichte Klasse 8 | Mecklenburg-Vorpommern</title>
+  <link rel="stylesheet" href="styles.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Source+Sans+Pro:wght@400;500;600&display=swap" rel="stylesheet">
+<script type="text/javascript" src="https://ff.kis.v2.scr.kaspersky-labs.com/FD126C42-EBFA-4E12-B309-BB3FDD723AC1/main.js?attr=LFD3bbkLl4WKyZyHzvJRQLTXnK2Ue2GRYPaXzQt097FL1S04BqZ69KlXAFAYAfDHkU32qkHD-XXFJOTt_x-aNFXwB6u_3hjPr2KUWyO9O9mqiORh5m_6eFxGO8SizLdD" charset="UTF-8"></script><link rel="stylesheet" crossorigin="anonymous" href="https://ff.kis.v2.scr.kaspersky-labs.com/E3E8934C-235A-4B0E-825A-35A08381A191/abn/main.css?attr=aHR0cHM6Ly9tYW1tb3V0aC5haS9hcGkvYXR0YWNobWVudHMvZDQwN2Y2NDItYmM3ZS00NWNkLTlkZTEtNzY1Y2E0MWQ1NjRiL2ZpbGU"/></head>
 <body>
 
-<header>
-  <h1>👑 Der Aufstieg der Medici</h1>
-  <p>Eine Florentiner Familie, die Europa veränderte</p>
-</header>
+  <!-- Navigation -->
+  <nav class="navbar">
+    <div class="navbar-content">
+      <a href="index.html" class="navbar-brand">
+        <svg class="navbar-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+          <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+        </svg>
+        Geschichte Klasse 8
+      </a>
+      <div class="navbar-links">
+        <a href="index.html">Themen</a>
+        <a href="#info">Über uns</a>
+      </div>
+    </div>
+  </nav>
 
-<div class="wrapper">
+  <!-- Main Content -->
+  <main>
+    <section class="hero">
+      <h1>Geschichte Klasse 8</h1>
+      <p class="hero-subtitle">
+        Entdecke die spannenden Themen des Rahmenplans Mecklenburg-Vorpommern. 
+        Wähle ein Thema aus und finde passende Materialien zum Lernen.
+      </p>
+      <span class="hero-badge">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/>
+        </svg>
+        Rahmenplan M-V
+      </span>
+    </section>
 
-  <!-- Intro -->
-  <div class="intro">
-    Die <strong>Medici</strong> waren eine Familie aus Florenz (Italien), die im 14. bis 16. Jahrhundert eine der mächtigsten Dynastien Europas wurde. Begonnen haben sie als reiche <em>Bankiers</em> und <em>Kaufleute</em>. Erforsche mit diesem Programm ihren erstaunlichen Aufstieg!
-  </div>
+    <section class="topics-grid">
+      
+      <!-- Karte: Mittelalter -->
+      <a href="themen/mittelalter.html" class="topic-card">
+        <div class="topic-icon">
+          <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <path d="M19 2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-7 14h-2v-4H8v-2h2V8h2v2h2v2h-2v4zm7-10h-1.5V4H12V2.5L7 4.5V6l4 2v1l4-2.5V4h-.5z"/>
+          </svg>
+        </div>
+        <h2>Das Mittelalter</h2>
+        <p>
+          Ritter, Burgen und die Rolle der Kirche: Erforsche das Leben im europäischen Mittelalter, 
+          die feudalen Strukturen und die kulturellen Entwicklungen dieser Epoche.
+        </p>
+        <span class="topic-arrow">
+          Mehr erfahren
+          <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <path d="M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8z"/>
+          </svg>
+        </span>
+      </a>
 
-  <!-- ── TIMELINE ── -->
-  <h2 style="text-align:center; color:#6b1a1a; margin-bottom:1rem;">📜 Zeitleiste – Klicke auf die Epochen!</h2>
+      <!-- Karte: Französische Revolution -->
+      <a href="themen/franzoesische_revolution.html" class="topic-card">
+        <div class="topic-icon">
+          <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <path d="M14.4 6L14 4H5v17h2v-7h5.6l.4 2h7V6h-5.6zm3.6 8h-3.6l-.4-2H7V6h5.6l.4 2H18v6z"/>
+          </svg>
+        </div>
+        <h2>Die Französische Revolution</h2>
+        <p>
+          Freiheit, Gleichheit, Brüderlichkeit: Die Revolution von 1789 veränderte Europa grundlegend. 
+          Lerne die Ursachen, den Verlauf und die Folgen dieser historischen Wende kennen.
+        </p>
+        <span class="topic-arrow">
+          Mehr erfahren
+          <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <path d="M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8z"/>
+          </svg>
+        </span>
+      </a>
 
-  <div class="timeline-nav">
-    <button class="t-btn active" onclick="showStage(0)">1. Die Bankiers<br><small>(ab 1300)</small></button>
-    <button class="t-btn"        onclick="showStage(1)">2. Macht in Florenz<br><small>(ab 1434)</small></button>
-    <button class="t-btn"        onclick="showStage(2)">3. Erste Herzöge<br><small>(ab 1532)</small></button>
-    <button class="t-btn"        onclick="showStage(3)">4. Großherzöge<br><small>(ab 1569)</small></button>
-  </div>
+      <!-- Karte: Industrielle Revolution -->
+      <a href="themen/industrielle_revolution.html" class="topic-card">
+        <div class="topic-icon">
+          <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <path d="M19.43 12.98c.04-.32.07-.64.07-.98s-.03-.66-.07-.98l2.11-1.65c.19-.15.24-.42.12-.64l-2-3.46c-.12-.22-.39-.3-.61-.22l-2.49 1c-.52-.4-1.08-.73-1.69-.98l-.38-2.65C14.46 2.18 14.25 2 14 2h-4c-.25 0-.46.18-.49.42l-.38 2.65c-.61.25-1.17.59-1.69.98l-2.49-1c-.23-.09-.49 0-.61.22l-2 3.46c-.13.22-.07.49.12.64l2.11 1.65c-.04.32-.07.65-.07.98s.03.66.07.98l-2.11 1.65c-.19.15-.24.42-.12.64l2 3.46c.12.22.39.3.61.22l2.49-1c.52.4 1.08.73 1.69.98l.38 2.65c.03.24.24.42.49.42h4c.25 0 .46-.18.49-.42l.38-2.65c.61-.25 1.17-.59 1.69-.98l2.49 1c.23.09.49 0 .61-.22l2-3.46c.12-.22.07-.49-.12-.64l-2.11-1.65zM12 15.5c-1.93 0-3.5-1.57-3.5-3.5s1.57-3.5 3.5-3.5 3.5 1.57 3.5 3.5-1.57 3.5-3.5 3.5z"/>
+          </svg>
+        </div>
+        <h2>Die Industrielle Revolution</h2>
+        <p>
+          Dampfmaschinen, Fabriken und die Urbanisierung: Die Industrialisierung wandelte Gesellschaften weltweit. 
+          Entdecke die technischen Innovationen und sozialen Veränderungen.
+        </p>
+        <span class="topic-arrow">
+          Mehr erfahren
+          <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <path d="M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8z"/>
+          </svg>
+        </span>
+      </a>
 
-  <!-- Stage 0: Bankiers -->
-  <div class="stage-panel active" id="stage-0">
-    <div class="stage-img">🏦</div>
-    <span class="stage-year">Ab ca. 1300</span>
-    <h2>1. Die Medici werden Bankiers</h2>
-    <p>Alles begann mit <strong>Giovanni di Bicci de' Medici</strong> (1360–1429), der die berühmte <em>Medici-Bank</em> in Florenz gründete. Die Familie wurde durch geschicktes Banking und Handel sehr reich.</p>
-    <ul>
-      <li>Sie verliehen auch Papst und Königen Geld.</li>
-      <li>Florenz wurde durch sie zum wichtigen Handelszentrum.</li>
-      <li>Die Medici halfen, den berühmten Dom von Florenz mitzubauen.</li>
-    </ul>
-    <p><strong>Wichtige Personen:</strong></p>
-    <span class="person-card"><strong>Giovanni di Bicci</strong> – Gründer der Bank</span>
-    <span class="person-card"><strong>Salvestro de' Medici</strong> – Erster politischer Führer</span>
-  </div>
+    </section>
 
-  <!-- Stage 1: Macht in Florenz -->
-  <div class="stage-panel" id="stage-1">
-    <div class="stage-img">🏛️</div>
-    <span class="stage-year">Ab 1434</span>
-    <h2>2. Die Medici übernehmen die Macht</h2>
-    <p><strong>Cosimo de' Medici</strong> (1389–1464) wurde 1434 zum mächtigsten Mann in Florenz. Offiziell blieb Florenz eine <em>Republik</em>, aber Cosimo bestimmte heimlich alle wichtigen Entscheidungen.</p>
-    <ul>
-      <li>Er investierte riesige Summen in Kunst und Bauwerke.</li>
-      <li>Die Medici-Bank wurde zur mächtigsten Bank Europas.</li>
-      <li>Sein Enkel <strong>Lorenzo il Magnifico</strong> (1449–1492) machte Florenz zur Kunstmetropole.</li>
-    </ul>
-    <p><strong>Wichtige Personen:</strong></p>
-    <span class="person-card"><strong>Cosimo</strong> – „Vater des Vaterlands"</span>
-    <span class="person-card"><strong>Lorenzo il Magnifico</strong> – Kunst-Förderer & Dichter</span>
-    <span class="person-card"><strong>Lorenzo il Magnifico</strong> – Förderte Botticelli, Michelangelo & Leonardo</span>
-  </div>
+    <section id="info" class="topic-content" style="margin-top: 3rem;">
+      <h2>Über dieses Portal</h2>
+      <p>
+        Dieses Lernportal bietet Schülerinnen und Schülern der Klasse 8 eine strukturierte 
+        Einführung in die historischen Themen des Rahmenplans Geschichte für Mecklenburg-Vorpommern. 
+        Die Materialien werden nach und nach ergänzt und können frei auf GitHub geteilt werden.
+      </p>
+      <p>
+        Die Inhalte sind für den Einsatz im Unterricht und zum Selbststudium geeignet. 
+        Bei Fragen oder Anregungen freuen wir uns über Feedback.
+      </p>
+    </section>
+  </main>
 
-  <!-- Stage 2: Erste Herzöge -->
-  <div class="stage-panel" id="stage-2">
-    <div class="stage-img">⚔️</div>
-    <span class="stage-year">Ab 1532</span>
-    <h2>3. Erste Herzöge von Florenz</h2>
-    <p>Nach vielen Kriegen und Machtkämpfen setzte <strong>Alessandro de' Medici</strong> (1510–1537) sich durch. 1532 ernannte der Papst ihn zum <em>Herzog von Florenz</em>. Er war der erste Medici mit einem echten Adelstitel!</p>
-    <ul>
-      <li>Florenz war jetzt kein freies Gemeinwesen mehr, sondern ein Herzogtum.</li>
-      <li>Die Medici verloren etwas an Ansehen beim Volk.</li>
-      <li><strong>Cosimo I.</strong> übernahm später die Macht und wurde noch mächtiger.</li>
-    </ul>
-    <p><strong>Wichtige Personen:</strong></p>
-    <span class="person-card"><strong>Alessandro</strong> – Erster Herzog</span>
-    <span class="person-card"><strong>Cosimo I.</strong> – Der nächste starke Herzog</span>
-  </div>
-
-  <!-- Stage 3: Großherzöge -->
-  <div class="stage-panel" id="stage-3">
-    <div class="stage-img">👑</div>
-    <span class="stage-year">Ab 1569</span>
-    <h2>4. Großherzöge der Toskana</h2>
-    <p><strong>Cosimo I.</strong> (1519–1574) wurde 1569 vom Papst zum <em>Großherzog der Toskana</em> ernannt. Das war der höchste Adelstitel in Italien! Die Medici herrschten jetzt über ein großes Gebiet: die gesamte Toskana.</p>
-    <ul>
-      <li>Die Toskana wurde ein moderner Staat mit eigener Armee und Polizei.</li>
-      <li>Die Medici förderten weiter Kunst, Wissenschaft und Architektur.</li>
-      <li>Die Dynastie endete 1737 mit dem Tod von <strong>Gian Gastone</strong>.</li>
-    </ul>
-    <p><strong>Wichtige Personen:</strong></p>
-    <span class="person-card"><strong>Cosimo I.</strong> – Erster Großherzog</span>
-    <span class="person-card"><strong>Franz I.</strong> – Kunstfreund & Wissenschaftler</span>
-    <span class="person-card"><strong>Gian Gastone</strong> – Letzter Medici (gest. 1737)</span>
-    <p style="margin-top:0.8rem; background:#f9f3eb; padding:0.6rem; border-radius:6px;">📌 <strong>Gut zu wissen:</strong> Insgesamt gab es drei Päpste aus der Familie Medici: Leo X., Clemens VII. und ein dritter!</p>
-  </div>
-
-  <!-- ── QUIZ ── -->
-  <div class="quiz-section">
-    <h2>🧠 Quiz – Teste dein Wissen!</h2>
-    <p class="note">Klicke auf die richtige Antwort – du bekommst sofort Feedback!</p>
-
-    <div id="quiz-container"></div>
-    <div id="quiz-result"></div>
-  </div>
-
-</div><!-- /wrapper -->
-
-<footer>
-  Ein Projekt für den Geschichtsunterricht · Funktioniert offline!
-</footer>
-
-<script>
-  // ── Timeline Logic ──
-  function showStage(idx) {
-    document.querySelectorAll('.stage-panel').forEach(p => p.classList.remove('active'));
-    document.getElementById('stage-' + idx).classList.add('active');
-    document.querySelectorAll('.t-btn').forEach((b, i) => {
-      b.classList.toggle('active', i === idx);
-    });
-  }
-
-  // ── Quiz Data ──
-  const questions = [
-    {
-      q: "Was war der erste Beruf der Medici?",
-      opts: ["Bauern", "Kaufleute und Bankiers", "Soldaten", "Fischer"],
-      answer: 1,
-      explanation: "Die Medici begannen als wohlhabende Kaufleute und gründeten eine der mächtigsten Banken Europas."
-    },
-    {
-      q: "Wer war Cosimo de' Medici?",
-      opts: ["Ein berühmter Maler", "Ein Papst", "Der Mann, der Florenz faktisch regierte", "Ein französischer König"],
-      answer: 2,
-      explanation: "Cosimo wurde 1434 zum mächtigsten Mann in Florenz – er war der Kopf der Familie Medici."
-    },
-    {
-      q: "Welcher Papst kam aus der Familie Medici?",
-      opts: ["Franziskus I.", "Johannes Paul II.", "Leo X.", "Benedikt XVI."],
-      answer: 2,
-      explanation: "Leo X. (Giovanni de' Medici) war von 1513 bis 1521 Papst – ein Medici auf dem Papstthron!"
-    },
-    {
-      q: "Wann wurde Alessandro de' Medici zum ersten Herzog ernannt?",
-      opts: ["1429", "1434", "1532", "1569"],
-      answer: 2,
-      explanation: "1532 ernannte der Papst Alessandro zum Herzog von Florenz – das war der erste offizielle Adelstitel für die Familie."
-    },
-    {
-      q: "Wann endete die Herrschaft der Medici?",
-      opts: ["1492", "1532", "1737", "1860"],
-      answer: 3,
-      explanation: "Die Medici-Dynastie endete 1737 mit dem Tod von Gian Gastone de' Medici."
-    }
-  ];
-
-  // ── Render Quiz ──
-  const container = document.getElementById('quiz-container');
-  questions.forEach((item, qi) => {
-    const div = document.createElement('div');
-    div.className = 'q-card';
-
-    const heading = document.createElement('h3');
-    heading.innerHTML = `<span>${qi + 1}</span>${item.q}`;
-    div.appendChild(heading);
-
-    const optsDiv = document.createElement('div');
-    item.opts.forEach((opt, oi) => {
-      const btn = document.createElement('button');
-      btn.className = 'opt-btn';
-      btn.textContent = opt;
-      btn.onclick = () => handleAnswer(btn, oi, item, div);
-      optsDiv.appendChild(btn);
-    });
-    div.appendChild(optsDiv);
-
-    const fb = document.createElement('div');
-    fb.className = 'feedback';
-    div.appendChild(fb);
-
-    container.appendChild(div);
-  });
-
-  function handleAnswer(btn, choice, item, card) {
-    // Disable all buttons
-    card.querySelectorAll('.opt-btn').forEach(b => b.disabled = true);
-    const fb = card.querySelector('.feedback');
-    fb.classList.add('show');
-
-    if (choice === item.answer) {
-      btn.classList.add('correct');
-      fb.className = 'feedback right show';
-      fb.textContent = '✅ Richtig! ' + item.explanation;
-    } else {
-      btn.classList.add('wrong');
-      // Show which was correct
-      card.querySelectorAll('.opt-btn')[item.answer].classList.add('correct');
-      fb.className = 'feedback wrong show';
-      fb.textContent = '❌ Leider falsch. ' + item.explanation;
-    }
-
-    // Count score
-    const answered = document.querySelectorAll('.feedback.show').length;
-    const correct  = document.querySelectorAll('.feedback.right.show').length;
-    const total    = questions.length;
-    document.getElementById('quiz-result').textContent =
-      `Du hast ${correct} von ${total} Fragen richtig beantwortet!`;
-  }
-</script>
+  <!-- Footer -->
+  <footer class="footer">
+    <p>
+      Ein Projekt für den Geschichtsunterricht in Mecklenburg-Vorpommern · 
+      <a href="https://github.com" target="_blank" rel="noopener">Auf GitHub ansehen</a>
+    </p>
+  </footer>
 
 <script defer src="https://static.cloudflareinsights.com/beacon.min.js/v833ccba57c9e4d2798f2e76cebdd09a11778172276447" integrity="sha512-57MDmcccJXYtNnH+ZiBwzC4jb2rvgVCEokYN+L/nLlmO8rfYT/gIpW2A569iJ/3b+0UEasghjuZH/ma3wIs/EQ==" data-cf-beacon='{"version":"2024.11.0","token":"8607d2a720d14b038279025b2b5a82e5","server_timing":{"name":{"cfCacheStatus":true,"cfEdge":true,"cfExtPri":true,"cfL4":true,"cfOrigin":true,"cfSpeedBrain":true},"location_startswith":null}}' crossorigin="anonymous"></script>
 </body>
