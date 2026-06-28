@@ -4,6 +4,22 @@
     <meta charset="UTF-8">
     <title>Unterrichtsmaterial</title>
     <link rel="stylesheet" href="styles.css">
+
+    <style>
+        .topic-image {
+            width: 100%;
+            aspect-ratio: 3 / 4;
+            object-fit: cover;
+            border-radius: 8px;
+            margin-bottom: 0.5rem;
+        }
+
+        .image-caption {
+            font-size: 0.85rem;
+            color: #666;
+            margin-bottom: 0.8rem;
+        }
+    </style>
 </head>
 <body>
 
@@ -26,19 +42,28 @@
     <!-- Fächer -->
     <div id="faecher" class="topics-grid">
 
+        <!-- Geschichte -->
         <div class="topic-card" onclick="zeigeKlassen('Geschichte')">
+            <img src="images/Geschichte.jpeg" alt="Geschichte" class="topic-image">
+            <div class="image-caption">Historische Entwicklungen und Ereignisse</div>
             <h2>🏺 Geschichte</h2>
             <p>Vergangenheit verstehen und Zusammenhänge erkennen</p>
             <div class="topic-arrow">Auswählen →</div>
         </div>
 
+        <!-- Informatik -->
         <div class="topic-card" onclick="zeigeKlassen('Informatik')">
+            <img src="images/Informatik.jpeg" alt="Informatik" class="topic-image">
+            <div class="image-caption">Digitale Technologien und Programmierung</div>
             <h2>💻 Informatik</h2>
             <p>Programmieren, Algorithmen und digitale Welt</p>
             <div class="topic-arrow">Auswählen →</div>
         </div>
 
+        <!-- Philosophie -->
         <div class="topic-card" onclick="zeigeKlassen('Philosophie')">
+            <img src="images/Philosophie.jpeg" alt="Philosophie" class="topic-image">
+            <div class="image-caption">Denken, Fragen und Argumentieren</div>
             <h2>🧠 Philosophie</h2>
             <p>Denken, hinterfragen und argumentieren</p>
             <div class="topic-arrow">Auswählen →</div>
@@ -59,7 +84,7 @@
             <div class="topic-card" onclick="weiter('9')"><h2>Klasse 9</h2></div>
             <div class="topic-card" onclick="weiter('10')"><h2>Klasse 10</h2></div>
             <div class="topic-card" onclick="weiter('Oberstufe')"><h2>Oberstufe</h2></div>
-	    <div class="topic-card" onclick="weiter('Operatoren')"><h2>Operatoren</h2></div>
+            <div class="topic-card" onclick="weiter('Operatoren')"><h2>Operatoren</h2></div>
         </div>
 
     </div>
