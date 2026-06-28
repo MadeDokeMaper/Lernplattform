@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <title>Lernportal</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<header class="navbar">
+    <div class="navbar-content">
+        <div class="navbar-brand">📚 Lernportal</div>
+    </div>
+</header>
+
+<main>
+
+    <!-- Hero -->
+    <section class="hero">
+        <h1>Lernportal</h1>
+        <p class="hero-subtitle">
+            Wähle ein Fach und anschließend deine Klassenstufe
+        </p>
+    </section>
+
+    <!-- Fächer -->
+    <div id="faecher" class="topics-grid">
+
+        <div class="topic-card" onclick="zeigeKlassen('Geschichte')">
+            <h2>🏺 Geschichte</h2>
+            <p>Vergangenheit verstehen und Zusammenhänge erkennen</p>
+            <div class="topic-arrow">Auswählen →</div>
+        </div>
+
+        <div class="topic-card" onclick="zeigeKlassen('Informatik')">
+            <h2>💻 Informatik</h2>
+            <p>Programmieren, Algorithmen und digitale Welt</p>
+            <div class="topic-arrow">Auswählen →</div>
+        </div>
+
+        <div class="topic-card" onclick="zeigeKlassen('Philosophie')">
+            <h2>🧠 Philosophie</h2>
+            <p>Denken, hinterfragen und argumentieren</p>
+            <div class="topic-arrow">Auswählen →</div>
+        </div>
+
+    </div>
+
+    <!-- Klassenstufen -->
+    <div id="klassenbereich" style="display:none; margin-top: 2rem;">
+
+        <div class="topic-header">
+            <h1 id="auswahlTitel"></h1>
+        </div>
+
+        <div class="topics-grid">
+            <div class="topic-card" onclick="weiter('7')"><h2>Klasse 7</h2></div>
+            <div class="topic-card" onclick="weiter('8')"><h2>Klasse 8</h2></div>
+            <div class="topic-card" onclick="weiter('9')"><h2>Klasse 9</h2></div>
+            <div class="topic-card" onclick="weiter('10')"><h2>Klasse 10</h2></div>
+            <div class="topic-card" onclick="weiter('Oberstufe')"><h2>Oberstufe</h2></div>
+	    <div class="topic-card" onclick="weiter('Operatoren')"><h2>Operatoren</h2></div>
+        </div>
+
+    </div>
+
+</main>
+
+<footer class="footer">
+    © Lernportal – Unterrichtsmaterialien
+</footer>
+
+<script>
+    let aktuellesFach = "";
+
+    function zeigeKlassen(fach) {
+        aktuellesFach = fach;
+        document.getElementById("klassenbereich").style.display = "block";
+        document.getElementById("auswahlTitel").innerText = fach + " – Klassenstufe wählen";
+        window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+    }
+
+    function weiter(stufe) {
+        const ziel = aktuellesFach + "_" + stufe + ".html";
+        window.location.href = ziel;
+    }
+</script>
+
+</body>
+</html>
