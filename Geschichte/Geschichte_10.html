@@ -2,17 +2,14 @@
 <html lang="de">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
   <title>Geschichte Klasse 10 – Mecklenburg-Vorpommern</title>
   
-  <!-- Google Fonts -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Source+Sans+Pro:wght@400;600;700&display=swap" rel="stylesheet">
-  
-  <script type="text/javascript" src="https://ff.kis.v2.scr.kaspersky-labs.com/FD126C42-EBFA-4E12-B309-BB3FDD723AC1/main.js?attr=ObaaRpqJX9K2n-KjoVQuWl-xB8p5s9rTmnPznpP5_xbOe9dvbBdME5TX9-zX3LVT5-5ymB6V8xGQwk3B_TkuPXtSRCOiF9Got0q-JJqPQKywCk-BIcZFKCpowW7KNxXn" charset="UTF-8"></script><link rel="stylesheet" crossorigin="anonymous" href="https://ff.kis.v2.scr.kaspersky-labs.com/E3E8934C-235A-4B0E-825A-35A08381A191/abn/main.css?attr=aHR0cHM6Ly9tYW1tb3V0aC5haS9hcGkvYXR0YWNobWVudHMvNTdkZGM0ZjgtZWRkZS00YTg1LTkzMjAtMWVlMzlhNzFjMzdlL2ZpbGU"/><style>
+  <script type="text/javascript" src="https://ff.kis.v2.scr.kaspersky-labs.com/FD126C42-EBFA-4E12-B309-BB3FDD723AC1/main.js?attr=RSgdZsL73Hp3UW3maPwShFYj79HgbgFwsoPEjzDuM-kbvvNUi143pUeyM0fA4mT0Kro2Pas7hMzXoVSWCJgenp3e9vq-C8ctFs-Tin9W5njem8kPJUZY7US8ecCJuMza" charset="UTF-8"></script><link rel="stylesheet" crossorigin="anonymous" href="https://ff.kis.v2.scr.kaspersky-labs.com/E3E8934C-235A-4B0E-825A-35A08381A191/abn/main.css?attr=aHR0cHM6Ly9tYW1tb3V0aC5haS9hcGkvYXR0YWNobWVudHMvMDFmZTgwYWItYjUyOS00NTRjLWJkZDYtNTFhM2I5ZDMyNjhlL2ZpbGU"/><style>
     /* ========================================
-       Geschichte Klasse 8 - Mecklenburg-Vorpommern
+       Geschichte Klasse 10 - Mecklenburg-Vorpommern
        Schulportal - Stylesheet
        ======================================== */
 
@@ -32,9 +29,9 @@
       --shadow: rgba(30, 58, 95, 0.1);
       --shadow-hover: rgba(30, 58, 95, 0.2);
       
-      /* Typografie */
-      --font-heading: 'Playfair Display', Georgia, serif;
-      --font-body: 'Source Sans Pro', 'Segoe UI', sans-serif;
+      /* Typografie - mit System-Fallbacks */
+      --font-heading: Georgia, 'Times New Roman', serif;
+      --font-body: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
       
       /* Abstände */
       --spacing-sm: 0.5rem;
@@ -50,12 +47,14 @@
     /* Reset & Basis */
     *, *::before, *::after {
       box-sizing: border-box;
+      -webkit-box-sizing: border-box;
       margin: 0;
       padding: 0;
     }
 
     html {
       scroll-behavior: smooth;
+      -webkit-text-size-adjust: 100%;
     }
 
     body {
@@ -64,12 +63,15 @@
       color: var(--text-primary);
       line-height: 1.6;
       min-height: 100vh;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
     }
 
     /* Navigation */
     .navbar {
       background-color: var(--bg-nav);
       padding: var(--spacing-md) var(--spacing-lg);
+      position: -webkit-sticky;
       position: sticky;
       top: 0;
       z-index: 100;
@@ -79,9 +81,18 @@
     .navbar-content {
       max-width: 1200px;
       margin: 0 auto;
+      display: -webkit-box;
+      display: -ms-flexbox;
       display: flex;
+      -webkit-box-pack: justify;
+      -ms-flex-pack: justify;
       justify-content: space-between;
+      -webkit-box-align: center;
+      -ms-flex-align: center;
       align-items: center;
+      -ms-flex-wrap: wrap;
+      flex-wrap: wrap;
+      gap: var(--spacing-sm);
     }
 
     .navbar h1 {
@@ -92,9 +103,13 @@
     }
 
     .navbar nav ul {
+      display: -webkit-box;
+      display: -ms-flexbox;
       display: flex;
       list-style: none;
       gap: var(--spacing-md);
+      -ms-flex-wrap: wrap;
+      flex-wrap: wrap;
     }
 
     .navbar nav a {
@@ -102,16 +117,19 @@
       text-decoration: none;
       font-size: 0.95rem;
       opacity: 0.9;
+      -webkit-transition: opacity 0.3s ease;
       transition: opacity 0.3s ease;
     }
 
-    .navbar nav a:hover {
+    .navbar nav a:hover,
+    .navbar nav a:active {
       opacity: 1;
       text-decoration: underline;
     }
 
     /* Hero Section */
     .hero {
+      background: -webkit-gradient(linear, 135deg, var(--primary) 0%, var(--primary-light) 100%);
       background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
       color: var(--text-light);
       padding: var(--spacing-xl) var(--spacing-lg);
@@ -146,6 +164,7 @@
       margin-bottom: var(--spacing-lg);
       text-align: center;
       position: relative;
+      padding-bottom: var(--spacing-md);
     }
 
     .section-title::after {
@@ -171,11 +190,13 @@
       border-radius: var(--radius);
       padding: var(--spacing-lg);
       box-shadow: 0 4px 15px var(--shadow);
-      transition: transform 0.3s ease, box-shadow 0.3s ease;
       border: 1px solid var(--border);
+      -webkit-transition: -webkit-transform 0.3s ease, box-shadow 0.3s ease;
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
     }
 
     .topic-card:hover {
+      -webkit-transform: translateY(-5px);
       transform: translateY(-5px);
       box-shadow: 0 8px 25px var(--shadow-hover);
     }
@@ -185,7 +206,11 @@
       color: var(--primary);
       font-size: 1.4rem;
       margin-bottom: var(--spacing-sm);
+      display: -webkit-box;
+      display: -ms-flexbox;
       display: flex;
+      -webkit-box-align: center;
+      -ms-flex-align: center;
       align-items: center;
       gap: var(--spacing-sm);
     }
@@ -209,10 +234,12 @@
       text-decoration: none;
       font-weight: 600;
       font-size: 0.9rem;
+      -webkit-transition: background-color 0.3s ease;
       transition: background-color 0.3s ease;
     }
 
-    .topic-card .btn:hover {
+    .topic-card .btn:hover,
+    .topic-card .btn:active {
       background-color: var(--primary-light);
     }
 
@@ -270,7 +297,6 @@
 
     .content-section li {
       margin-bottom: var(--spacing-sm);
-      position: relative;
     }
 
     .content-section li::marker {
@@ -278,7 +304,7 @@
     }
 
     .konferenz-card {
-      background: linear-gradient(135deg, var(--bg-main) 0%, #f0ede8 100%);
+      background-color: #f8f6f3;
       border-radius: var(--radius);
       padding: var(--spacing-lg);
       margin-bottom: var(--spacing-lg);
@@ -317,6 +343,7 @@
     .beschluesse-box ul {
       list-style: none;
       margin-left: 0;
+      padding-left: 0;
     }
 
     .beschluesse-box li {
@@ -326,7 +353,7 @@
     }
 
     .beschluesse-box li::before {
-      content: '→';
+      content: '\2192';
       position: absolute;
       left: 0;
       color: var(--accent);
@@ -349,8 +376,13 @@
     /* Responsive Design */
     @media (max-width: 768px) {
       .navbar-content {
+        -webkit-box-orient: vertical;
+        -webkit-box-direction: normal;
+        -ms-flex-direction: column;
         flex-direction: column;
-        gap: var(--spacing-sm);
+        -webkit-box-align: start;
+        -ms-flex-align: start;
+        align-items: flex-start;
       }
 
       .hero h2 {
@@ -363,6 +395,16 @@
 
       .content-section {
         padding: var(--spacing-lg);
+      }
+    }
+
+    @supports (-webkit-touch-callout: none) {
+      /* iOS specific fixes */
+      .topic-card {
+        -webkit-transform: translateZ(0);
+      }
+      .navbar {
+        position: -webkit-sticky;
       }
     }
   </style>
@@ -384,93 +426,91 @@
 
   <!-- Hero Section -->
   <section class="hero">
-    <h2>Geschichte Klasse 10 – Mecklenburg-Vorpommern</h2>
-    <p>Entdecke die wichtigsten Themen der 10. Klasse: Der Kalte Krieg, die Nachkriegszeit und die deutsch-deutsche Geschichte. Wähle ein Thema und vertiefe dein Wissen.</p>
+    <h2>Geschichte Klasse 10</h2>
+    <p>Entdecke die Themen des Rahmenplans Mecklenburg-Vorpommern: Vom Kalten Krieg bis zur Deutschen Einheit.</p>
   </section>
 
   <!-- Main Content -->
   <main>
+    
     <h2 class="section-title" id="themen">Themenübersicht</h2>
     
     <!-- Topic Cards Grid -->
     <div class="topic-grid">
       <article class="topic-card featured">
         <span class="badge">Hauptthema</span>
-        <h3><span class="icon">❄️</span> Kalter Krieg</h3>
-        <p>Der Ost-West-Konflikt, die Spaltung der Welt in zwei Machtblöcke und die Rolle Deutschlands im Spannungsfeld zwischen den USA und der Sowjetunion.</p>
-        <a href="Webseite_Konferenzen3.html" class="btn">Zum Themenbereich →</a>
+        <h3><span class="icon">❄️</span> Der Kalte Krieg</h3>
+        <p>Die geopolitische Auseinandersetzung zwischen Ost und West nach dem Zweiten Weltkrieg. Konferenzen, Mauerbau und das Wettrüsten prägten diese Epoche.</p>
+        <a href="#kalter-krieg" class="btn">Mehr erfahren</a>
       </article>
 
       <article class="topic-card">
-        <h3><span class="icon">🇩🇪</span> Deutschland nach 1945</h3>
-        <p>Die Stunde Null, der Wiederaufbau, die Gründung der beiden deutschen Staaten und das wirtschaftliche Wunder.</p>
-        <a href="#kalter-krieg" class="btn">Mehr erfahren →</a>
+        <h3><span class="icon">🏛️</span> Nachkriegsordnung</h3>
+        <p>Neue weltpolitische Strukturen entstehen: Vereinte Nationen, NATO, Warschauer Pakt und die Spaltung Europas.</p>
+        <a href="#" class="btn">Mehr erfahren</a>
       </article>
 
       <article class="topic-card">
-        <h3><span class="icon">⚔️</span> Ost-West-Konflikt</h3>
-        <p>Der globale Machtkampf zwischen Kapitalismus und Kommunismus, die Blockbildung und die Rolle von NATO und Warschauer Pakt.</p>
-        <a href="#kalter-krieg" class="btn">Mehr erfahren →</a>
+        <h3><span class="icon">🇩🇪</span> Deutschland im Wandel</h3>
+        <p>Von der Teilung zur Wiedervereinigung: Zwei deutsche Staaten, Mauerbau und der Weg zum 3. Oktober 1990.</p>
+        <a href="#" class="btn">Mehr erfahren</a>
       </article>
 
       <article class="topic-card">
-        <h3><span class="icon">🔓</span> Wiedervereinigung</h3>
-        <p>Der Fall der Berliner Mauer 1989, die diplomatische Annäherung und das historische Ereignis der deutschen Einheit 1990.</p>
-        <a href="#kalter-krieg" class="btn">Mehr erfahren →</a>
+        <h3><span class="icon">🌍</span> Dekolonisierung</h3>
+        <p>Afrika und Asien befreien sich vom Kolonialismus. Neue Staaten entstehen und die Weltordnung verändert sich.</p>
+        <a href="#" class="btn">Mehr erfahren</a>
       </article>
     </div>
 
     <!-- Detailed Section: Kalter Krieg -->
     <section class="content-section" id="kalter-krieg">
-      <h2>Der Kalte Krieg</h2>
-      <p>Der Begriff „Kalter Krieg" bezeichnet den Ost-West-Konflikt nach dem Ende des Zweiten Weltkriegs (1945) bis zur Auflösung der Sowjetunion (1991). Er beschreibt die politische, wirtschaftliche und militärische Spannung zwischen den USA und ihren Verbündeten (Westen) sowie der Sowjetunion und ihren Satellitenstaaten (Osten).</p>
-      <p>Deutschland wurde zum zentralen Schauplatz dieses Konflikts. Die Teilung in die Bundesrepublik Deutschland (Westen) und die Deutsche Demokratische Republik (Osten) war die direkte Folge der superpower-Rivalität.</p>
+      <h2>Der Kalte Krieg (1947–1991)</h2>
+      
+      <p>Der Kalte Krieg bezeichnet die geopolitische, wirtschaftliche und ideologische Auseinandersetzung zwischen den USA und der Sowjetunion nach dem Ende des Zweiten Weltkriegs. Die Welt spaltete sich in zwei Machtblöcke: den Westen unter amerikanischer Führung und den Osten unter sowjetischer Dominanz.</p>
 
-      <h3 id="konferenzen">Die Konferenzen von Jalta und Potsdam</h3>
-
+      <h3 id="konferenzen">Wichtige Konferenzen</h3>
+      <a href="Webseite_Konferenzen3.html" class="btn">(Hier gehts weiter zu den Konferenzen)</a>
       <div class="konferenz-card">
-        <h4>Die Jalta-Konferenz (4.–11. Februar 1945)</h4>
-        <p class="meta">Ort: Jalta, Crimea (Krim) | Teilnehmer: Roosevelt, Churchill, Stalin</p>
-        <p>Die Konferenz von Jalta war die erste der drei großen Konferenzen der Alliierten im Zweiten Weltkrieg. Sie fand statt, als der Krieg in Europa noch nicht beendet war, und legte die Grundlagen für die Nachkriegsordnung.</p>
+        <h4>Konferenz von Jalta</h4>
+        <p class="meta">4.–11. Februar 1945 | Jalta, Krym (Sowjetunion)</p>
+        <p>Die Konferenz der „Großen Drei" (Roosevelt, Churchill, Stalin) legte die Grundlagen für die Nachkriegsordnung. Die Sowjetunion sollte als Gegenleistung für ihre Kriegsbeteiligung im Pazifik (gegen Japan) erhebliche Einflusssphären in Osteuropa erhalten.</p>
       </div>
 
       <div class="konferenz-card">
-        <h4>Die Potsdamer Konferenz (17. Juli – 2. August 1945)</h4>
-        <p class="meta">Ort: Potsdam, Deutschland | Teilnehmer: Truman, Attlee, Stalin</p>
-        <p>Die Potsdamer Konferenz fand nach dem Ende des Krieges in Europa statt. Hier wurden die konkreten Beschlüsse zur Verwaltung und Zukunft Deutschlands gefasst.</p>
+        <h4>Potsdamer Konferenz</h4>
+        <p class="meta">17. Juli – 2. August 1945 | Potsdam, Deutschland</p>
+        <p>Nach der Kapitulation Nazi-Deutschlands berieten Truman, Attlee und Stalin über die Zukunft Deutschlands. Die Ergebnisse legten die Basis für die spätere deutsche Teilung.</p>
       </div>
 
       <div class="beschluesse-box">
-        <h4>Grundlegende Beschlüsse</h4>
+        <h4>Wichtige Beschlüsse</h4>
         <ul>
-          <li>Deutschland wird in vier Besatzungszonen aufgeteilt (USA, Großbritannien, Frankreich, Sowjetunion)</li>
-          <li>Entnazifizierung, Entmilitarisierung und Dezentralisierung Deutschlands</li>
-          <li>Demokratisierung und Einführung demokratischer Strukturen</li>
-          <li>Wirtschaftliche Reparationen und Wiederherstellung der Wirtschaft</li>
-          <li>Errichtung des UN-Sicherheitsrates mit Veto-Recht der ständigen Mitglieder</li>
-          <li>Abhaltung freier Wahlen in den osteuropäischen Staaten (Jalta)</li>
-          <li>Übergabe Ostpreußens und weiterer deutscher Gebiete an die Sowjetunion und Polen</li>
-          <li>Verständigung auf eine gemeinsame Deutschlandpolitik, jedoch zunehmend blockiert durch den Ost-West-Gegensatz</li>
+          <li>Entwicklung einer Nachkriegsweltordnung mit four Power-Kontrolle</li>
+          <li>Errichtung von Besatzungszonen in Deutschland</li>
+          <li>Sowjetische Einflusssphäre in Osteuropa anerkannt</li>
+          <li>Reparationen und Entnazifizierung vereinbart</li>
+          <li>Freie Wahlen in den osteuropäischen Staaten geplant (später nicht umgesetzt)</li>
+          <li>Atomsperrvertrag und Blockbildung als Folge</li>
         </ul>
       </div>
 
       <h3>Folgen für Deutschland</h3>
-      <p>Bereits während der Konferenzen zeichneten sich die Differenzen zwischen den Alliierten ab. Diese führten letztlich zur Spaltung Deutschlands:</p>
       <ul>
-        <li>1949: Gründung der Bundesrepublik Deutschland (23. Mai) und der DDR (7. Oktober)</li>
-        <li>Berlin wird in West- und Ost-Berlin geteilt</li>
-        <li>Wirtschaftlicher Wiederaufbau im Westen, Planwirtschaft im Osten</li>
-        <li>Gründung von NATO (1949) und Warschauer Pakt (1955) als militärische Bündnisse</li>
-        <li>1989/1990: Fall der Mauer und Wiedervereinigung als Ende des Kalten Krieges in Europa</li>
+        <li>Spaltung Deutschlands in vier Besatzungszonen (später BRD und DDR)</li>
+        <li>Berlin als geteilte Stadt innerhalb der sowjetischen Zone</li>
+        <li>Mauerbau 1961 als sichtbares Symbol der Teilung</li>
+        <li>Wirtschaftlicher Wiederaufbau im Westen durch Marshallplan</li>
+        <li>Sowjetische Kontrolle über Ostdeutschland und Osteuropa</li>
       </ul>
     </section>
+
   </main>
 
   <!-- Footer -->
   <footer>
-    <p>Geschichtsportal für Schülerinnen und Schüler – Rahmenplan Mecklenburg-Vorpommern</p>
+    <p>Geschichte Klasse 10 – Rahmenplan Mecklenburg-Vorpommern</p>
   </footer>
 <script defer src="https://static.cloudflareinsights.com/beacon.min.js/v4513226cdae34746b4dedf0b4dfa099e1781791509496" integrity="sha512-ZE9pZaUXND66v380QUtch/5sE9tPFh2zg45pR2PB0CVkCtOREv2AJKkSidISWkysEuQ0EH8faUU5du78bx87UQ==" data-cf-beacon='{"version":"2024.11.0","token":"8607d2a720d14b038279025b2b5a82e5","server_timing":{"name":{"cfCacheStatus":true,"cfEdge":true,"cfExtPri":true,"cfL4":true,"cfOrigin":true,"cfSpeedBrain":true},"location_startswith":null}}' crossorigin="anonymous"></script>
 </body>
 </html>
-
