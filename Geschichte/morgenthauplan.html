@@ -1,0 +1,461 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Morgenthauplan - Interaktive Karte</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: white;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .container {
+            display: flex;
+            width: 100%;
+            max-width: 1400px;
+            height: 90vh;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+        }
+
+        .map-container {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #f8fafc;
+            padding: 20px;
+            position: relative;
+        }
+
+        .map-container svg {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+        }
+
+        .info-panel {
+            flex: 1;
+            background: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 30px;
+            position: relative;
+        }
+
+        .info-card {
+            display: none;
+            flex-direction: column;
+            width: 100%;
+            max-width: 400px;
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+            overflow: hidden;
+            animation: slideIn 0.3s ease-out;
+        }
+
+        .info-card.active {
+            display: flex;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .info-card-header {
+            display: flex;
+            align-items: center;
+            padding: 20px;
+            gap: 15px;
+        }
+
+        .accent-bar {
+            width: 6px;
+            height: 50px;
+            border-radius: 3px;
+        }
+
+        .info-card-title {
+            flex: 1;
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: #1e293b;
+        }
+
+        .close-btn {
+            width: 36px;
+            height: 36px;
+            border: none;
+            background: #f1f5f9;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            color: #64748b;
+            transition: all 0.2s ease;
+        }
+
+        .close-btn:hover {
+            background: #e2e8f0;
+            color: #475569;
+            transform: rotate(90deg);
+        }
+
+        .info-card-body {
+            padding: 0 20px 25px 20px;
+        }
+
+        .info-card-text {
+            font-size: 1rem;
+            line-height: 1.7;
+            color: #475569;
+        }
+
+        .placeholder-hint {
+            text-align: center;
+            color: #94a3b8;
+            font-style: italic;
+            padding: 20px;
+            border: 2px dashed #e2e8f0;
+            border-radius: 12px;
+            background: #f8fafc;
+        }
+
+        .placeholder-hint p {
+            margin: 8px 0;
+        }
+
+        /* SVG hover effects */
+        .clickable-zone {
+            cursor: pointer;
+            transition: filter 0.2s ease;
+        }
+
+        .clickable-zone:hover {
+            filter: brightness(1.15);
+        }
+
+        .clickable-zone.active {
+            filter: brightness(1.25) drop-shadow(0 0 8px rgba(0, 0, 0, 0.4));
+        }
+
+        .non-clickable {
+            cursor: default;
+        }
+
+        /* Zone selection hint */
+        .zone-hint {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(255, 255, 255, 0.95);
+            padding: 12px 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            font-size: 0.9rem;
+            color: #64748b;
+            text-align: center;
+            max-width: 300px;
+        }
+
+        .zone-hint span {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            border-radius: 4px;
+            margin-right: 6px;
+            vertical-align: middle;
+        }
+
+        /* Connection line */
+        .connection-line {
+            position: absolute;
+            pointer-events: none;
+            z-index: 10;
+        }
+
+        /* Instructions overlay */
+        .instructions {
+            position: absolute;
+            top: 15px;
+            left: 15px;
+            background: rgba(255, 255, 255, 0.95);
+            padding: 10px 15px;
+            border-radius: 8px;
+            font-size: 0.8rem;
+            color: #64748b;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="map-container">
+            
+            
+            <svg version="1.2" width="210mm" height="297mm" viewBox="0 0 21000 29700" preserveAspectRatio="xMidYMid" fill-rule="evenodd" stroke-width="28.222" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg" xmlns:ooo="http://xml.openoffice.org/svg/export" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:presentation="http://sun.com/xmlns/staroffice/presentation" xmlns:smil="http://www.w3.org/2001/SMIL20/" xmlns:anim="urn:oasis:names:tc:opendocument:xmlns:animation:1.0" xmlns:svg="urn:oasis:names:tc:opendocument:xmlns:svg-compatible:1.0" xml:space="preserve">
+                <defs class="ClipPathGroup">
+                    <clipPath id="presentation_clip_path" clipPathUnits="userSpaceOnUse">
+                        <rect x="0" y="0" width="21000" height="29700"/>
+                    </clipPath>
+                    <clipPath id="presentation_clip_path_shrink" clipPathUnits="userSpaceOnUse">
+                        <rect x="21" y="29" width="20958" height="29641"/>
+                    </clipPath>
+                </defs>
+                <defs class="TextShapeIndex">
+                    <g ooo:slide="id1" ooo:id-list="id3 id4 id5 id6 id7 id8 id9 id10"/>
+                </defs>
+                <defs class="EmbeddedBulletChars">
+                    <g id="bullet-char-template-57356" transform="scale(0.00048828125,-0.00048828125)">
+                        <path d="M 580,1141 L 1163,571 580,0 -4,571 580,1141 Z"/>
+                    </g>
+                    <g id="bullet-char-template-57354" transform="scale(0.00048828125,-0.00048828125)">
+                        <path d="M 8,1128 L 1137,1128 1137,0 8,0 8,1128 Z"/>
+                    </g>
+                    <g id="bullet-char-template-10146" transform="scale(0.00048828125,-0.00048828125)">
+                        <path d="M 174,0 L 602,739 174,1481 1456,739 174,0 Z M 1358,739 L 309,1346 659,739 1358,739 Z"/>
+                    </g>
+                    <g id="bullet-char-template-10132" transform="scale(0.00048828125,-0.00048828125)">
+                        <path d="M 2015,739 L 1276,0 717,0 1260,543 174,543 174,936 1260,936 717,1481 1274,1481 2015,739 Z"/>
+                    </g>
+                    <g id="bullet-char-template-10007" transform="scale(0.00048828125,-0.00048828125)">
+                        <path d="M 0,-2 C -7,14 -16,27 -25,37 L 356,567 C 262,823 215,952 215,954 215,979 228,992 255,992 264,992 276,990 289,987 310,991 331,999 354,1012 L 381,999 492,748 772,1049 836,1024 860,1049 C 881,1039 901,1025 922,1006 886,937 835,863 770,784 769,783 710,716 594,584 L 774,223 C 774,196 753,168 711,139 L 727,119 C 717,90 699,76 672,76 641,76 570,178 457,381 L 164,-76 C 142,-110 111,-127 72,-127 30,-127 9,-110 8,-76 1,-67 -2,-52 -2,-32 -2,-23 -1,-13 0,-2 Z"/>
+                    </g>
+                    <g id="bullet-char-template-10004" transform="scale(0.00048828125,-0.00048828125)">
+                        <path d="M 285,-33 C 182,-33 111,30 74,156 52,228 41,333 41,471 41,549 55,616 82,672 116,743 169,778 240,778 293,778 328,747 346,684 L 369,508 C 377,444 397,411 428,410 L 1163,1116 C 1174,1127 1196,1133 1229,1133 1271,1133 1292,1118 1292,1087 L 1292,965 C 1292,929 1282,901 1262,881 L 442,47 C 390,-6 338,-33 285,-33 Z"/>
+                    </g>
+                    <g id="bullet-char-template-9679" transform="scale(0.00048828125,-0.00048828125)">
+                        <path d="M 813,0 C 632,0 489,54 383,161 276,268 223,411 223,592 223,773 276,916 383,1023 489,1130 632,1184 813,1184 992,1184 1136,1130 1245,1023 1353,916 1407,772 1407,592 1407,412 1353,268 1245,161 1136,54 992,0 813,0 Z"/>
+                    </g>
+                    <g id="bullet-char-template-8226" transform="scale(0.00048828125,-0.00048828125)">
+                        <path d="M 346,457 C 273,457 209,483 155,535 101,586 74,649 74,723 74,796 101,859 155,911 209,963 273,989 346,989 419,989 480,963 531,910 582,859 608,796 608,723 608,648 583,586 532,535 482,483 420,457 346,457 Z"/>
+                    </g>
+                    <g id="bullet-char-template-8211" transform="scale(0.00048828125,-0.00048828125)">
+                        <path d="M -4,459 L 1135,459 1135,606 -4,606 -4,459 Z"/>
+                    </g>
+                    <g id="bullet-char-template-61548" transform="scale(0.00048828125,-0.00048828125)">
+                        <path d="M 173,740 C 173,903 231,1043 346,1159 462,1274 601,1332 765,1332 928,1332 1067,1274 1183,1159 1299,1043 1357,903 1357,740 1357,577 1299,437 1183,322 1067,206 928,148 765,148 601,148 462,206 346,322 231,437 173,577 173,740 Z"/>
+                    </g>
+                </defs>
+                <g>
+                    <g id="id2" class="Master_Slide">
+                        <g id="bg-id2" class="Background"/>
+                        <g id="bo-id2" class="BackgroundObjects"/>
+                    </g>
+                </g>
+                <g class="SlideGroup">
+                    <g>
+                        <g id="container-id1">
+                            <g id="id1" class="Slide" clip-path="url(#presentation_clip_path)">
+                                <g class="Page">
+                                    <g class="Graphic">
+                                        <g id="id3" class="non-clickable">
+                                            <rect class="BoundingBox" stroke="none" fill="none" x="1500" y="3500" width="18658" height="16494"/>
+                                            <path fill="none" stroke="rgb(52,101,164)" d="M 3818,6121 C 3542,6400 2922,6092 2888,6729 2867,7137 2756,7437 2530,7873 2352,8216 2448,8624 2566,9017 2731,9569 2061,9422 1923,9947 1814,10364 1665,10695 1529,11091 1402,11461 1763,11852 1601,12235 1381,12755 2089,12850 1994,13379 1897,13917 2599,13808 2888,14023 3232,14280 3964,14065 4032,14488 4142,15167 4623,14829 4855,15167 5173,15631 4630,16066 4282,16168 3790,16312 3537,16698 3460,17098 3375,17535 2403,17660 3317,18135 3686,18327 3941,18782 4390,18671 4803,18569 5122,18164 5534,18206 5976,18251 6282,18604 6642,18957 6910,19220 7395,18987 7751,19100 8123,19218 8487,19406 8895,19386 9276,19367 9684,19287 10039,19457 10456,19656 10790,19410 11183,19350 11637,19281 11546,20606 11862,19636 12016,19162 11678,18818 11934,18492 12196,18158 12840,18448 13078,18063 13283,17732 13138,17298 13114,16919 13087,16494 12819,16098 12434,15918 12004,15717 11858,15212 11541,14881 11188,14513 11021,14155 11076,13737 11127,13345 11684,12882 12184,13129 12621,13344 12926,12852 13293,12736 13683,12612 14079,12492 14437,12271 14755,12075 15148,11885 15581,12342 15916,12696 16153,13077 16654,13165 17035,13232 17457,13142 17798,13379 18138,13616 18547,13714 18942,13701 19274,13690 19627,13938 19871,13343 20030,12955 20380,12415 19764,12307 19343,12233 18786,12218 18620,11735 18485,11343 18303,10985 18119,10626 17859,10117 17169,10771 17083,10054 17013,9476 16422,9642 16081,9375 15686,9066 15248,8746 15188,8266 15128,7788 15926,7764 16332,7587 16673,7438 17120,7602 17333,7086 17495,6693 17595,6182 17118,5978 16728,5811 16392,5492 15938,5477 15556,5464 15166,5393 14794,5477 14396,5567 13950,5530 13650,5907 13344,6292 12827,6023 12506,5835 12147,5625 11749,5617 11362,5620 10974,5623 10685,6017 10253,5942 9877,5876 9481,5817 9109,5907 8509,6052 8589,5478 8537,5191 8451,4722 7957,4572 7858,4047 7754,3499 7248,3663 6714,3511 6308,3396 6521,4281 6392,4655 6280,4979 6589,5584 5927,5549 5523,5528 5159,5195 4783,5299 4300,5432 4046,5972 3639,6264 L 3532,6300 "/>
+                                            <path fill="none" stroke="rgb(52,101,164)" d="M 19264,5334 C 18896,5424 18459,5589 18370,6050 18273,6557 18845,6593 19157,6800 19553,7063 19879,6950 20086,6514 20392,5869 19582,5901 19907,5370 20352,4641 19340,5106 19192,5263 L 19157,5263 19264,5334 Z "/>
+                                        </g>
+                                    </g>
+                                    
+                                    <!-- Gruppe für Lila Bereiche (id4 + id5) - Klickbar -->
+                                    <g id="lila-gruppe" class="clickable-zone Group" data-zone="lila">
+                                        <g id="id4" class="com.sun.star.drawing.ClosedFreeHandShape">
+                                            <rect class="BoundingBox" stroke="none" fill="none" x="15517" y="9668" width="4185" height="3788"/>
+                                            <path fill="rgb(161,70,126)" stroke="none" d="M 16269,12550 C 16116,12117 15502,12036 15518,11513 15529,11126 15724,10751 15625,10369 15519,9960 16035,9319 16412,9904 16641,10259 16963,10680 17449,10691 18073,10704 17946,11258 18164,11656 18454,12186 18841,11985 19129,12550 19269,12825 20169,13193 19379,13408 18972,13518 18572,13416 18235,13229 17907,13047 17497,12631 17091,12943 L 16733,12943 16412,12550 16340,12478 16269,12550 Z "/>
+                                            <path fill="none" stroke="rgb(191,129,158)" d="M 16269,12550 C 16116,12117 15502,12036 15518,11513 15529,11126 15724,10751 15625,10369 15519,9960 16035,9319 16412,9904 16641,10259 16963,10680 17449,10691 18073,10704 17946,11258 18164,11656 18454,12186 18841,11985 19129,12550 19269,12825 20169,13193 19379,13408 18972,13518 18572,13416 18235,13229 17907,13047 17497,12631 17091,12943 L 16733,12943 16412,12550 16340,12478 16269,12550 Z "/>
+                                        </g>
+                                        <g id="id5" class="com.sun.star.drawing.ClosedFreeHandShape">
+                                            <rect class="BoundingBox" stroke="none" fill="none" x="18449" y="5969" width="1612" height="755"/>
+                                            <path fill="rgb(161,70,126)" stroke="none" d="M 18450,6078 C 18821,6174 19252,6245 19594,6043 20197,5686 20207,6753 19665,6650 L 19272,6722 18914,6579 18664,6364 18450,6078 Z "/>
+                                            <path fill="none" stroke="rgb(191,129,158)" d="M 18450,6078 C 18821,6174 19252,6245 19594,6043 20197,5686 20207,6753 19665,6650 L 19272,6722 18914,6579 18664,6364 18450,6078 Z "/>
+                                        </g>
+                                    </g>
+                                    
+                                    <!-- id6 - Dunkelrot - Klickbar -->
+                                    <g id="id6" class="clickable-zone com.sun.star.drawing.ClosedFreeHandShape" data-zone="dunkelrot">
+                                        <rect class="BoundingBox" stroke="none" fill="none" x="18657" y="5076" width="1118" height="1048"/>
+                                        <path fill="rgb(201,33,30)" stroke="none" d="M 19773,5077 C 19492,5440 18794,5373 18664,5792 18572,6088 19581,6401 19630,5685 L 19737,5399 19773,5077 Z "/>
+                                        <path fill="none" stroke="rgb(255,64,0)" d="M 19773,5077 C 19492,5440 18794,5373 18664,5792 18572,6088 19581,6401 19630,5685 L 19737,5399 19773,5077 Z "/>
+                                    </g>
+                                    
+                                    <!-- id7 - Blau - Klickbar -->
+                                    <g id="id7" class="clickable-zone com.sun.star.drawing.ClosedFreeHandShape" data-zone="blau">
+                                        <rect class="BoundingBox" stroke="none" fill="none" x="3146" y="12338" width="2362" height="2502"/>
+                                        <path fill="rgb(42,96,153)" stroke="none" d="M 4970,14838 C 5462,14741 5575,14187 5471,13837 5357,13450 4739,13271 4791,12764 4857,12125 4127,12367 3826,12478 3334,12660 3161,13140 3147,13587 3131,14112 4064,13768 4219,14338 L 4505,14695 4970,14838 Z "/>
+                                        <path fill="none" stroke="rgb(114,159,207)" d="M 4970,14838 C 5462,14741 5575,14187 5471,13837 5357,13450 4739,13271 4791,12764 4857,12125 4127,12367 3826,12478 3334,12660 3161,13140 3147,13587 3131,14112 4064,13768 4219,14338 L 4505,14695 4970,14838 Z "/>
+                                    </g>
+                                    
+                                    <!-- id8 - Grün - Klickbar -->
+                                    <g id="id8" class="clickable-zone com.sun.star.drawing.ClosedFreeHandShape" data-zone="gruen">
+                                        <rect class="BoundingBox" stroke="none" fill="none" x="3466" y="13553" width="9256" height="5685"/>
+                                        <path fill="rgb(94,185,30)" stroke="none" d="M 5221,15160 C 5337,14516 6190,15025 6222,14373 6249,13830 6768,13816 7116,13801 7496,13785 7879,13789 8260,13801 8643,13814 9027,13787 9404,13730 9782,13673 10210,13440 10548,13623 10915,13822 10893,14367 10941,14767 11005,15298 11595,15350 11764,15804 11934,16261 12497,16467 12586,16948 12645,17270 12978,17728 12300,17913 11914,18019 11235,18248 11442,18771 11674,19358 11013,19238 10762,19200 10384,19143 10004,18969 9618,19093 9212,19223 8898,18956 8474,18986 8084,19014 7717,18792 7330,18735 6907,18672 6485,18554 6186,18235 5903,17933 5467,17844 5077,17842 4686,17840 4330,18065 3933,18092 3373,18130 3280,17379 3862,17198 4305,17060 4685,16759 5006,16411 L 5077,16018 5113,15947 5221,15160 Z "/>
+                                        <path fill="none" stroke="rgb(187,227,61)" d="M 5221,15160 C 5337,14516 6190,15025 6222,14373 6249,13830 6768,13816 7116,13801 7496,13785 7879,13789 8260,13801 8643,13814 9027,13787 9404,13730 9782,13673 10210,13440 10548,13623 10915,13822 10893,14367 10941,14767 11005,15298 11595,15350 11764,15804 11934,16261 12497,16467 12586,16948 12645,17270 12978,17728 12300,17913 11914,18019 11235,18248 11442,18771 11674,19358 11013,19238 10762,19200 10384,19143 10004,18969 9618,19093 9212,19223 8898,18956 8474,18986 8084,19014 7717,18792 7330,18735 6907,18672 6485,18554 6186,18235 5903,17933 5467,17844 5077,17842 4686,17840 4330,18065 3933,18092 3373,18130 3280,17379 3862,17198 4305,17060 4685,16759 5006,16411 L 5077,16018 5113,15947 5221,15160 Z "/>
+                                    </g>
+                                    
+                                    <!-- id9 - Goldgelb/Orange - Klickbar -->
+                                    <g id="id9" class="clickable-zone com.sun.star.drawing.ClosedFreeHandShape" data-zone="gold">
+                                        <rect class="BoundingBox" stroke="none" fill="none" x="1809" y="3854" width="6624" height="9704"/>
+                                        <path fill="rgb(180,120,4)" stroke="none" d="M 4934,12157 C 5279,12480 5060,13122 5542,13301 5901,13434 6235,13584 6651,13551 7074,13517 7569,13376 7688,12943 7791,12568 7712,12161 7580,11799 7444,11429 7551,11034 7509,10655 7465,10254 7832,9893 7580,9511 7363,9182 7290,8780 7330,8402 7371,8008 7360,7579 7688,7258 8005,6948 8245,6543 8367,6114 8473,5740 8463,5286 8224,4970 7972,4637 7839,4025 7330,4076 7076,4101 6313,3458 6651,4255 6798,4603 6942,5086 6686,5399 6424,5719 6207,6176 5614,6114 5194,6070 4854,5728 4505,5935 4087,6183 3775,6542 3361,6793 2885,7082 2979,7512 2968,7902 2957,8292 2810,8656 2825,9046 2841,9451 2814,9907 2432,10190 2078,10452 1944,10914 1860,11334 1781,11733 1767,12119 2038,12443 2284,12737 2143,13605 2718,12764 3067,12253 3027,11876 3683,11978 L 4041,11871 4076,11835 4934,12157 Z "/>
+                                        <path fill="none" stroke="rgb(255,212,40)" d="M 4934,12157 C 5279,12480 5060,13122 5542,13301 5901,13434 6235,13584 6651,13551 7074,13517 7569,13376 7688,12943 7791,12568 7712,12161 7580,11799 7444,11429 7551,11034 7509,10655 7465,10254 7832,9893 7580,9511 7363,9182 7290,8780 7330,8402 7371,8008 7360,7579 7688,7258 8005,6948 8245,6543 8367,6114 8473,5740 8463,5286 8224,4970 7972,4637 7839,4025 7330,4076 7076,4101 6313,3458 6651,4255 6798,4603 6942,5086 6686,5399 6424,5719 6207,6176 5614,6114 5194,6070 4854,5728 4505,5935 4087,6183 3775,6542 3361,6793 2885,7082 2979,7512 2968,7902 2957,8292 2810,8656 2825,9046 2841,9451 2814,9907 2432,10190 2078,10452 1944,10914 1860,11334 1781,11733 1767,12119 2038,12443 2284,12737 2143,13605 2718,12764 3067,12253 3027,11876 3683,11978 L 4041,11871 4076,11835 4934,12157 Z "/>
+                                    </g>
+                                    
+                                    <!-- id10 - Bordeaux - Klickbar -->
+                                    <g id="id10" class="clickable-zone com.sun.star.drawing.ClosedFreeHandShape" data-zone="bordeaux">
+                                        <rect class="BoundingBox" stroke="none" fill="none" x="7913" y="5837" width="9117" height="7446"/>
+                                        <path fill="rgb(167,7,75)" stroke="none" d="M 10262,6221 C 9896,6357 9485,6312 9118,6436 8661,6591 8672,7253 8295,7509 7853,7809 7898,8251 7938,8653 7977,9045 8195,9404 8188,9797 8181,10185 8299,10560 8188,10941 8079,11313 7888,11704 7974,12085 8068,12499 7886,12958 8474,13193 8864,13348 9204,13247 9583,13265 9972,13284 10356,13164 10727,13015 11151,12845 11449,12478 11871,12335 12234,12212 12635,12261 13015,12300 13449,12345 13771,12037 14088,11763 14442,11457 14876,11235 15089,10798 15264,10438 15379,10044 15303,9654 15221,9236 14963,8887 14731,8545 14519,8232 14475,7716 15017,7509 15413,7358 15745,7193 16126,7079 16416,6992 17111,7245 17020,6650 16952,6206 16503,5997 16090,5935 15712,5878 15343,5937 14981,5864 14534,5774 14141,5927 13837,6186 13428,6535 13088,6439 12693,6472 12223,6511 11989,6009 11549,5935 L 11156,6043 10798,6114 10727,6150 10262,6221 Z "/>
+                                        <path fill="none" stroke="rgb(214,46,78)" d="M 10262,6221 C 9896,6357 9485,6312 9118,6436 8661,6591 8672,7253 8295,7509 7853,7809 7898,8251 7938,8653 7977,9045 8195,9404 8188,9797 8181,10185 8299,10560 8188,10941 8079,11313 7888,11704 7974,12085 8068,12499 7886,12958 8474,13193 8864,13348 9204,13247 9583,13265 9972,13284 10356,13164 10727,13015 11151,12845 11449,12478 11871,12335 12234,12212 12635,12261 13015,12300 13449,12345 13771,12037 14088,11763 14442,11457 14876,11235 15089,10798 15264,10438 15379,10044 15303,9654 15221,9236 14963,8887 14731,8545 14519,8232 14475,7716 15017,7509 15413,7358 15745,7193 16126,7079 16416,6992 17111,7245 17020,6650 16952,6206 16503,5997 16090,5935 15712,5878 15343,5937 14981,5864 14534,5774 14141,5927 13837,6186 13428,6535 13088,6439 12693,6472 12223,6511 11989,6009 11549,5935 L 11156,6043 10798,6114 10727,6150 10262,6221 Z "/>
+                                    </g>
+                                </g>
+                            </g>
+                        </g>
+                    </g>
+                </g>
+            </svg>
+            
+           
+        </div>
+        
+        <div class="info-panel">
+            <div class="info-card" id="info-card">
+                <div class="info-card-header">
+                    <div class="accent-bar" id="accent-bar"></div>
+                    <h2 class="info-card-title" id="info-title">Überschrift</h2>
+                    <button class="close-btn" id="close-btn" onclick="closeInfo()">×</button>
+                </div>
+                <div class="info-card-body">
+                    <p class="info-card-text" id="info-text">Hier steht ein kurzer Beschreibungstext, der später ergänzt wird.</p>
+                </div>
+            </div>
+            
+            <div class="placeholder-hint" id="placeholder-hint">
+                <p>Klicke auf eine farbige Zone auf der Karte, um mehr Informationen zu erhalten.</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Zonendaten mit Farben und Platzhalter-Texten
+        const zoneData = {
+            lila: {
+                title: 'Lila Zone',
+                text: 'Hier steht ein kurzer Beschreibungstext für die lila Zone. Diese Zone besteht aus id4 und id5 und kann nur zusammen angeklickt werden.',
+                color: '#a1467e'
+            },
+            dunkelrot: {
+                title: 'Dunkelrote Zone',
+                text: 'Hier steht ein kurzer Beschreibungstext für die dunkelrote Zone (id6). Die Farbe rgb(201,33,30) wird für den Akzentbalken verwendet.',
+                color: '#c9211e'
+            },
+            blau: {
+                title: 'Blaue Zone',
+                text: 'Hier steht ein kurzer Beschreibungstext für die blaue Zone (id7). Diese Zone hat die Farbe rgb(42,96,153).',
+                color: '#2a6099'
+            },
+            gruen: {
+                title: 'Grüne Zone',
+                text: 'Hier steht ein kurzer Beschreibungstext für die grüne Zone (id8). Diese Zone hat die Farbe rgb(94,185,30).',
+                color: '#5eb91e'
+            },
+            gold: {
+                title: 'Goldgelbe Zone',
+                text: 'Hier steht ein kurzer Beschreibungstext für die goldgelbe Zone (id9). Diese Zone hat die Farbe rgb(180,120,4).',
+                color: '#b47804'
+            },
+            bordeaux: {
+                title: 'Bordeaux Zone',
+                text: 'Hier steht ein kurzer Beschreibungstext für die Bordeaux Zone (id10). Diese Zone hat die Farbe rgb(167,7,75).',
+                color: '#a7074b'
+            }
+        };
+
+        let activeZone = null;
+
+        // Klickbare Zonen auswählen
+        const clickableZones = document.querySelectorAll('.clickable-zone');
+
+        // Event Listener für jede klickbare Zone
+        clickableZones.forEach(zone => {
+            zone.addEventListener('click', function(e) {
+                e.stopPropagation();
+                const zoneName = this.getAttribute('data-zone');
+                showInfo(zoneName, this);
+            });
+        });
+
+        function showInfo(zoneName, zoneElement) {
+            const data = zoneData[zoneName];
+            if (!data) return;
+
+            // Vorherige Zone desaktivieren
+            if (activeZone) {
+                activeZone.classList.remove('active');
+            }
+
+            // Neue Zone aktivieren
+            activeZone = zoneElement;
+            activeZone.classList.add('active');
+
+            // Info-Karte aktualisieren
+            document.getElementById('accent-bar').style.backgroundColor = data.color;
+            document.getElementById('info-title').textContent = data.title;
+            document.getElementById('info-text').textContent = data.text;
+
+            // Info-Karte anzeigen
+            document.getElementById('info-card').classList.add('active');
+            document.getElementById('placeholder-hint').style.display = 'none';
+        }
+
+        function closeInfo() {
+            document.getElementById('info-card').classList.remove('active');
+            document.getElementById('placeholder-hint').style.display = 'block';
+
+            if (activeZone) {
+                activeZone.classList.remove('active');
+                activeZone = null;
+            }
+        }
+
+        // Escape-Taste zum Schließen
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                closeInfo();
+            }
+        });
+
+        // Klick außerhalb der Karte schließt Info
+        document.addEventListener('click', function(e) {
+            if (!e.target.closest('.clickable-zone') && 
+                !e.target.closest('.info-card') &&
+                !e.target.closest('.map-container')) {
+                closeInfo();
+            }
+        });
+    </script>
+
+</body>
+</html>

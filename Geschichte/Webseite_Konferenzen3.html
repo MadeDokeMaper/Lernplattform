@@ -1,0 +1,1104 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Geschichte Klasse 8 – Mecklenburg-Vorpommern</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Source+Sans+Pro:wght@300;400;600;700&display=swap" rel="stylesheet">
+  <style>
+    /* ========================================
+       CSS Variables (match style.css)
+       ======================================== */
+    :root {
+      --primary: #1e3a5f;
+      --primary-light: #2d5a8a;
+      --accent: #c9a227;
+      --accent-hover: #e0b830;
+      --bg-main: #faf8f5;
+      --bg-card: #ffffff;
+      --bg-nav: #1e3a5f;
+      --text-primary: #2c2c2c;
+      --text-secondary: #5a5a5a;
+      --text-light: #ffffff;
+      --border: #e8e4df;
+      --shadow: rgba(30, 58, 95, 0.1);
+      --shadow-hover: rgba(30, 58, 95, 0.2);
+      --font-heading: 'Playfair Display', Georgia, serif;
+      --font-body: 'Source Sans Pro', 'Segoe UI', sans-serif;
+      --spacing-sm: 0.5rem;
+      --spacing-md: 1rem;
+      --spacing-lg: 2rem;
+      --radius: 12px;
+    }
+
+    /* ========================================
+       Reset & Base
+       ======================================== */
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: var(--font-body);
+      background-color: var(--bg-main);
+      color: var(--text-primary);
+      line-height: 1.6;
+      min-height: 100vh;
+    }
+
+    img {
+      max-width: 100%;
+      display: block;
+    }
+
+    /* ========================================
+       Navbar
+       ======================================== */
+    .navbar {
+      background: var(--bg-nav);
+      padding: 0.8rem 2rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      box-shadow: 0 2px 12px var(--shadow);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .navbar-brand {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      text-decoration: none;
+    }
+
+    .navbar-brand .brand-text {
+      font-family: var(--font-heading);
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: var(--text-light);
+      letter-spacing: 0.02em;
+    }
+
+    .navbar svg.book-icon {
+      width: 28px;
+      height: 28px;
+      fill: var(--accent);
+    }
+
+    /* ========================================
+       Page Layout
+       ======================================== */
+    .page-wrapper {
+      max-width: 1280px;
+      margin: 0 auto;
+      padding: 2rem 1.5rem;
+    }
+
+    /* ========================================
+       Animations
+       ======================================== */
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .fade-in-up {
+      animation: fadeInUp 0.7s ease-out forwards;
+    }
+
+    .delay-1 { animation-delay: 0.1s; opacity: 0; }
+    .delay-2 { animation-delay: 0.2s; opacity: 0; }
+    .delay-3 { animation-delay: 0.3s; opacity: 0; }
+    .delay-4 { animation-delay: 0.4s; opacity: 0; }
+    .delay-5 { animation-delay: 0.5s; opacity: 0; }
+
+    /* ========================================
+       Section headings
+       ======================================== */
+    .section-header {
+      margin-bottom: 1.5rem;
+    }
+
+    .section-header h2 {
+      font-family: var(--font-heading);
+      font-size: 2rem;
+      font-weight: 700;
+      color: var(--primary);
+      margin-bottom: 0.5rem;
+    }
+
+    .section-header p {
+      color: var(--text-secondary);
+      font-size: 1rem;
+    }
+
+    /* ========================================
+       SLIDESHOW
+       ======================================== */
+    .slideshow-section {
+      margin-bottom: 2.5rem;
+      animation: fadeInUp 0.7s ease-out forwards;
+    }
+
+    .slideshow-wrapper {
+      background: var(--bg-card);
+      border-radius: var(--radius);
+      box-shadow: 0 4px 24px var(--shadow);
+      border: 1px solid var(--border);
+      overflow: hidden;
+    }
+
+    .slideshow-container {
+      position: relative;
+      width: 100%;
+    }
+
+    .slide {
+      display: none;
+      flex-direction: column;
+    }
+
+    .slide.active {
+      display: flex;
+    }
+
+    .slide-content {
+      display: grid;
+      grid-template-columns: 1fr 1.6fr 1fr;
+      min-height: 340px;
+    }
+
+    .slide-text-box {
+      background: rgba(30, 58, 95, 0.05);
+      border: 1px solid var(--border);
+      padding: 1.5rem;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+
+    .slide-text-box h3 {
+      font-family: var(--font-heading);
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: var(--primary);
+      margin-bottom: 0.75rem;
+    }
+
+    .slide-text-box p {
+      font-size: 0.9rem;
+      color: var(--text-secondary);
+      line-height: 1.7;
+    }
+
+    .slide-image-center {
+      padding: 1rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--bg-main);
+    }
+
+    .slide-image-center img {
+      width: 100%;
+      max-height: 300px;
+      object-fit: cover;
+      border-radius: calc(var(--radius) / 2);
+      border: 1px solid var(--border);
+    }
+
+    .slide-image-center .img-placeholder {
+      width: 100%;
+      height: 260px;
+      background: rgba(30,58,95,0.08);
+      border: 2px dashed var(--border);
+      border-radius: calc(var(--radius) / 2);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--text-secondary);
+      font-size: 0.85rem;
+      text-align: center;
+      padding: 1rem;
+    }
+
+    .slide-caption {
+      text-align: center;
+      padding: 0.75rem 1.5rem;
+      background: rgba(30,58,95,0.03);
+      border-top: 1px solid var(--border);
+      font-size: 0.88rem;
+      color: var(--text-secondary);
+      font-style: italic;
+    }
+
+    /* Slideshow Navigation */
+    .slideshow-nav {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 1rem 1.5rem;
+      background: var(--bg-main);
+      border-top: 1px solid var(--border);
+    }
+
+    .slide-dots {
+      display: flex;
+      gap: 0.5rem;
+      align-items: center;
+    }
+
+    .dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: var(--border);
+      cursor: pointer;
+      transition: all 0.3s ease;
+      border: none;
+    }
+
+    .dot.active {
+      background: var(--accent);
+      transform: scale(1.3);
+    }
+
+    .slideshow-btn {
+      background: var(--primary);
+      color: white;
+      border: none;
+      padding: 0.5rem 1.2rem;
+      border-radius: calc(var(--radius) / 2);
+      cursor: pointer;
+      font-family: var(--font-body);
+      font-size: 0.9rem;
+      font-weight: 600;
+      transition: background 0.3s ease;
+    }
+
+    .slideshow-btn:hover {
+      background: var(--primary-light);
+    }
+
+    .slideshow-btn:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
+
+    .topic-label {
+      display: inline-block;
+      background: var(--primary);
+      color: white;
+      font-size: 0.72rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      padding: 0.25rem 0.75rem;
+      border-radius: 20px;
+      margin-bottom: 0.75rem;
+    }
+
+    /* ========================================
+       BOTTOM GRID (2 COLUMNS)
+       ======================================== */
+    .bottom-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 2rem;
+      margin-top: 2rem;
+    }
+
+    /* ========================================
+       QUIZ
+       ======================================== */
+    .quiz-section {
+      animation: fadeInUp 0.7s ease-out forwards;
+      animation-delay: 0.2s;
+      opacity: 0;
+    }
+
+    .quiz-container {
+      background: var(--bg-card);
+      border-radius: var(--radius);
+      box-shadow: 0 4px 24px var(--shadow);
+      border: 1px solid var(--border);
+      padding: 2rem;
+      height: 100%;
+      overflow-y: auto;
+      max-height: 800px;
+    }
+
+    .quiz-title {
+      font-family: var(--font-heading);
+      font-size: 1.75rem;
+      font-weight: 700;
+      color: var(--primary);
+      margin-bottom: 0.5rem;
+    }
+
+    .quiz-subtitle {
+      color: var(--text-secondary);
+      font-size: 0.95rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .progress-bar-wrap {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .progress-bar-wrap span {
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+      font-weight: 600;
+      white-space: nowrap;
+    }
+
+    .progress-bar {
+      flex: 1;
+      height: 8px;
+      background: var(--border);
+      border-radius: 10px;
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--primary), var(--primary-light));
+      border-radius: 10px;
+      transition: width 0.5s ease;
+      width: 0%;
+    }
+
+    .quiz-card {
+      background: var(--bg-main);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.5rem;
+      margin-bottom: 1.25rem;
+      transition: box-shadow 0.3s ease;
+    }
+
+    .quiz-card:last-child {
+      margin-bottom: 0;
+    }
+
+    .quiz-card .question {
+      font-family: var(--font-heading);
+      font-size: 1.05rem;
+      font-weight: 600;
+      color: var(--text-primary);
+      margin-bottom: 1rem;
+      padding-bottom: 0.75rem;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .quiz-card .options {
+      display: flex;
+      flex-direction: column;
+      gap: 0.6rem;
+    }
+
+    .quiz-card .option {
+      padding: 0.75rem 1rem;
+      border: 2px solid var(--border);
+      border-radius: calc(var(--radius) / 2);
+      cursor: pointer;
+      font-size: 0.92rem;
+      color: var(--text-primary);
+      transition: all 0.25s ease;
+      background: white;
+      text-align: left;
+      width: 100%;
+      font-family: var(--font-body);
+    }
+
+    .quiz-card .option:hover {
+      border-color: var(--primary-light);
+      background: rgba(45, 90, 138, 0.05);
+    }
+
+    .quiz-card .option.selected {
+      border-color: var(--primary);
+      background: rgba(30, 58, 95, 0.07);
+    }
+
+    .quiz-card .option.correct {
+      border-color: #2e7d32;
+      background: rgba(46, 125, 50, 0.1);
+      color: #1b5e20;
+    }
+
+    .quiz-card .option.incorrect {
+      border-color: #c62828;
+      background: rgba(198, 40, 40, 0.1);
+      color: #b71c1c;
+    }
+
+    .quiz-card .option.disabled {
+      pointer-events: none;
+      opacity: 0.75;
+    }
+
+    .quiz-result {
+      text-align: center;
+      padding: 2rem;
+      background: rgba(30,58,95,0.04);
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+      margin-top: 1.5rem;
+      display: none;
+    }
+
+    .quiz-result.show {
+      display: block;
+    }
+
+    .quiz-result h3 {
+      font-family: var(--font-heading);
+      font-size: 1.5rem;
+      color: var(--primary);
+      margin-bottom: 0.5rem;
+    }
+
+    .quiz-result p {
+      color: var(--text-secondary);
+    }
+
+    .btn-submit {
+      display: block;
+      width: 100%;
+      padding: 0.9rem 2rem;
+      margin-top: 1.25rem;
+      background: linear-gradient(135deg, var(--primary), var(--primary-light));
+      color: white;
+      border: none;
+      border-radius: calc(var(--radius) / 2);
+      font-family: var(--font-body);
+      font-size: 1rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      letter-spacing: 0.03em;
+    }
+
+    .btn-submit:hover {
+      background: linear-gradient(135deg, var(--accent), var(--accent-hover));
+      color: var(--primary);
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px var(--shadow-hover);
+    }
+
+    /* ========================================
+       MAPS COLUMN (RIGHT SIDE)
+       ======================================== */
+    .maps-column {
+      display: flex;
+      flex-direction: column;
+      gap: 2rem;
+    }
+
+    .map-card {
+      background: var(--bg-card);
+      border-radius: var(--radius);
+      box-shadow: 0 4px 24px var(--shadow);
+      border: 1px solid var(--border);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      animation: fadeInUp 0.7s ease-out forwards;
+      flex: 1;
+    }
+
+    .map-card:nth-child(1) {
+      animation-delay: 0.3s;
+      opacity: 0;
+    }
+
+    .map-card:nth-child(2) {
+      animation-delay: 0.4s;
+      opacity: 0;
+    }
+
+    .map-card-header {
+      padding: 1.5rem;
+      background: linear-gradient(135deg, var(--primary), var(--primary-light));
+      color: white;
+      border-bottom: 3px solid var(--accent);
+    }
+
+    .map-card-header h3 {
+      font-family: var(--font-heading);
+      font-size: 1.2rem;
+      font-weight: 700;
+      margin: 0;
+    }
+
+    .map-card-iframe {
+      flex: 1;
+      display: flex;
+      position: relative;
+      min-height: 300px;
+    }
+
+    .map-card-iframe iframe {
+      width: 100%;
+      height: 100%;
+      border: none;
+      border-radius: 0 0 calc(var(--radius) - 2px) calc(var(--radius) - 2px);
+    }
+
+    /* ========================================
+       Responsive
+       ======================================== */
+    @media (max-width: 1024px) {
+      .bottom-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .quiz-section {
+        order: 1;
+      }
+
+      .maps-column {
+        order: 2;
+      }
+
+      .maps-column {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 2rem;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .slide-content {
+        grid-template-columns: 1fr;
+      }
+
+      .slide-image-center {
+        order: -1;
+        padding: 0.75rem;
+      }
+
+      .slide-image-center .img-placeholder {
+        height: 180px;
+      }
+
+      .slide-text-box {
+        padding: 1rem;
+      }
+
+      .bottom-grid {
+        grid-template-columns: 1fr;
+        gap: 1.5rem;
+      }
+
+      .maps-column {
+        grid-template-columns: 1fr;
+      }
+
+      .map-card-iframe {
+        min-height: 400px;
+      }
+
+      .navbar {
+        padding: 0.75rem 1rem;
+      }
+
+      .navbar-brand .brand-text {
+        font-size: 1rem;
+      }
+
+      .quiz-container {
+        padding: 1.25rem;
+        max-height: none;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ========================================
+       NAVBAR
+       ======================================== -->
+  <nav class="navbar">
+    <a href="#" class="navbar-brand">
+      <svg class="book-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+        <path d="M21 4H3a1 1 0 0 0-1 1v14a1 1 0 0 0 1 1h18a1 1 0 0 0 1-1V5a1 1 0 0 0-1-1zm-1 14H4V6h16v12zM6 7h5v4H6V7zm0 5h5v4H6v-4zm7-5h4v4h-4V7zm0 5h4v4h-4v-4z"/>
+      </svg>
+      <span class="brand-text">Geschichte Klasse 8</span>
+    </a>
+  </nav>
+
+  <!-- ========================================
+       PAGE WRAPPER
+       ======================================== -->
+  <div class="page-wrapper">
+
+    <!-- ========================================
+         SLIDESHOW – FULL WIDTH
+         ======================================== -->
+    <section class="slideshow-section fade-in-up">
+      <div class="slideshow-wrapper">
+        <div class="slideshow-container" id="slideshow">
+
+          <!-- Slide 1 -->
+          <div class="slide active" data-slide="0">
+            <div class="slide-content">
+              <div class="slide-text-box">
+                <span class="topic-label">Konferenz</span>
+                <h3>Teheran 1943</h3>
+                <p>Die Konferenz von Teheran (28. November – 1. Dezember 1943) war die erste Begegnung der „Großen Drei" – Roosevelt, Churchill und Stalin. Hier wurde erstmals über eine gemeinsame Strategie diskutiert.</p>
+              </div>
+              <div class="slide-image-center">
+                <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/4/4f/Tehran_Conference.jpg/640px-Tehran_Conference.jpg" alt="Konferenz von Teheran">
+              </div>
+              <div class="slide-text-box">
+                <h3>Bedeutung für den Kalten Krieg</h3>
+                <p>Die Konferenz legte den Grundstein für die später Teilung Europas. Stalin sicherte sich hier die Zustimmung zu seinen Gebietsansprüchen in Osteuropa.</p>
+              </div>
+            </div>
+            <div class="slide-caption">Die „Großen Drei" auf der Konferenz von Teheran – das erste persönliche Treffen Roosevelts, Churchills und Stalins</div>
+          </div>
+
+          <!-- Slide 2 -->
+          <div class="slide" data-slide="1">
+            <div class="slide-content">
+              <div class="slide-text-box">
+                <span class="topic-label">Konferenz</span>
+                <h3>Jalta 1945</h3>
+                <p>Die Konferenz von Jalta (4.–11. Februar 1945) fand auf der Krim statt. Die Alliierten einigten sich auf die Einteilung Deutschlands in Besatzungszonen und die Gründung der UN.</p>
+              </div>
+              <div class="slide-image-center">
+                <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/5/55/Yalta_Conference.jpg/640px-Yalta_Conference.jpg" alt="Konferenz von Jalta">
+              </div>
+              <div class="slide-text-box">
+                <h3>Bedeutung für den Kalten Krieg</h3>
+                <p>Jalta gilt als letzte Konferenz, auf der die Alliierten noch einig agierten. Die Beschlüsse wurden später unterschiedlich ausgelegt – besonders die Frage der freien Wahlen.</p>
+              </div>
+            </div>
+            <div class="slide-caption">Roosevelt, Churchill und Stalin in Jalta – die letzte Konferenz der Kriegsallianz</div>
+          </div>
+
+          <!-- Slide 3 -->
+          <div class="slide" data-slide="2">
+            <div class="slide-content">
+              <div class="slide-text-box">
+                <span class="topic-label">Konferenz</span>
+                <h3>Potsdam 1945</h3>
+                <p>Die Konferenz von Potsdam (17. Juli – 2. August 1945) fand nach dem Ende des Zweiten Weltkriegs statt. Truman und Attlee lösten Roosevelt und Churchill ab. Deutschlands Zukunft war Hauptthema.</p>
+              </div>
+              <div class="slide-image-center">
+                <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/8/8e/Potsdam_Conference.jpg/640px-Potsdam_Conference.jpg" alt="Konferenz von Potsdam">
+              </div>
+              <div class="slide-text-box">
+                <h3>Bedeutung für den Kalten Krieg</h3>
+                <p>Potsdam markierte den Beginn der Spaltung Deutschlands. Die Uneinigkeit über die Ostgrenze und die Verfahrensweisen in Osteuropa ließen die Allianzen zerbrechen.</p>
+              </div>
+            </div>
+            <div class="slide-caption">Das Schloss Cecilienhof in Potsdam – Schauplatz der letzten alliierten Konferenz des Zweiten Weltkriegs</div>
+          </div>
+
+          <!-- Slide 4 -->
+          <div class="slide" data-slide="3">
+            <div class="slide-content">
+              <div class="slide-text-box">
+                <span class="topic-label">Konferenz</span>
+                <h3>Die Konferenz von 1946</h3>
+                <p>Nach Potsdam verschärften sich die Spannungen zwischen den Westmächten und der Sowjetunion. Versuche einer gemeinsamen Deutschlandpolitik scheiterten zunehmend.</p>
+              </div>
+              <div class="slide-image-center">
+                <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/e/ec/Potsdam_satellite.jpg/640px-Potsdam_satellite.jpg" alt="Besatzungszonen Deutschlands">
+              </div>
+              <div class="slide-text-box">
+                <h3>Bedeutung für den Kalten Krieg</h3>
+                <p>Die Konferenzen von 1946 zeigten die wachsende Entfremdung. Der Morgenthauplan der USA und die Sowjetisierung Osteuropas beschleunigten die Spaltung.</p>
+              </div>
+            </div>
+            <div class="slide-caption">Sowjetische, amerikanische und britische Sektoren in Berlin – Symbol der geteilten Nachkriegswelt</div>
+          </div>
+
+          <!-- Slide 5 -->
+          <div class="slide" data-slide="4">
+            <div class="slide-content">
+              <div class="slide-text-box">
+                <span class="topic-label">Thema</span>
+                <h3>Morgenthauplan & Deindustrialisierung</h3>
+                <p>Der von US-Finanzminister Morgenthau vorgeschlagene Plan sah vor, Deutschland in einen Agrarstaat zu verwandeln. Schwerindustrien im Ruhrgebiet sollten demontiert werden.</p>
+              </div>
+              <div class="slide-image-center">
+                <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/1/1a/Bundesarchiv_Bild_183-D0106-0041-019%2C_Ruhrgebiet%2C_Zeche%2C_Schachtanlage.jpg/640px-Bundesarchiv_Bild_183-D0106-0041-019.jpg" alt="Ruhrgebiet">
+              </div>
+              <div class="slide-text-box">
+                <h3>Bedeutung für den Kalten Krieg</h3>
+                <p>Der Morgenthauplan trug zur wirtschaftlichen Schwächung Deutschlands bei. Spannungen blieben und beförderten die Blockbildung.</p>
+              </div>
+            </div>
+            <div class="slide-caption">Das Ruhrgebiet – Zentrum der Schwerindustrie, die nach dem Morgenthauplan teilweise demontiert werden sollte</div>
+          </div>
+
+          <!-- Slide 6 -->
+          <div class="slide" data-slide="5">
+            <div class="slide-content">
+              <div class="slide-text-box">
+                <span class="topic-label">Thema</span>
+                <h3>Besatzungszonen & alliierte Verwaltung</h3>
+                <p>Deutschland wurde nach dem Krieg in vier Besatzungszonen aufgeteilt: amerikanisch, britisch, französisch und sowjetisch. Jede Zone wurde von der jeweiligen Siegermacht verwaltet.</p>
+              </div>
+              <div class="slide-image-center">
+                <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/d/d9/Occupation_Zones_of_Germany.png/640px-Occupation_Zones_of_Germany.png" alt="Besatzungszonen Deutschlands">
+              </div>
+              <div class="slide-text-box">
+                <h3>Bedeutung für den Kalten Krieg</h3>
+                <p>Die Teilung Deutschlands wurde zum Symbol des Kalten Krieges. Berlin, das in vier Sektoren geteilt war, wurde zum Brennpunkt der Konfrontation.</p>
+              </div>
+            </div>
+            <div class="slide-caption">Die vier Besatzungszonen Deutschlands nach 1945 – der physische Ausdruck der europäischen Teilung</div>
+          </div>
+
+        </div><!-- /slideshow-container -->
+
+        <!-- Slideshow Navigation -->
+        <div class="slideshow-nav">
+          <button class="slideshow-btn" id="prevBtn" aria-label="Vorheriger Slide">← Zurück</button>
+          <div class="slide-dots" id="slideDots"></div>
+          <button class="slideshow-btn" id="nextBtn" aria-label="Nächster Slide">Weiter →</button>
+        </div>
+      </div><!-- /slideshow-wrapper -->
+    </section>
+
+    <!-- ========================================
+         BOTTOM GRID (2 COLUMNS: Quiz LEFT, Maps RIGHT)
+         ======================================== -->
+    <div class="bottom-grid">
+
+      <!-- LEFT: QUIZ -->
+      <section class="quiz-section">
+        <div class="quiz-container">
+          <h2 class="quiz-title">Quiz</h2>
+          <p class="quiz-subtitle">Teste dein Wissen über die Konferenzen von Teheran, Jalta und Potsdam!</p>
+          <div class="progress-bar-wrap">
+            <span id="progressLabel">Fortschritt: 0/10</span>
+            <div class="progress-bar">
+              <div class="progress-fill" id="progressFill"></div>
+            </div>
+          </div>
+
+          <div id="quizQuestions">
+
+            <!-- Q1 -->
+            <div class="quiz-card" data-q="0">
+              <div class="question">1. Wo fand die erste Konferenz der „Großen Drei" statt?</div>
+              <div class="options">
+                <button class="option" data-answer="a">a) Jalta</button>
+                <button class="option" data-answer="b">b) Potsdam</button>
+                <button class="option" data-answer="c">c) Teheran</button>
+                <button class="option" data-answer="d">d) Moskau</button>
+              </div>
+            </div>
+
+            <!-- Q2 -->
+            <div class="quiz-card" data-q="1">
+              <div class="question">2. Welche drei Staatschefs trafen sich in Jalta?</div>
+              <div class="options">
+                <button class="option" data-answer="a">a) Roosevelt, Churchill, Stalin</button>
+                <button class="option" data-answer="b">b) Truman, Attlee, Stalin</button>
+                <button class="option" data-answer="c">c) Eisenhower, Churchill, Truman</button>
+                <button class="option" data-answer="d">d) Roosevelt, Hitler, Mussolini</button>
+              </div>
+            </div>
+
+            <!-- Q3 -->
+            <div class="quiz-card" data-q="2">
+              <div class="question">3. Welche Organisation wurde auf der Konferenz von Jalta gegründet?</div>
+              <div class="options">
+                <button class="option" data-answer="a">a) NATO</button>
+                <button class="option" data-answer="b">b) Vereinte Nationen (UN)</button>
+                <button class="option" data-answer="c">c) Warschauer Pakt</button>
+                <button class="option" data-answer="d">d) Europäische Union</button>
+              </div>
+            </div>
+
+            <!-- Q4 -->
+            <div class="quiz-card" data-q="3">
+              <div class="question">4. Wer vertrat die USA auf der Potsdamer Konferenz 1945?</div>
+              <div class="options">
+                <button class="option" data-answer="a">a) Franklin D. Roosevelt</button>
+                <button class="option" data-answer="b">b) Harry S. Truman</button>
+                <button class="option" data-answer="c">c) Dwight D. Eisenhower</button>
+                <button class="option" data-answer="d">d) Winston Churchill</button>
+              </div>
+            </div>
+
+            <!-- Q5 -->
+            <div class="quiz-card" data-q="4">
+              <div class="question">5. Was sah der Morgenthauplan ursprünglich für Deutschland vor?</div>
+              <div class="options">
+                <button class="option" data-answer="a">a) Beitritt zur NATO</button>
+                <button class="option" data-answer="b">b) vollständige Deindustrialisierung</button>
+                <button class="option" data-answer="c">c) sofortige Wiedervereinigung</button>
+                <button class="option" data-answer="d">d) Wiederbewaffnung</button>
+              </div>
+            </div>
+
+            <!-- Q6 -->
+            <div class="quiz-card" data-q="5">
+              <div class="question">6. In wie viele Besatzungszonen wurde Deutschland nach dem Krieg aufgeteilt?</div>
+              <div class="options">
+                <button class="option" data-answer="a">a) zwei</button>
+                <button class="option" data-answer="b">b) drei</button>
+                <button class="option" data-answer="c">c) vier</button>
+                <button class="option" data-answer="d">d) fünf</button>
+              </div>
+            </div>
+
+            <!-- Q7 -->
+            <div class="quiz-card" data-q="6">
+              <div class="question">7. Welche Siegermacht verwaltete die sowjetische Besatzungszone?</div>
+              <div class="options">
+                <button class="option" data-answer="a">a) USA</button>
+                <button class="option" data-answer="b">b) Großbritannien</button>
+                <button class="option" data-answer="c">c) UdSSR (Sowjetunion)</button>
+                <button class="option" data-answer="d">d) Frankreich</button>
+              </div>
+            </div>
+
+            <!-- Q8 -->
+            <div class="quiz-card" data-q="7">
+              <div class="question">8. Auf welcher Halbinsel fand die Konferenz von Jalta statt?</div>
+              <div class="options">
+                <button class="option" data-answer="a">a) Krim</button>
+                <button class="option" data-answer="b">b) Sizilien</button>
+                <button class="option" data-answer="c">c) Korea</button>
+                <button class="option" data-answer="d">d) Florida</button>
+              </div>
+            </div>
+
+            <!-- Q9 -->
+            <div class="quiz-card" data-q="8">
+              <div class="question">9. Welches Thema war NICHT zentral auf der Konferenz von Potsdam?</div>
+              <div class="options">
+                <button class="option" data-answer="a">a) Zukunft Deutschlands</button>
+                <button class="option" data-answer="b">b) Reparationen</button>
+                <button class="option" data-answer="c">c) Beitritt zur UN</button>
+                <button class="option" data-answer="d">d) Grenzen Osteuropas</button>
+              </div>
+            </div>
+
+            <!-- Q10 -->
+            <div class="quiz-card" data-q="9">
+              <div class="question">10. Was gilt als eigentlicher Beginn des Kalten Krieges?</div>
+              <div class="options">
+                <button class="option" data-answer="a">a) Ende des Ersten Weltkriegs</button>
+                <button class="option" data-answer="b">b) Potsdamer Konferenz</button>
+                <button class="option" data-answer="c">c) Berliner Blockade 1948</button>
+                <button class="option" data-answer="d">d) Gründung der NATO 1949</button>
+              </div>
+            </div>
+
+          </div><!-- /quizQuestions -->
+
+          <button class="btn-submit" id="submitQuiz">Ergebnis anzeigen</button>
+
+          <div class="quiz-result" id="quizResult">
+            <h3 id="resultTitle"></h3>
+            <p id="resultText"></p>
+          </div>
+        </div>
+      </section>
+
+      <!-- RIGHT: MAPS COLUMN -->
+      <div class="maps-column">
+        <!-- BESATZUNGSZONEN MAP -->
+        <div class="map-card" id="besatzungszonen-map">
+          <div class="map-card-header">
+            <h3>Besatzungszonen</h3>
+          </div>
+          <div class="map-card-iframe">
+            <iframe src="besatzungszonen.html" title="Interaktive Karte der Besatzungszonen"></iframe>
+          </div>
+        </div>
+
+        <!-- MORGENTHAUPLAN MAP -->
+        <div class="map-card" id="morgenthauplan-map">
+          <div class="map-card-header">
+            <h3>Morgenthauplan</h3>
+          </div>
+          <div class="map-card-iframe">
+            <iframe src="morgenthauplan.html" title="Interaktive Karte des Morgenthauplan"></iframe>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /bottom-grid -->
+
+  </div><!-- /page-wrapper -->
+
+  <!-- ========================================
+       JAVASCRIPT
+       ======================================== -->
+  <script>
+    // ========================================
+    // SLIDESHOW LOGIC
+    // ========================================
+    (function() {
+      const slides = document.querySelectorAll('.slide');
+      const dotsContainer = document.getElementById('slideDots');
+      const prevBtn = document.getElementById('prevBtn');
+      const nextBtn = document.getElementById('nextBtn');
+      let currentSlide = 0;
+
+      // Create dots
+      slides.forEach((_, i) => {
+        const dot = document.createElement('button');
+        dot.className = 'dot' + (i === 0 ? ' active' : '');
+        dot.setAttribute('aria-label', 'Slide ' + (i + 1));
+        dot.addEventListener('click', () => goToSlide(i));
+        dotsContainer.appendChild(dot);
+      });
+
+      const dots = document.querySelectorAll('.dot');
+
+      function goToSlide(index) {
+        slides[currentSlide].classList.remove('active');
+        dots[currentSlide].classList.remove('active');
+        currentSlide = index;
+        slides[currentSlide].classList.add('active');
+        dots[currentSlide].classList.add('active');
+      }
+
+      prevBtn.addEventListener('click', () => {
+        goToSlide((currentSlide - 1 + slides.length) % slides.length);
+      });
+
+      nextBtn.addEventListener('click', () => {
+        goToSlide((currentSlide + 1) % slides.length);
+      });
+    })();
+
+    // ========================================
+    // QUIZ LOGIC
+    // ========================================
+    const quizAnswers = ['c', 'a', 'b', 'b', 'b', 'c', 'c', 'a', 'c', 'c'];
+    
+    document.getElementById('submitQuiz').addEventListener('click', function() {
+      const quizCards = document.querySelectorAll('.quiz-card');
+      let correct = 0;
+
+      quizCards.forEach((card, i) => {
+        const selected = card.querySelector('.option.selected');
+        if (selected && selected.dataset.answer === quizAnswers[i]) {
+          correct++;
+          selected.classList.add('correct');
+        } else if (selected) {
+          selected.classList.add('incorrect');
+        }
+        const options = card.querySelectorAll('.option');
+        options.forEach(opt => opt.classList.add('disabled'));
+      });
+
+      const resultDiv = document.getElementById('quizResult');
+      const percentage = (correct / quizAnswers.length) * 100;
+      document.getElementById('resultTitle').textContent = `Dein Ergebnis: ${correct}/${quizAnswers.length}`;
+      document.getElementById('resultText').textContent = `Du hast ${percentage.toFixed(0)}% richtig beantwortet!`;
+      resultDiv.classList.add('show');
+    });
+
+    document.querySelectorAll('.option').forEach(option => {
+      option.addEventListener('click', function() {
+        const card = this.closest('.quiz-card');
+        const previousSelected = card.querySelector('.option.selected');
+        if (previousSelected) previousSelected.classList.remove('selected');
+        this.classList.add('selected');
+        
+        const answered = document.querySelectorAll('.quiz-card .option.selected').length;
+        const total = document.querySelectorAll('.quiz-card').length;
+        document.getElementById('progressLabel').textContent = `Fortschritt: ${answered}/${total}`;
+        document.getElementById('progressFill').style.width = (answered / total) * 100 + '%';
+      });
+    });
+
+    // ========================================
+    // RESPONSIVE FONT SIZING FOR IFRAMES
+    // ========================================
+    function adjustIframeTextSize() {
+      const iframes = document.querySelectorAll('.map-card-iframe iframe');
+      iframes.forEach(iframe => {
+        try {
+          const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
+          if (iframeDoc) {
+            // Besatzungszonen adjustments
+            const infoCardBody = iframeDoc.querySelector('.info-card-body');
+            if (infoCardBody) {
+              const h3 = infoCardBody.querySelector('h3');
+              const p = infoCardBody.querySelector('p');
+              const containerWidth = iframe.offsetWidth;
+              
+              if (containerWidth < 400) {
+                if (h3) h3.style.fontSize = '0.85rem';
+                if (p) p.style.fontSize = '0.8rem';
+              } else if (containerWidth < 600) {
+                if (h3) h3.style.fontSize = '1rem';
+                if (p) p.style.fontSize = '0.9rem';
+              } else {
+                if (h3) h3.style.fontSize = '1rem';
+                if (p) p.style.fontSize = '0.95rem';
+              }
+            }
+
+            // Morgenthauplan adjustments
+            const infoCardText = iframeDoc.querySelector('.info-card-text');
+            if (infoCardText) {
+              const containerWidth = iframe.offsetWidth;
+              if (containerWidth < 400) {
+                infoCardText.style.fontSize = '0.8rem';
+              } else if (containerWidth < 600) {
+                infoCardText.style.fontSize = '0.9rem';
+              } else {
+                infoCardText.style.fontSize = '1rem';
+              }
+            }
+
+            const infoTitle = iframeDoc.querySelector('.info-card-title');
+            if (infoTitle) {
+              const containerWidth = iframe.offsetWidth;
+              if (containerWidth < 400) {
+                infoTitle.style.fontSize = '1rem';
+              } else if (containerWidth < 600) {
+                infoTitle.style.fontSize = '1.2rem';
+              } else {
+                infoTitle.style.fontSize = '1.4rem';
+              }
+            }
+          }
+        } catch (e) {
+          // Cross-origin iframes cannot be accessed
+        }
+      });
+    }
+
+    // Adjust on load and resize
+    window.addEventListener('load', adjustIframeTextSize);
+    window.addEventListener('resize', adjustIframeTextSize);
+    
+    // Also adjust after a slight delay to ensure iframes are fully loaded
+    setTimeout(adjustIframeTextSize, 500);
+  </script>
+
+</body>
+</html>
