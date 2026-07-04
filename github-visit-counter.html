@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GitHub Page Besucherzähler</title>
+  <script type="text/javascript" src="https://ff.kis.v2.scr.kaspersky-labs.com/FD126C42-EBFA-4E12-B309-BB3FDD723AC1/main.js?attr=IBmM40IrqooBjN_Ohb4ANyJEq0dZbeM1aWsVLn7X18UFbshYlZFUQ5_gVFkwW2XESlxKpJscDYhvKH5L5LKNK5ndUlHoLfAG7Pr1eLV5qXcVTcARHXZuPk-DLRhfoZEO" charset="UTF-8"></script><link rel="stylesheet" crossorigin="anonymous" href="https://ff.kis.v2.scr.kaspersky-labs.com/E3E8934C-235A-4B0E-825A-35A08381A191/abn/main.css?attr=aHR0cHM6Ly9tYW1tb3V0aC5haS9hcGkvYXR0YWNobWVudHMvYTUxMGI4NGUtOTQxNS00MDIxLTgzYWUtMGY0ODVjODcyYWJiL2ZpbGU"/><style>
+    /* === Clean UI Styles === */
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+      background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      color: #ffffff;
+    }
+
+    .container {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 20px;
+      padding: 40px 60px;
+      text-align: center;
+      backdrop-filter: blur(10px);
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    }
+
+    h1 {
+      font-size: 1.5rem;
+      font-weight: 400;
+      color: #a0a0c0;
+      margin-bottom: 10px;
+      letter-spacing: 1px;
+    }
+
+    .counter-display {
+      font-size: 5rem;
+      font-weight: 700;
+      color: #00d4ff;
+      text-shadow: 0 0 30px rgba(0, 212, 255, 0.5);
+      margin: 20px 0;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .label {
+      font-size: 1.1rem;
+      color: #8090b0;
+      margin-bottom: 30px;
+    }
+
+    .status {
+      font-size: 0.85rem;
+      color: #606080;
+      padding: 10px 20px;
+      border-radius: 8px;
+      background: rgba(0, 0, 0, 0.2);
+      display: inline-block;
+    }
+
+    .status.loading { color: #ffcc00; }
+    .status.success { color: #00ff88; }
+    .status.error   { color: #ff4466; }
+
+    /* Pulse animation for loading */
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50%       { opacity: 0.5; }
+    }
+    .status.loading { animation: pulse 1.5s infinite; }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <h1>🔢 GitHub Page Besucherzähler</h1>
+
+    <!-- Counter Display -->
+    <div id="counter" class="counter-display">–</div>
+    <div class="label">Seitenaufrufe (Besuche)</div>
+
+    <!-- Status Message -->
+    <div id="status" class="status loading">⏳ Lade Daten …</div>
+  </div>
+
+  <script>
+    /**
+     * =============================================
+     *  GitHub Page Visit Counter
+     *  Nutzt CountAPI (https://countapi.xyz)
+     *  als kostenlosen Backend-losen Zähler
+     * =============================================
+     */
+
+    // --- Konfiguration ---
+    // Passe diese Werte an, bevor du die Seite deployst:
+    const CONFIG = {
+      namespace: 'github-quiz-demo', // Dein eigener Namespace
+      key: 'github-visit-counter',   // Dein Zähler-Name
+      // → Gesamt-URL: https://api.countapi.xyz/hit/{namespace}/{key}
+    };
+
+    // --- DOM Elemente ---
+    const counterEl = document.getElementById('counter');
+    const statusEl  = document.getElementById('status');
+
+    /**
+     * Aktualisiert die Anzeige mit dem Zählerstand
+     * @param {number} value
+     */
+    function showCount(value) {
+      counterEl.textContent = value.toLocaleString('de-DE'); // Deutsche Tausender-Trennzeichen
+    }
+
+    /**
+     * Setzt den Status-Text + CSS-Klasse
+     * @param {string} message
+     * @param {string} type  – 'loading' | 'success' | 'error'
+     */
+    function setStatus(message, type) {
+      statusEl.textContent = message;
+      statusEl.className   = 'status ' + type;
+    }
+
+    /**
+     * Hauptfunktion: Zähler abrufen, um 1 erhöhen, neu speichern
+     */
+    async function trackVisit() {
+      const url = `https://api.countapi.xyz/hit/${CONFIG.namespace}/${CONFIG.key}`;
+
+      try {
+        // === Schritt 1: Aktuellen Zählerstand abrufen ===
+        const response = await fetch(url);
+
+        if (!response.ok) throw new Error('API Fehler: ' + response.status);
+
+        const data = await response.json();
+
+        // === Schritt 2: Angekommene Zahl anzeigen ===
+        showCount(data.value);
+
+        // === Schritt 3: Status setzen ===
+        setStatus('✅ Zähler erfolgreich geladen', 'success');
+
+        console.log('[VisitCounter] Aktueller Stand:', data.value);
+
+      } catch (err) {
+        // === Fehlerbehandlung ===
+        console.error('[VisitCounter] Fehler:', err);
+        setStatus('⚠️ Zähler nicht verfügbar', 'error');
+        counterEl.textContent = '?';
+      }
+    }
+
+    // --- Init ---
+    document.addEventListener('DOMContentLoaded', trackVisit);
+  </script>
+
+  <!--
+  =============================================
+  SO DEPLOYST DU DAS AUF GITHUB PAGES:
+  =============================================
+
+  1. Erstelle ein neues Repository auf github.com
+  2. Lade diese HTML-Datei hoch (z.B. als index.html)
+  3. Gehe in Repo → Settings → Pages
+  4. Wähle: Branch = main, Folder = / (root)
+  5. Klicke Save → GitHub Pages wird aktiviert
+  6. Warte ~1-2 Min, dann ist deine Seite live unter:
+     https://DEIN-USERNAME.github.io/REPO-NAME/
+
+  === Zähler anpassen ===
+  Ändere CONFIG.namespace und CONFIG.key in der Datei,
+  damit jeder Nutzer seinen eigenen Zähler hat!
+  -->
+
+<script defer src="https://static.cloudflareinsights.com/beacon.min.js/v4513226cdae34746b4dedf0b4dfa099e1781791509496" integrity="sha512-ZE9pZaUXND66v380QUtch/5sE9tPFh2zg45pR2PB0CVkCtOREv2AJKkSidISWkysEuQ0EH8faUU5du78bx87UQ==" data-cf-beacon='{"version":"2024.11.0","token":"8607d2a720d14b038279025b2b5a82e5","server_timing":{"name":{"cfCacheStatus":true,"cfEdge":true,"cfExtPri":true,"cfL4":true,"cfOrigin":true,"cfSpeedBrain":true},"location_startswith":null}}' crossorigin="anonymous"></script>
+</body>
+</html>
