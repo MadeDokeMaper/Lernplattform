@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<title>Unterschrift Karls des Großen – Buchstabenpuzzle</title>
+<style>
+  body {
+    font-family: Arial, sans-serif;
+    text-align: center;
+    background: #f4f1ea;
+    margin: 0;
+    padding: 20px;
+  }
+
+  h1 {
+    color: #3a2e1f;
+  }
+
+  /* Container für das Hauptbild + die Klickfelder */
+  .signature-container {
+    position: relative;
+    display: inline-block;
+    margin-top: 20px;
+  }
+
+  .signature-container img#main-image {
+    display: block;
+    max-width: 900px;
+    width: 100%;
+    height: auto;
+  }
+
+  /* Die anklickbaren Felder über den Buchstaben */
+  .letter-hotspot {
+    position: absolute;
+    cursor: pointer;
+    border: none;
+    background: transparent;
+    box-sizing: border-box;
+  }
+
+  /* Bereich, in dem sich das Wort KAROLUS unten zusammensetzt */
+  #answer-area {
+    margin-top: 40px;
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+
+  .answer-slot {
+    width: 60px;
+    height: 60px;
+    border: 2px dashed #999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #fff;
+    border-radius: 6px;
+  }
+
+  .answer-slot img {
+    max-width: 100%;
+    max-height: 100%;
+  }
+
+  #reset-button {
+    margin-top: 30px;
+    padding: 10px 20px;
+    font-size: 16px;
+    cursor: pointer;
+    border: none;
+    background: #3a2e1f;
+    color: white;
+    border-radius: 5px;
+  }
+
+  #reset-button:hover {
+    background: #55432b;
+  }
+
+  #success-message {
+    margin-top: 20px;
+    font-size: 20px;
+    font-weight: bold;
+    color: green;
+    display: none;
+  }
+</style>
+</head>
+<body>
+
+<h1>Zerlege die Unterschrift Karls des Großen</h1>
+<p>Klicke die Buchstaben in der richtigen Reihenfolge an, um <strong>KAROLUS</strong> zu bilden.</p>
+
+<div class="signature-container">
+  <!-- 
+    HIER DEN PFAD ZUM HAUPTBILD EINFÜGEN 
+    Beispiel: <img id="main-image" src="bilder/unterschrift.png" alt="Unterschrift Karls des Großen">
+  -->
+  <img id="main-image" src="Bildressourcen_Karolus/Monogram.png" alt="Unterschrift Karls des Großen">
+
+  <!-- 
+    ===== KLICKFELDER FÜR DIE BUCHSTABEN =====
+    Jedes Feld hat:
+    - data-letter: welcher Buchstabe es ist (wird für die richtige Reihenfolge benutzt)
+    - data-img: Pfad zum Bild dieses einzelnen Buchstabens (das unten erscheinen soll)
+    - style: Position & Größe in Prozent (relativ zum Bild) - HIER ANPASSEN
+  -->
+
+  <div class="letter-hotspot" 
+       data-letter="K" 
+       data-img="Bildressourcen_Karolus/K.png"
+       style="top: 25%; left: 5%; width: 28%; height: 45%;"></div>
+
+  <div class="letter-hotspot" 
+       data-letter="A" 
+       data-img="Bildressourcen_Karolus/A.png"
+       style="top: 32%; left: 40%; width: 30%; height: 18%;"></div>
+
+  <div class="letter-hotspot" 
+       data-letter="R" 
+       data-img="Bildressourcen_Karolus/R.png"
+       style="top: 2%; left: 48%; width: 25%; height: 30%;"></div>
+
+  <div class="letter-hotspot" 
+       data-letter="O" 
+       data-img="Bildressourcen_Karolus/O.png"
+       style="top: 32%; left: 40%; width: 30%; height: 33%;"></div>
+
+  <div class="letter-hotspot" 
+       data-letter="L" 
+       data-img="Bildressourcen_Karolus/L.png"
+       style="top: 65%; left: 45%; width: 21%; height: 35%;"></div>
+
+  <div class="letter-hotspot" 
+       data-letter="U" 
+       data-img="Bildressourcen_Karolus/U.png"
+       style="top: 50%; left: 40%; width: 30%; height: 15%;"></div>
+
+  <div class="letter-hotspot" 
+       data-letter="S" 
+       data-img="Bildressourcen_Karolus/S.png"
+       style="top: 35%; left: 80%; width: 20%; height: 30%;"></div>
+
+</div>
+
+<h2>Ergebnis: K – A – R – O – L – U – S</h2>
+<div id="answer-area">
+  <div class="answer-slot" data-target="K"></div>
+  <div class="answer-slot" data-target="A"></div>
+  <div class="answer-slot" data-target="R"></div>
+  <div class="answer-slot" data-target="O"></div>
+  <div class="answer-slot" data-target="L"></div>
+  <div class="answer-slot" data-target="U"></div>
+  <div class="answer-slot" data-target="S"></div>
+</div>
+
+<button id="reset-button">Zurücksetzen</button>
+<p id="success-message">🎉 Super! Du hast KAROLUS richtig zusammengesetzt!</p>
+
+<script>
+  const hotspots = document.querySelectorAll('.letter-hotspot');
+  const slots = document.querySelectorAll('.answer-slot');
+  const successMessage = document.getElementById('success-message');
+
+  let placedLetters = {};
+
+  hotspots.forEach(hotspot => {
+    hotspot.addEventListener('click', () => {
+      const letter = hotspot.dataset.letter;
+      const imgSrc = hotspot.dataset.img;
+
+      // Prüfen, ob der Buchstabe schon platziert wurde
+      if (placedLetters[letter]) return;
+
+      // Passenden Slot finden
+      const slot = document.querySelector(`.answer-slot[data-target="${letter}"]`);
+      if (slot && slot.children.length === 0) {
+        const img = document.createElement('img');
+        img.src = imgSrc;
+        img.alt = letter;
+        slot.appendChild(img);
+        placedLetters[letter] = true;
+
+        // Buchstabe optisch als "verwendet" markieren
+        hotspot.style.pointerEvents = 'none';
+        hotspot.style.opacity = '0.3';
+
+        checkCompletion();
+      }
+    });
+  });
+
+  function checkCompletion() {
+    const allFilled = [...slots].every(slot => slot.children.length > 0);
+    if (allFilled) {
+      successMessage.style.display = 'block';
+    }
+  }
+
+  document.getElementById('reset-button').addEventListener('click', () => {
+    slots.forEach(slot => slot.innerHTML = '');
+    hotspots.forEach(hotspot => {
+      hotspot.style.pointerEvents = 'auto';
+      hotspot.style.opacity = '1';
+    });
+    placedLetters = {};
+    successMessage.style.display = 'none';
+  });
+</script>
+
+</body>
+</html>
