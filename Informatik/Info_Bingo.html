@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<title>Bingo-Matrix</title>
+<style>
+  body {
+    font-family: Arial, sans-serif;
+    text-align: center;
+    background: #f4f4f4;
+    padding: 20px;
+  }
+
+  h1 {
+    color: #333;
+  }
+
+  #grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 8px;
+    max-width: 600px;
+    margin: 20px auto;
+  }
+
+  .cell {
+    background: white;
+    border: 2px solid #999;
+    border-radius: 8px;
+    padding: 20px 10px;
+    min-height: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    font-size: 1.1em;
+    cursor: pointer;
+    user-select: none;
+    transition: background-color 0.2s;
+    word-break: break-word;
+  }
+
+  .cell:active {
+    transform: scale(0.97);
+  }
+
+  .selected {
+    background-color: #4CAF50 !important;
+    color: white;
+    border-color: #388E3C;
+  }
+
+  #shuffleBtn {
+    padding: 12px 25px;
+    font-size: 1em;
+    background: #2196F3;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    margin-top: 10px;
+  }
+
+  #shuffleBtn:hover {
+    background: #1976D2;
+  }
+
+  #bingoMessage {
+    font-size: 2em;
+    color: #d32f2f;
+    font-weight: bold;
+    margin-top: 20px;
+    min-height: 50px;
+    animation: pulse 0.6s ease-in-out;
+  }
+
+  @keyframes pulse {
+    0% { transform: scale(0.5); opacity: 0; }
+    50% { transform: scale(1.2); }
+    100% { transform: scale(1); opacity: 1; }
+  }
+</style>
+</head>
+<body>
+
+<h1>Info-Bingo-Klasse 8 und 10</h1>
+<button id="shuffleBtn" onclick="shuffleAndGenerate()">🔀 Shuffle</button>
+
+<div id="grid"></div>
+
+<div id="bingoMessage"></div>
+
+<script>
+  // ============================================
+  // HIER die Begriffe eintragen (beliebig viele!)
+  // ============================================
+  const begriffe = [
+    "Variable",
+    "explizit",
+    "implizit",
+    "Fakt",
+    "Regel",
+    "Abfrage",
+    "Datentyp",
+    "Integer (Ganzzahlwer)",
+    "String (Zeichenkette)",
+    "Boolean/Wahrheitswert",
+    "Bedingung",
+    "Verzweigung (if)",
+    "Ausgabe (print)",
+    "Eingabe (input)",
+    "logisches UND",
+    "logisches ODER",
+    "Regelkopf",
+    "Spalte",
+    "Zeile",
+    "Zelle",
+    "Tabellenname",
+    "Suchkriterium",
+    "Name einer Person",
+    "Datenschutz"
+  ];
+
+  const grid = document.getElementById('grid');
+  const bingoMessage = document.getElementById('bingoMessage');
+
+  function shuffleArray(array) {
+    const arr = [...array];
+    for (let i = arr.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [arr[i], arr[j]] = [arr[j], arr[i]];
+    }
+    return arr;
+  }
+
+  function generateGrid() {
+    grid.innerHTML = '';
+    bingoMessage.textContent = '';
+
+    if (begriffe.length < 16) {
+      grid.innerHTML = '<p style="grid-column: span 4; color:red;">Bitte mindestens 16 Begriffe im Code definieren!</p>';
+      return;
+    }
+
+    const shuffled = shuffleArray(begriffe);
+    const selected16 = shuffled.slice(0, 16);
+    const finalOrder = shuffleArray(selected16);
+
+    finalOrder.forEach(text => {
+      const cell = document.createElement('div');
+      cell.classList.add('cell');
+      cell.textContent = text;
+      cell.addEventListener('click', () => toggleCell(cell));
+      grid.appendChild(cell);
+    });
+  }
+
+  function toggleCell(cell) {
+    cell.classList.toggle('selected');
+    checkBingo();
+  }
+
+  function checkBingo() {
+    const cells = Array.from(grid.children);
+    let bingo = false;
+
+    // Reihen prüfen
+    for (let row = 0; row < 4; row++) {
+      let rowBingo = true;
+      for (let col = 0; col < 4; col++) {
+        if (!cells[row * 4 + col].classList.contains('selected')) {
+          rowBingo = false;
+          break;
+        }
+      }
+      if (rowBingo) bingo = true;
+    }
+
+    // Spalten prüfen
+    for (let col = 0; col < 4; col++) {
+      let colBingo = true;
+      for (let row = 0; row < 4; row++) {
+        if (!cells[row * 4 + col].classList.contains('selected')) {
+          colBingo = false;
+          break;
+        }
+      }
+      if (colBingo) bingo = true;
+    }
+
+    if (bingo) {
+      bingoMessage.textContent = '🎉 Bingo! 🎉';
+    } else {
+      bingoMessage.textContent = '';
+    }
+  }
+
+  function shuffleAndGenerate() {
+    generateGrid();
+  }
+
+  // Beim Laden der Seite direkt Grid erzeugen
+  generateGrid();
+</script>
+
+</body>
+</html>
