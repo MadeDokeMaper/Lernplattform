@@ -1,0 +1,793 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<title>Relationale Algebra Trainer</title>
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        background: #f0f2f5;
+        margin: 0;
+        padding: 20px;
+    }
+    h1 {
+        text-align: center;
+        color: #2c3e50;
+    }
+    .container {
+        max-width: 1150px;
+        margin: 0 auto;
+        display: flex;
+        gap: 20px;
+        flex-wrap: wrap;
+    }
+    .tables-panel {
+        flex: 1;
+        min-width: 320px;
+    }
+    .query-panel {
+        flex: 1.3;
+        min-width: 420px;
+    }
+    .table-box {
+        background: white;
+        border-radius: 8px;
+        padding: 10px 15px;
+        margin-bottom: 15px;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+    .table-box h3 {
+        margin-top: 5px;
+        color: #34495e;
+        border-bottom: 2px solid #3498db;
+        padding-bottom: 5px;
+    }
+    table {
+        border-collapse: collapse;
+        width: 100%;
+        font-size: 13px;
+    }
+    th, td {
+        border: 1px solid #ccc;
+        padding: 5px 8px;
+        text-align: left;
+    }
+    th {
+        background: #3498db;
+        color: white;
+    }
+    th small {
+        display: block;
+        font-weight: normal;
+        font-size: 10px;
+        color: #eaf4fc;
+    }
+    tr:nth-child(even) {
+        background: #f2f2f2;
+    }
+    .box {
+        background: white;
+        border-radius: 8px;
+        padding: 15px;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        margin-bottom: 15px;
+    }
+    #task {
+        font-weight: bold;
+        color: #c0392b;
+        font-size: 16px;
+        margin-bottom: 10px;
+    }
+    textarea {
+        width: 100%;
+        height: 80px;
+        font-size: 16px;
+        font-family: "Courier New", monospace;
+        padding: 8px;
+        box-sizing: border-box;
+        border: 1px solid #bbb;
+        border-radius: 5px;
+    }
+    .symbol-buttons {
+        margin-top: 8px;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 5px;
+    }
+    .symbol-buttons button {
+        font-size: 16px;
+        padding: 6px 10px;
+        cursor: pointer;
+        border: 1px solid #999;
+        border-radius: 5px;
+        background: #ecf0f1;
+        transition: 0.2s;
+    }
+    .symbol-buttons button:hover {
+        background: #3498db;
+        color: white;
+    }
+    .action-buttons {
+        margin-top: 15px;
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+    }
+    .action-buttons button {
+        padding: 10px 18px;
+        font-size: 15px;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        color: white;
+    }
+    #btnCheck { background: #27ae60; }
+    #btnNew { background: #2980b9; }
+    #btnShowSolutionHint { background: #e67e22; }
+
+    #result, #userResult {
+        margin-top: 10px;
+        overflow-x: auto;
+    }
+    #feedback {
+        margin-top: 10px;
+        font-weight: bold;
+    }
+    .correct { color: #27ae60; }
+    .wrong { color: #c0392b; }
+    .error-box {
+        background: #fdecea;
+        border: 1px solid #c0392b;
+        color: #c0392b;
+        padding: 8px;
+        border-radius: 5px;
+        font-family: "Courier New", monospace;
+        font-size: 13px;
+    }
+
+    .hint {
+        font-size: 13px;
+        color: #7f8c8d;
+        margin-top: 5px;
+    }
+    .type-int { color: #2980b9; }
+    .type-string { color: #27ae60; }
+</style>
+</head>
+<body>
+
+<h1>🧠 Relationale Algebra Trainer</h1>
+
+<div class="container">
+    <!-- Tabellenanzeige -->
+    <div class="tables-panel">
+        <div class="table-box">
+            <h3>Tabelle: Schueler</h3>
+            <table id="tbl_Schueler"></table>
+        </div>
+        <div class="table-box">
+            <h3>Tabelle: Kurse</h3>
+            <table id="tbl_Kurse"></table>
+        </div>
+        <div class="table-box">
+            <h3>Tabelle: Noten</h3>
+            <table id="tbl_Noten"></table>
+        </div>
+    </div>
+
+    <!-- Aufgaben- und Abfragebereich -->
+    <div class="query-panel">
+        <div class="box">
+            <div id="task">Aufgabe wird geladen...</div>
+            <div class="hint" id="hint"></div>
+        </div>
+
+        <div class="box">
+            <label for="query"><strong>Deine Abfrage (relationale Algebra):</strong></label>
+            <textarea id="query" placeholder="z.B. σ Note < 3 (Noten)"></textarea>
+
+            <div class="symbol-buttons">
+                <button onclick="insertSymbol('σ')">σ (Selektion)</button>
+                <button onclick="insertSymbol('π')">π (Projektion)</button>
+                <button onclick="insertSymbol('⋈')">⋈ (Join)</button>
+                <button onclick="insertSymbol('×')">× (Kreuzprodukt)</button>
+                <button onclick="insertSymbol('∪')">∪ (Vereinigung)</button>
+                <button onclick="insertSymbol('∩')">∩ (Durchschnitt)</button>
+                <button onclick="insertSymbol('−')">− (Differenz)</button>
+                <button onclick="insertSymbol('ρ')">ρ (Umbenennung)</button>
+                <button onclick="insertSymbol('≠')">≠</button>
+                <button onclick="insertSymbol('≤')">≤</button>
+                <button onclick="insertSymbol('≥')">≥</button>
+                <button onclick="insertSymbol('∧')">∧ (UND)</button>
+                <button onclick="insertSymbol('∨')">∨ (ODER)</button>
+                <button onclick="insertSymbol('¬')">¬ (NICHT)</button>
+            </div>
+
+            <div class="action-buttons">
+                <button id="btnCheck" onclick="checkAnswer()">Abfrage ausführen & prüfen</button>
+                <button id="btnNew" onclick="newTask()">Neue Aufgabe</button>
+                <button id="btnShowSolutionHint" onclick="showSolution()">Musterlösung zeigen</button>
+            </div>
+
+            <div id="feedback"></div>
+        </div>
+
+        <div class="box">
+            <h3>📌 Ergebnis deiner Abfrage:</h3>
+            <div id="userResult"><i>Noch keine Abfrage ausgeführt.</i></div>
+        </div>
+
+        <div class="box">
+            <h3>🎯 Zieldaten (was du finden sollst):</h3>
+            <div id="result"></div>
+        </div>
+    </div>
+</div>
+
+<script>
+/* ==========================================================
+   Datenbasis: 3 Tabellen mit Spalten-Typinformationen
+   ========================================================== */
+
+const schema = {
+    Schueler: {
+        SID: "int",
+        Name: "string",
+        Alter: "int",
+        Klasse: "string"
+    },
+    Kurse: {
+        KID: "int",
+        Fach: "string",
+        Lehrer: "string"
+    },
+    Noten: {
+        SID: "int",
+        KID: "int",
+        Note: "int"
+    }
+};
+
+const Schueler = [
+    { SID: 1, Name: "Anna",   Alter: 16, Klasse: "10A" },
+    { SID: 2, Name: "Ben",    Alter: 17, Klasse: "10B" },
+    { SID: 3, Name: "Clara",  Alter: 16, Klasse: "10A" },
+    { SID: 4, Name: "David",  Alter: 18, Klasse: "11A" },
+    { SID: 5, Name: "Emma",   Alter: 17, Klasse: "10B" },
+    { SID: 6, Name: "Felix",  Alter: 18, Klasse: "11A" }
+];
+
+const Kurse = [
+    { KID: 100, Fach: "Mathematik", Lehrer: "Hr. Müller" },
+    { KID: 101, Fach: "Informatik", Lehrer: "Fr. Schmidt" },
+    { KID: 102, Fach: "Englisch",   Lehrer: "Fr. Klein" },
+    { KID: 103, Fach: "Physik",     Lehrer: "Hr. Bauer" }
+];
+
+const Noten = [
+    { SID: 1, KID: 100, Note: 2 },
+    { SID: 1, KID: 101, Note: 1 },
+    { SID: 2, KID: 102, Note: 3 },
+    { SID: 3, KID: 100, Note: 4 },
+    { SID: 3, KID: 103, Note: 2 },
+    { SID: 4, KID: 101, Note: 1 },
+    { SID: 5, KID: 102, Note: 2 },
+    { SID: 6, KID: 100, Note: 3 },
+    { SID: 6, KID: 103, Note: 5 },
+    { SID: 2, KID: 100, Note: 2 }
+];
+
+const database = { Schueler, Kurse, Noten };
+
+/* ==========================================================
+   Tabellen rendern (inkl. Datentypen in der Kopfzeile)
+   ========================================================== */
+
+function renderTable(id, tableName, data) {
+    const table = document.getElementById(id);
+    table.innerHTML = "";
+    if (data.length === 0) {
+        table.innerHTML = "<tr><td>Keine Daten</td></tr>";
+        return;
+    }
+    const headers = Object.keys(data[0]);
+    const types = schema[tableName] || {};
+
+    let thead = "<tr>" + headers.map(h => {
+        const t = types[h] || "?";
+        const cls = t === "int" ? "type-int" : "type-string";
+        return `<th>${h}<small class="${cls}">(${t})</small></th>`;
+    }).join("") + "</tr>";
+
+    let rows = data.map(row =>
+        "<tr>" + headers.map(h => `<td>${row[h]}</td>`).join("") + "</tr>"
+    ).join("");
+
+    table.innerHTML = thead + rows;
+}
+
+renderTable("tbl_Schueler", "Schueler", Schueler);
+renderTable("tbl_Kurse", "Kurse", Kurse);
+renderTable("tbl_Noten", "Noten", Noten);
+
+/* ==========================================================
+   Aufgaben-Generator
+   ========================================================== */
+
+let currentTask = null;
+
+function randomItem(arr) {
+    return arr[Math.floor(Math.random() * arr.length)];
+}
+
+function generateTask() {
+    const taskTypes = ["selektion", "projektion", "kombiniert", "join"];
+    const type = randomItem(taskTypes);
+
+    if (type === "selektion") {
+        const options = [
+            {
+                text: "Gib alle Schüler aus der Klasse '10A' aus.",
+                solution: "σ Klasse = '10A' (Schueler)",
+                data: Schueler.filter(s => s.Klasse === "10A")
+            },
+            {
+                text: "Gib alle Noten aus, die schlechter als 3 sind (Note > 3).",
+                solution: "σ Note > 3 (Noten)",
+                data: Noten.filter(n => n.Note > 3)
+            },
+            {
+                text: "Gib alle Schüler aus, die älter als 16 Jahre sind.",
+                solution: "σ Alter > 16 (Schueler)",
+                data: Schueler.filter(s => s.Alter > 16)
+            },
+            {
+                text: "Gib alle Kurse aus, die von 'Fr. Schmidt' unterrichtet werden.",
+                solution: "σ Lehrer = 'Fr. Schmidt' (Kurse)",
+                data: Kurse.filter(k => k.Lehrer === "Fr. Schmidt")
+            }
+        ];
+        return randomItem(options);
+    }
+
+    if (type === "projektion") {
+        const options = [
+            {
+                text: "Gib nur die Namen und das Alter aller Schüler aus (ohne Klasse und SID).",
+                solution: "π Name, Alter (Schueler)",
+                data: Schueler.map(s => ({ Name: s.Name, Alter: s.Alter }))
+            },
+            {
+                text: "Gib nur die Fächer aller Kurse aus (ohne KID und Lehrer).",
+                solution: "π Fach (Kurse)",
+                data: [...new Set(Kurse.map(k => k.Fach))].map(f => ({ Fach: f }))
+            }
+        ];
+        return randomItem(options);
+    }
+
+    if (type === "kombiniert") {
+        const options = [
+            {
+                text: "Gib die Namen aller Schüler aus der Klasse '10B' aus.",
+                solution: "π Name (σ Klasse = '10B' (Schueler))",
+                data: Schueler.filter(s => s.Klasse === "10B").map(s => ({ Name: s.Name }))
+            },
+            {
+                text: "Gib die SID aller Schüler aus, die eine Note schlechter als 3 haben.",
+                solution: "π SID (σ Note > 3 (Noten))",
+                data: [...new Set(Noten.filter(n => n.Note > 3).map(n => n.SID))].map(sid => ({ SID: sid }))
+            }
+        ];
+        return randomItem(options);
+    }
+
+    if (type === "join") {
+        const options = [
+            {
+                text: "Gib alle Kombinationen von Schüler-Namen mit ihren Noten und den zugehörigen Fächern aus (Join über SID und KID).",
+                solution: "π Name, Fach, Note (Schueler ⋈ Noten ⋈ Kurse)",
+                data: Noten.map(n => {
+                    const s = Schueler.find(x => x.SID === n.SID);
+                    const k = Kurse.find(x => x.KID === n.KID);
+                    return { Name: s.Name, Fach: k.Fach, Note: n.Note };
+                })
+            },
+            {
+                text: "Gib die Namen der Schüler aus, die im Fach 'Mathematik' eine Note besser als 3 haben.",
+                solution: "π Name (σ Fach='Mathematik' ∧ Note<3 (Schueler ⋈ Noten ⋈ Kurse))",
+                data: Noten.filter(n => {
+                    const k = Kurse.find(x => x.KID === n.KID);
+                    return k.Fach === "Mathematik" && n.Note < 3;
+                }).map(n => {
+                    const s = Schueler.find(x => x.SID === n.SID);
+                    return { Name: s.Name };
+                })
+            }
+        ];
+        return randomItem(options);
+    }
+}
+
+function newTask() {
+    currentTask = generateTask();
+    document.getElementById("task").innerText = "📝 Aufgabe: " + currentTask.text;
+    document.getElementById("hint").innerText = "";
+    document.getElementById("feedback").innerHTML = "";
+    document.getElementById("userResult").innerHTML = "<i>Noch keine Abfrage ausgeführt.</i>";
+    renderResultTable("result", currentTask.data);
+}
+
+function renderResultTable(targetId, data) {
+    const div = document.getElementById(targetId);
+    if (!data || data.length === 0) {
+        div.innerHTML = "<i>Keine passenden Daten gefunden (leeres Ergebnis).</i>";
+        return;
+    }
+    const headers = Object.keys(data[0]);
+    let html = "<table><tr>" + headers.map(h => `<th>${h}</th>`).join("") + "</tr>";
+    data.forEach(row => {
+        html += "<tr>" + headers.map(h => `<td>${row[h]}</td>`).join("") + "</tr>";
+    });
+    html += "</table>";
+    div.innerHTML = html;
+}
+
+/* ==========================================================
+   Symbol-Einfügefunktion
+   ========================================================== */
+
+function insertSymbol(symbol) {
+    const textarea = document.getElementById("query");
+    const start = textarea.selectionStart;
+    const end = textarea.selectionEnd;
+    const text = textarea.value;
+    textarea.value = text.substring(0, start) + symbol + text.substring(end);
+    textarea.focus();
+    textarea.selectionStart = textarea.selectionEnd = start + symbol.length;
+}
+
+/* ==========================================================
+   PARSER für relationale Algebra
+   Unterstützt: σ (Selektion), π (Projektion), ⋈ (Join, natural),
+   ×, ∪, ∩, − sowie Klammerungen, ∧ / ∨ / ¬ und Vergleichsoperatoren
+   =, ≠, <, >, ≤, ≥
+   ==========================================================
+   Grammatik (vereinfacht):
+   expr := σ cond (expr) | π colList (expr) | tableName
+         | (expr) ⋈ (expr) | (expr) ⋈ (expr)   [auch ohne Klammern erlaubt]
+         | expr × expr | expr ∪ expr | expr ∩ expr | expr − expr
+   ========================================================== */
+
+class RAParseError extends Error {}
+
+function tokenize(str) {
+    // Ersetze Sonderzeichen mit Leerzeichen drumherum, um Tokens zu trennen
+    const spaced = str
+        .replace(/([σπ⋈×∪∩−ρ()≠≤≥∧∨¬=<>,])/g, " $1 ")
+        .trim();
+    return spaced.split(/\s+/).filter(t => t.length > 0);
+}
+
+function parseQuery(query) {
+    const tokens = tokenize(query);
+    let pos = 0;
+
+    function peek() {
+        return tokens[pos];
+    }
+    function next() {
+        return tokens[pos++];
+    }
+    function expect(sym) {
+        if (peek() !== sym) {
+            throw new RAParseError(`Erwartet '${sym}', aber gefunden '${peek() ?? "Ende"}'`);
+        }
+        return next();
+    }
+
+    // Kompletten Ausdruck parsen (mit Mengenoperationen als niedrigste Priorität)
+    function parseExpr() {
+        let left = parseUnary();
+        while (peek() === "∪" || peek() === "∩" || peek() === "−" || peek() === "×" || peek() === "⋈") {
+            const op = next();
+            const right = parseUnary();
+            left = applySetOp(op, left, right);
+        }
+        return left;
+    }
+
+    function parseUnary() {
+        const tok = peek();
+
+        if (tok === "σ") {
+            next();
+            const cond = parseCondition();
+            expect("(");
+            const inner = parseExpr();
+            expect(")");
+            return applySelection(cond, inner);
+        }
+
+        if (tok === "π") {
+            next();
+            const cols = parseColumnList();
+            expect("(");
+            const inner = parseExpr();
+            expect(")");
+            return applyProjection(cols, inner);
+        }
+
+        if (tok === "(") {
+            next();
+            const inner = parseExpr();
+            expect(")");
+            return inner;
+        }
+
+        // Tabellenname
+        if (tok && database.hasOwnProperty(tok)) {
+            next();
+            return {
+                rows: database[tok].map(r => ({ ...r })),
+                schema: { ...schema[tok] }
+            };
+        }
+
+        throw new RAParseError(`Unerwartetes Token: '${tok ?? "Ende der Eingabe"}'`);
+    }
+
+    // Spaltenliste für Projektion: Name, Alter, ...
+    function parseColumnList() {
+        const cols = [];
+        cols.push(next());
+        while (peek() === ",") {
+            next();
+            cols.push(next());
+        }
+        return cols;
+    }
+
+    // Bedingung für Selektion (einfaches Format: bis zur öffnenden Klammer)
+    function parseCondition() {
+        let condTokens = [];
+        while (peek() !== "(" ) {
+            if (peek() === undefined) throw new RAParseError("Bedingung nicht vollständig / '(' fehlt");
+            condTokens.push(next());
+        }
+        return condTokens.join(" ");
+    }
+
+    const result = parseExpr();
+    if (pos < tokens.length) {
+        throw new RAParseError(`Unerwartete Tokens am Ende: '${tokens.slice(pos).join(" ")}'`);
+    }
+    return result;
+}
+
+/* ---------- Hilfsfunktionen für die Operatoren ---------- */
+
+function applyProjection(cols, relation) {
+    cols.forEach(c => {
+        if (!(c in relation.schema)) {
+            throw new RAParseError(`Spalte '${c}' existiert nicht in der Relation`);
+        }
+    });
+    const newRows = relation.rows.map(r => {
+        const o = {};
+        cols.forEach(c => o[c] = r[c]);
+        return o;
+    });
+    // Duplikate entfernen (wie in relationaler Algebra üblich)
+    const seen = new Set();
+    const distinctRows = [];
+    newRows.forEach(r => {
+        const key = JSON.stringify(r);
+        if (!seen.has(key)) {
+            seen.add(key);
+            distinctRows.push(r);
+        }
+    });
+    const newSchema = {};
+    cols.forEach(c => newSchema[c] = relation.schema[c]);
+    return { rows: distinctRows, schema: newSchema };
+}
+
+function evaluateSingleCondition(row, schemaObj, left, op, right) {
+    let leftVal, rightVal, colType;
+
+    if (left in schemaObj) {
+        leftVal = row[left];
+        colType = schemaObj[left];
+    } else {
+        throw new RAParseError(`Unbekannte Spalte in Bedingung: '${left}'`);
+    }
+
+    // rechte Seite: entweder Spaltenname oder Literal
+    if (right.startsWith("'") && right.endsWith("'")) {
+        rightVal = right.slice(1, -1);
+    } else if (!isNaN(right)) {
+        rightVal = Number(right);
+    } else if (right in schemaObj) {
+        rightVal = row[right];
+    } else {
+        rightVal = right; // fallback
+    }
+
+    // Typ-Korrektheit prüfen (leichte Warnung/Fehler bei Zahl vs Text)
+    if (colType === "int" && typeof rightVal === "string" && isNaN(rightVal)) {
+        throw new RAParseError(`Typkonflikt: Spalte '${left}' ist vom Typ int, aber '${right}' ist Text`);
+    }
+    if (colType === "string" && typeof rightVal === "number") {
+        throw new RAParseError(`Typkonflikt: Spalte '${left}' ist vom Typ string, aber '${right}' ist eine Zahl`);
+    }
+
+    switch (op) {
+        case "=": return leftVal == rightVal;
+        case "≠": return leftVal != rightVal;
+        case "<": return leftVal < rightVal;
+        case ">": return leftVal > rightVal;
+        case "≤": return leftVal <= rightVal;
+        case "≥": return leftVal >= rightVal;
+        default:
+            throw new RAParseError(`Unbekannter Operator: '${op}'`);
+    }
+}
+
+function applySelection(condStr, relation) {
+    // Bedingung in Tokens teilen (bereits durch tokenize vorbereitet, condStr ist String aus Tokens)
+    const condTokens = condStr.split(" ").filter(t => t.length > 0);
+
+    // Wir unterstützen Verknüpfungen mit ∧ / ∨ (keine Klammern innerhalb der Bedingung)
+    // Aufbau: cond (∧|∨ cond)*
+    function parseAtomicConditions(tokens) {
+        const atomics = [];
+        const logicOps = [];
+        let i = 0;
+        while (i < tokens.length) {
+            let left = tokens[i++];
+            let op = tokens[i++];
+            let right = tokens[i++];
+            atomics.push([left, op, right]);
+            if (i < tokens.length) {
+                logicOps.push(tokens[i++]); // ∧ oder ∨
+            }
+        }
+        return { atomics, logicOps };
+    }
+
+    const { atomics, logicOps } = parseAtomicConditions(condTokens);
+
+    const filteredRows = relation.rows.filter(row => {
+        let results = atomics.map(([l, o, r]) => evaluateSingleCondition(row, relation.schema, l, o, r));
+        let combined = results[0];
+        for (let i = 0; i < logicOps.length; i++) {
+            if (logicOps[i] === "∧") combined = combined && results[i + 1];
+            else if (logicOps[i] === "∨") combined = combined || results[i + 1];
+        }
+        return combined;
+    });
+
+    return { rows: filteredRows, schema: { ...relation.schema } };
+}
+
+function applySetOp(op, left, right) {
+    if (op === "×") {
+        const newSchema = { ...left.schema, ...right.schema };
+        const newRows = [];
+        left.rows.forEach(l => {
+            right.rows.forEach(r => {
+                newRows.push({ ...l, ...r });
+            });
+        });
+        return { rows: newRows, schema: newSchema };
+    }
+
+    if (op === "⋈") {
+        // Natural Join: gemeinsame Spalten müssen übereinstimmen
+        const commonCols = Object.keys(left.schema).filter(c => c in right.schema);
+        const newSchema = { ...left.schema, ...right.schema };
+        const newRows = [];
+        left.rows.forEach(l => {
+            right.rows.forEach(r => {
+                const matches = commonCols.every(c => l[c] === r[c]);
+                if (matches) {
+                    newRows.push({ ...l, ...r });
+                }
+            });
+        });
+        return { rows: newRows, schema: newSchema };
+    }
+
+    if (op === "∪" || op === "∩" || op === "−") {
+        const leftCols = Object.keys(left.schema);
+        const rightCols = Object.keys(right.schema);
+        if (JSON.stringify(leftCols.sort()) !== JSON.stringify(rightCols.sort())) {
+            throw new RAParseError(`${op} erfordert gleiche Spalten in beiden Relationen`);
+        }
+
+        const leftSet = left.rows.map(r => JSON.stringify(r));
+        const rightSet = right.rows.map(r => JSON.stringify(r));
+
+        let resultRows = [];
+        if (op === "∪") {
+            const combined = [...left.rows, ...right.rows];
+            const seen = new Set();
+            combined.forEach(r => {
+                const key = JSON.stringify(r);
+                if (!seen.has(key)) {
+                    seen.add(key);
+                    resultRows.push(r);
+                }
+            });
+        } else if (op === "∩") {
+            resultRows = left.rows.filter(r => rightSet.includes(JSON.stringify(r)));
+        } else if (op === "−") {
+            resultRows = left.rows.filter(r => !rightSet.includes(JSON.stringify(r)));
+        }
+
+        return { rows: resultRows, schema: { ...left.schema } };
+    }
+
+    throw new RAParseError(`Unbekannter Operator: '${op}'`);
+}
+
+/* ==========================================================
+   Prüfung / Musterlösung
+   ========================================================== */
+
+function normalizeForCompare(rows) {
+    return rows
+        .map(r => JSON.stringify(Object.keys(r).sort().reduce((o, k) => (o[k] = r[k], o), {})))
+        .sort();
+}
+
+function checkAnswer() {
+    const userAnswer = document.getElementById("query").value.trim();
+    const feedback = document.getElementById("feedback");
+    const userResultDiv = document.getElementById("userResult");
+
+    if (!userAnswer) {
+        feedback.innerHTML = "<span class='wrong'>Bitte gib eine Abfrage ein.</span>";
+        return;
+    }
+
+    let userRelation;
+    try {
+        userRelation = parseQuery(userAnswer);
+    } catch (e) {
+        userResultDiv.innerHTML = `<div class="error-box">❌ Fehler beim Auswerten deiner Abfrage:<br>${e.message}</div>`;
+        feedback.innerHTML = "<span class='wrong'>⚠️ Deine Abfrage konnte nicht ausgewertet werden. Bitte Syntax prüfen.</span>";
+        return;
+    }
+
+    // Ergebnis der Schülerabfrage IMMER anzeigen
+    renderResultTable("userResult", userRelation.rows);
+
+    // Vergleich mit Zieldaten (inhaltlich, unabhängig von Spaltenreihenfolge)
+    const targetNormalized = normalizeForCompare(currentTask.data);
+    const userNormalized = normalizeForCompare(userRelation.rows);
+
+    const isEqual = JSON.stringify(targetNormalized) === JSON.stringify(userNormalized);
+
+    if (isEqual) {
+        feedback.innerHTML = "<span class='correct'>✅ Richtig! Dein Ergebnis stimmt mit den Zieldaten überein.</span>";
+    } else {
+        feedback.innerHTML = "<span class='wrong'>❌ Dein Ergebnis stimmt noch nicht mit den Zieldaten überein. Vergleiche die beiden Tabellen unten.</span>";
+    }
+}
+
+function showSolution() {
+    const feedback = document.getElementById("feedback");
+    feedback.innerHTML = "<span class='correct'>💡 Musterlösung: " + currentTask.solution + "</span>";
+}
+
+/* ==========================================================
+   Initialisierung
+   ========================================================== */
+
+newTask();
+</script>
+
+</body>
+</html>
