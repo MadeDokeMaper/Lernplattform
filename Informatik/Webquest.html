@@ -1,0 +1,600 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🕵️ Die Bildrechte-Detektive</title>
+<style>
+  :root {
+    --primary: #2c3e50;
+    --accent: #e74c3c;
+    --success: #27ae60;
+    --bg: #f4f6f8;
+    --card: #ffffff;
+  }
+  * { box-sizing: border-box; }
+  body {
+    font-family: 'Segoe UI', Arial, sans-serif;
+    background: var(--bg);
+    margin: 0;
+    padding: 0;
+    color: var(--primary);
+  }
+  header {
+    background: linear-gradient(135deg, #2c3e50, #4a6572);
+    color: white;
+    padding: 30px 20px;
+    text-align: center;
+  }
+  header h1 { margin: 0; font-size: 2em; }
+  header p { opacity: 0.9; }
+
+  .progress-bar {
+    background: #ddd;
+    height: 20px;
+    border-radius: 10px;
+    margin: 20px auto;
+    max-width: 700px;
+    overflow: hidden;
+  }
+  .progress-fill {
+    background: var(--success);
+    height: 100%;
+    width: 0%;
+    transition: width 0.5s ease;
+    text-align: center;
+    color: white;
+    font-size: 0.8em;
+    line-height: 20px;
+  }
+
+  .container {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 20px;
+  }
+
+  .level {
+    background: var(--card);
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    margin-bottom: 25px;
+    padding: 25px;
+    display: none;
+    animation: fadeIn 0.6s ease;
+  }
+  .level.active { display: block; }
+  .level.locked {
+    display: block;
+    opacity: 0.5;
+    text-align: center;
+    padding: 40px;
+  }
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(15px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .level h2 {
+    border-bottom: 3px solid var(--accent);
+    padding-bottom: 8px;
+  }
+  .badge {
+    display: inline-block;
+    background: var(--accent);
+    color: white;
+    border-radius: 20px;
+    padding: 3px 12px;
+    font-size: 0.8em;
+    margin-bottom: 10px;
+  }
+
+  .story-box {
+    background: #fdf6ec;
+    border-left: 5px solid #e67e22;
+    padding: 12px 15px;
+    margin: 15px 0;
+    border-radius: 6px;
+    font-style: italic;
+  }
+
+  .task-box {
+    background: #eef6fb;
+    border-left: 5px solid #3498db;
+    padding: 15px;
+    margin: 15px 0;
+    border-radius: 6px;
+  }
+
+  .sort-container {
+    display: flex;
+    gap: 15px;
+    flex-wrap: wrap;
+    margin: 15px 0;
+  }
+  .drop-zone {
+    flex: 1;
+    min-height: 150px;
+    border: 3px dashed #ccc;
+    border-radius: 8px;
+    padding: 10px;
+    background: #fafafa;
+  }
+  .drop-zone.good { border-color: var(--success); }
+  .drop-zone.bad { border-color: var(--accent); }
+  .drop-zone h4 { margin-top: 0; text-align: center; }
+  .drag-item {
+    background: var(--primary);
+    color: white;
+    padding: 8px 12px;
+    margin: 5px;
+    border-radius: 6px;
+    cursor: grab;
+    display: inline-block;
+    user-select: none;
+  }
+  .drag-item.placed { opacity: 0.9; }
+
+  .quiz-q {
+    margin: 15px 0;
+    padding: 12px;
+    background: #f9f9f9;
+    border-radius: 8px;
+  }
+  .quiz-q p { font-weight: bold; margin-bottom: 8px; }
+  .quiz-options label {
+    display: block;
+    padding: 6px;
+    cursor: pointer;
+    border-radius: 5px;
+  }
+  .quiz-options label:hover { background: #eee; }
+
+  input[type="text"], textarea {
+    width: 100%;
+    padding: 10px;
+    border: 2px solid #ccc;
+    border-radius: 6px;
+    font-size: 1em;
+    margin-top: 5px;
+  }
+
+  button {
+    background: var(--primary);
+    color: white;
+    border: none;
+    padding: 12px 22px;
+    border-radius: 8px;
+    font-size: 1em;
+    cursor: pointer;
+    margin-top: 15px;
+    transition: background 0.3s;
+  }
+  button:hover { background: var(--accent); }
+
+  .feedback {
+    margin-top: 12px;
+    padding: 10px;
+    border-radius: 6px;
+    display: none;
+  }
+  .feedback.correct {
+    background: #d4edda;
+    color: #155724;
+    display: block;
+  }
+  .feedback.wrong {
+    background: #f8d7da;
+    color: #721c24;
+    display: block;
+  }
+
+  .code-display {
+    background: #2c3e50;
+    color: #2ecc71;
+    font-family: 'Courier New', monospace;
+    font-size: 1.4em;
+    padding: 15px;
+    border-radius: 8px;
+    text-align: center;
+    margin: 15px 0;
+    letter-spacing: 3px;
+  }
+
+  .locked-icon { font-size: 3em; margin-bottom: 10px; }
+
+  .final-cert {
+    text-align: center;
+    background: linear-gradient(135deg, #f1c40f, #f39c12);
+    color: white;
+    padding: 40px;
+    border-radius: 15px;
+    display: none;
+  }
+  .final-cert.show { display: block; animation: fadeIn 1s ease; }
+  .final-cert h2 { font-size: 2em; }
+
+  .cc-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 15px 0;
+  }
+  .cc-table th, .cc-table td {
+    border: 1px solid #ccc;
+    padding: 8px;
+    text-align: center;
+  }
+  .cc-table th { background: #34495e; color: white; }
+
+  .hint-btn {
+    background: #95a5a6;
+    font-size: 0.85em;
+    padding: 6px 12px;
+  }
+  .hint-text {
+    display: none;
+    background: #fff3cd;
+    padding: 8px;
+    border-radius: 6px;
+    margin-top: 8px;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>🕵️ Die Bildrechte-Detektive</h1>
+  <p>Löst den Fall der geklauten Bilder – Level für Level!</p>
+</header>
+
+<div class="progress-bar">
+  <div class="progress-fill" id="progressFill">0%</div>
+</div>
+
+<div class="container">
+
+  <div class="story-box">
+    📢 <strong>Fall Nr. 2026-09:</strong> Auf dem Schulserver wurde eine Präsentation gemeldet – wegen Urheberrechtsverletzung! Eure Mission: Findet heraus, welche Regeln beim Verwenden von Bildern gelten, und werdet zertifizierte Bildrechte-Detektive. Jedes Level muss korrekt gelöst werden, um den Code für das nächste Level freizuschalten. Viel Erfolg! 🔍
+  </div>
+
+  <!-- LEVEL 1 -->
+  <div class="level active" id="level1">
+    <span class="badge">LEVEL 1 / 5</span>
+    <h2>🔎 Der Tatort – Warum ist das ein Problem?</h2>
+    <div class="task-box">
+      <p><strong>Auftrag:</strong> Beantwortet die folgenden drei Fragen. Nutzt dazu z. B. <a href="https://www.klicksafe.de" target="_blank">klicksafe.de</a> oder <a href="https://irights.info" target="_blank">irights.info</a> zur Recherche.</p>
+    </div>
+
+    <p><strong>1. Was schützt das Urheberrecht bei einem Foto? (Stichwort mit 5 Buchstaben)</strong></p>
+    <input type="text" id="q1a" placeholder="Antwort eingeben...">
+
+    <p><strong>2. Wie nennt man es, wenn man ein Bild ohne Erlaubnis nutzt? (Ein Wort, beginnt mit E)</strong></p>
+    <input type="text" id="q1b" placeholder="Antwort eingeben...">
+
+    <p><strong>3. Was muss man bei jedem fremden Bild immer angeben, egal welche Lizenz? (ein Wort, beginnt mit Q)</strong></p>
+    <input type="text" id="q1c" placeholder="Antwort eingeben...">
+
+    <button onclick="checkLevel1()">Antworten prüfen ✅</button>
+    <div class="feedback" id="feedback1"></div>
+  </div>
+
+  <!-- LEVEL 2 -->
+  <div class="level locked" id="level2">
+    <div class="locked-icon">🔒</div>
+    <h3>Level 2 ist noch gesperrt</h3>
+    <p>Löse zuerst Level 1, um den Code freizuschalten.</p>
+    <input type="text" id="codeInput2" placeholder="Code eingeben...">
+    <button onclick="unlockLevel(2)">Freischalten</button>
+    <div class="feedback" id="codeFeedback2"></div>
+  </div>
+
+  <div class="level" id="level2content" style="display:none;">
+    <span class="badge">LEVEL 2 / 5</span>
+    <h2>🖼️ Die Bilderfahndung – Wo finde ich legale Bilder?</h2>
+    <div class="task-box">
+      <p><strong>Auftrag:</strong> Zieht die Plattformen in die richtige Kategorie: geeignet für lizenzfreie/CC-Bilder oder eher ungeeignet.</p>
+    </div>
+
+    <div class="sort-container">
+      <div class="drop-zone good" id="zoneGood" ondrop="drop(event)" ondragover="allowDrop(event)">
+        <h4>✅ Geeignet</h4>
+      </div>
+      <div class="drop-zone bad" id="zoneBad" ondrop="drop(event)" ondragover="allowDrop(event)">
+        <h4>❌ Ungeeignet</h4>
+      </div>
+    </div>
+
+    <div id="dragPool">
+      <div class="drag-item" draggable="true" ondragstart="drag(event)" data-answer="good" id="item1">Pixabay</div>
+      <div class="drag-item" draggable="true" ondragstart="drag(event)" data-answer="good" id="item2">Unsplash</div>
+      <div class="drag-item" draggable="true" ondragstart="drag(event)" data-answer="good" id="item3">Wikimedia Commons</div>
+      <div class="drag-item" draggable="true" ondragstart="drag(event)" data-answer="bad" id="item4">Google-Bildersuche (allgemein)</div>
+      <div class="drag-item" draggable="true" ondragstart="drag(event)" data-answer="bad" id="item5">Pinterest</div>
+      <div class="drag-item" draggable="true" ondragstart="drag(event)" data-answer="bad" id="item6">Instagram-Fotos anderer</div>
+    </div>
+
+    <button onclick="checkLevel2()">Sortierung prüfen ✅</button>
+    <div class="feedback" id="feedback2"></div>
+  </div>
+
+  <!-- LEVEL 3 -->
+  <div class="level locked" id="level3">
+    <div class="locked-icon">🔒</div>
+    <h3>Level 3 ist noch gesperrt</h3>
+    <input type="text" id="codeInput3" placeholder="Code eingeben...">
+    <button onclick="unlockLevel(3)">Freischalten</button>
+    <div class="feedback" id="codeFeedback3"></div>
+  </div>
+
+  <div class="level" id="level3content" style="display:none;">
+    <span class="badge">LEVEL 3 / 5</span>
+    <h2>🏷️ Die Lizenz-Enträtselung – CC-Symbole verstehen</h2>
+
+    <table class="cc-table">
+      <tr><th>Symbol</th><th>Bedeutung</th></tr>
+      <tr><td>BY</td><td>Namensnennung erforderlich</td></tr>
+      <tr><td>SA</td><td>Weitergabe unter gleichen Bedingungen</td></tr>
+      <tr><td>NC</td><td>Nicht kommerzielle Nutzung</td></tr>
+      <tr><td>ND</td><td>Keine Bearbeitung erlaubt</td></tr>
+    </table>
+
+    <div class="quiz-q">
+      <p>1. Ein Bild ist mit "CC BY-NC" lizenziert. Ihr wollt es in einem YouTube-Video mit Werbeeinnahmen nutzen. Erlaubt?</p>
+      <div class="quiz-options">
+        <label><input type="radio" name="qz1" value="wrong"> Ja, kein Problem</label>
+        <label><input type="radio" name="qz1" value="correct"> Nein, da NC = nicht kommerziell</label>
+      </div>
+    </div>
+
+    <div class="quiz-q">
+      <p>2. Ein Bild ist "CC BY-ND" lizenziert. Ihr wollt es zuschneiden und einfärben. Erlaubt?</p>
+      <div class="quiz-options">
+        <label><input type="radio" name="qz2" value="wrong"> Ja, kein Problem</label>
+        <label><input type="radio" name="qz2" value="correct"> Nein, ND verbietet Bearbeitungen</label>
+      </div>
+    </div>
+
+    <div class="quiz-q">
+      <p>3. Bei "CC BY" verwendet ihr ein Bild in eurer Schulpräsentation ohne Namen des Urhebers zu nennen. Korrekt?</p>
+      <div class="quiz-options">
+        <label><input type="radio" name="qz3" value="wrong"> Ja, das reicht</label>
+        <label><input type="radio" name="qz3" value="correct"> Nein, Namensnennung ist Pflicht</label>
+      </div>
+    </div>
+
+    <button onclick="checkLevel3()">Quiz auswerten ✅</button>
+    <div class="feedback" id="feedback3"></div>
+  </div>
+
+  <!-- LEVEL 4 -->
+  <div class="level locked" id="level4">
+    <div class="locked-icon">🔒</div>
+    <h3>Level 4 ist noch gesperrt</h3>
+    <input type="text" id="codeInput4" placeholder="Code eingeben...">
+    <button onclick="unlockLevel(4)">Freischalten</button>
+    <div class="feedback" id="codeFeedback4"></div>
+  </div>
+
+  <div class="level" id="level4content" style="display:none;">
+    <span class="badge">LEVEL 4 / 5</span>
+    <h2>✍️ Der Beweis – Richtig zitieren!</h2>
+
+    <div class="story-box">
+      Beispielbild: "Sonnenblumenfeld" – gefunden auf Pixabay, hochgeladen von <em>NaturFan99</em>, Lizenz: <strong>CC BY 2.0</strong>
+    </div>
+
+    <div class="task-box">
+      <p><strong>Auftrag:</strong> Erstellt die korrekte Bildquellenangabe nach dem Schema:</p>
+      <p><em>Urheber – Titel – Quelle – Lizenz</em></p>
+    </div>
+
+    <textarea id="citationInput" rows="3" placeholder="Eure Quellenangabe hier eintragen..."></textarea>
+    <button onclick="checkLevel4()">Quellenangabe prüfen ✅</button>
+    <div class="feedback" id="feedback4"></div>
+
+    <button class="hint-btn" onclick="toggleHint('hint4')">💡 Hinweis anzeigen</button>
+    <div class="hint-text" id="hint4">
+      Achtet darauf, dass alle vier Elemente vorkommen: Name des Urhebers, Bildtitel, Quelle (Plattform) und Lizenzbezeichnung (CC BY 2.0).
+    </div>
+  </div>
+
+  <!-- LEVEL 5 -->
+  <div class="level locked" id="level5">
+    <div class="locked-icon">🔒</div>
+    <h3>Level 5 ist noch gesperrt</h3>
+    <input type="text" id="codeInput5" placeholder="Code eingeben...">
+    <button onclick="unlockLevel(5)">Freischalten</button>
+    <div class="feedback" id="codeFeedback5"></div>
+  </div>
+
+  <div class="level" id="level5content" style="display:none;">
+    <span class="badge">LEVEL 5 / 5</span>
+    <h2>🏆 Der Abschlussfall – Euer Lizenz-Führerschein</h2>
+
+    <div class="task-box">
+      <p><strong>Auftrag:</strong> Sucht ein eigenes CC-Bild (z. B. auf Pixabay oder Wikimedia Commons) und schreibt hier die vollständige, korrekte Quellenangabe dazu. Notiert außerdem, wofür ihr es nutzen dürftet (z. B. Schulpräsentation, YouTube-Video mit Werbung, etc.) basierend auf der Lizenz.</p>
+    </div>
+
+    <textarea id="finalTask" rows="4" placeholder="Bildquelle + Nutzungsmöglichkeiten eintragen..."></textarea>
+    <button onclick="finishQuest()">Fall abschließen 🎉</button>
+    <div class="feedback" id="feedback5"></div>
+  </div>
+
+  <!-- ZERTIFIKAT -->
+  <div class="final-cert" id="certificate">
+    <h2>🎖️ Zertifizierte Bildrechte-Detektive</h2>
+    <p>Herzlichen Glückwunsch! Ihr habt alle Level gemeistert und wisst nun, wie man Bilder korrekt und rechtssicher verwendet.</p>
+    <p><strong>Datum:</strong> <span id="certDate"></span></p>
+  </div>
+
+</div>
+
+<script>
+let unlockedLevels = 1;
+const totalLevels = 5;
+const codes = { 2: "RECHT", 3: "1234", 4: "LIZENZ", 5: "ZITAT" };
+
+function updateProgress() {
+  const percent = Math.round((unlockedLevels / totalLevels) * 100);
+  document.getElementById('progressFill').style.width = percent + '%';
+  document.getElementById('progressFill').innerText = percent + '%';
+}
+
+function showFeedback(id, message, correct) {
+  const fb = document.getElementById(id);
+  fb.innerText = message;
+  fb.className = 'feedback ' + (correct ? 'correct' : 'wrong');
+}
+
+// LEVEL 1
+function checkLevel1() {
+  const a = document.getElementById('q1a').value.trim().toLowerCase();
+  const b = document.getElementById('q1b').value.trim().toLowerCase();
+  const c = document.getElementById('q1c').value.trim().toLowerCase();
+
+  const correctA = a.includes("werk");
+  const correctB = b.includes("verletzung") || b.includes("verstoß");
+  const correctC = c.includes("quelle");
+
+  if (correctA && correctB && correctC) {
+    showFeedback('feedback1', '✅ Richtig! Euer Code für Level 2 lautet: RECHT', true);
+    document.getElementById('level2').innerHTML = `
+      <div class="locked-icon">🔓</div>
+      <h3>Level 1 abgeschlossen!</h3>
+      <div class="code-display">Code: RECHT</div>
+      <input type="text" id="codeInput2" placeholder="Code eingeben...">
+      <button onclick="unlockLevel(2)">Level 2 freischalten</button>
+      <div class="feedback" id="codeFeedback2"></div>
+    `;
+  } else {
+    showFeedback('feedback1', '❌ Noch nicht ganz richtig. Recherchiert nochmal genauer!', false);
+  }
+}
+
+function unlockLevel(levelNum) {
+  const input = document.getElementById('codeInput' + levelNum).value.trim().toUpperCase();
+  if (input === codes[levelNum]) {
+    document.getElementById('level' + levelNum).style.display = 'none';
+    document.getElementById('level' + levelNum + 'content').style.display = 'block';
+    unlockedLevels = Math.max(unlockedLevels, levelNum);
+    updateProgress();
+  } else {
+    showFeedback('codeFeedback' + levelNum, '❌ Falscher Code. Überprüft eure Lösung aus dem vorherigen Level!', false);
+  }
+}
+
+// LEVEL 2 - Drag & Drop
+function allowDrop(ev) { ev.preventDefault(); }
+function drag(ev) { ev.dataTransfer.setData("id", ev.target.id); }
+function drop(ev) {
+  ev.preventDefault();
+  const id = ev.dataTransfer.getData("id");
+  const item = document.getElementById(id);
+  ev.currentTarget.appendChild(item);
+  item.classList.add('placed');
+}
+
+function checkLevel2() {
+  const goodZone = document.getElementById('zoneGood');
+  const badZone = document.getElementById('zoneBad');
+  let correct = 0;
+  let total = 6;
+
+  [...goodZone.children].forEach(child => {
+    if (child.dataset && child.dataset.answer === 'good') correct++;
+  });
+  [...badZone.children].forEach(child => {
+    if (child.dataset && child.dataset.answer === 'bad') correct++;
+  });
+
+  if (correct === total) {
+    showFeedback('feedback2', '✅ Perfekt sortiert! Euer Code für Level 3 lautet: 1234', true);
+    document.getElementById('level3').innerHTML = `
+      <div class="locked-icon">🔓</div>
+      <h3>Level 2 abgeschlossen!</h3>
+      <div class="code-display">Code: 1234</div>
+      <input type="text" id="codeInput3" placeholder="Code eingeben...">
+      <button onclick="unlockLevel(3)">Level 3 freischalten</button>
+      <div class="feedback" id="codeFeedback3"></div>
+    `;
+  } else {
+    showFeedback('feedback2', `❌ ${correct}/${total} richtig sortiert. Versucht es nochmal!`, false);
+  }
+}
+
+// LEVEL 3 - Quiz
+function checkLevel3() {
+  const q1 = document.querySelector('input[name="qz1"]:checked');
+  const q2 = document.querySelector('input[name="qz2"]:checked');
+  const q3 = document.querySelector('input[name="qz3"]:checked');
+
+  if (q1 && q2 && q3 && q1.value === 'correct' && q2.value === 'correct' && q3.value === 'correct') {
+    showFeedback('feedback3', '✅ Alle Antworten korrekt! Euer Code für Level 4 lautet: LIZENZ', true);
+    document.getElementById('level4').innerHTML = `
+      <div class="locked-icon">🔓</div>
+      <h3>Level 3 abgeschlossen!</h3>
+      <div class="code-display">Code: LIZENZ</div>
+      <input type="text" id="codeInput4" placeholder="Code eingeben...">
+      <button onclick="unlockLevel(4)">Level 4 freischalten</button>
+      <div class="feedback" id="codeFeedback4"></div>
+    `;
+  } else {
+    showFeedback('feedback3', '❌ Nicht alle Antworten sind richtig. Schaut euch die CC-Tabelle nochmal an!', false);
+  }
+}
+
+// LEVEL 4 - Zitation
+function toggleHint(id) {
+  const hint = document.getElementById(id);
+  hint.style.display = hint.style.display === 'block' ? 'none' : 'block';
+}
+
+function checkLevel4() {
+  const text = document.getElementById('citationInput').value.toLowerCase();
+  const hasName = text.includes('naturfan99') || text.includes('naturfan');
+  const hasTitle = text.includes('sonnenblumenfeld') || text.includes('sonnenblume');
+  const hasSource = text.includes('pixabay');
+  const hasLicense = text.includes('cc by') || text.includes('cc-by');
+
+  if (hasName && hasTitle && hasSource && hasLicense) {
+    showFeedback('feedback4', '✅ Perfekte Quellenangabe! Euer Code für Level 5 lautet: ZITAT', true);
+    document.getElementById('level5').innerHTML = `
+      <div class="locked-icon">🔓</div>
+      <h3>Level 4 abgeschlossen!</h3>
+      <div class="code-display">Code: ZITAT</div>
+      <input type="text" id="codeInput5" placeholder="Code eingeben...">
+      <button onclick="unlockLevel(5)">Level 5 freischalten</button>
+      <div class="feedback" id="codeFeedback5"></div>
+    `;
+  } else {
+    let missing = [];
+    if (!hasName) missing.push("Urheber");
+    if (!hasTitle) missing.push("Titel");
+    if (!hasSource) missing.push("Quelle");
+    if (!hasLicense) missing.push("Lizenz");
+    showFeedback('feedback4', `❌ Es fehlt noch: ${missing.join(', ')}. Nutzt gerne den Hinweis!`, false);
+  }
+}
+
+// LEVEL 5 - Abschluss
+function finishQuest() {
+  const text = document.getElementById('finalTask').value.trim();
+  if (text.length > 20) {
+    showFeedback('feedback5', '✅ Fall abgeschlossen! Euer Zertifikat wird ausgestellt...', true);
+    unlockedLevels = 5;
+    updateProgress();
+    setTimeout(() => {
+      document.getElementById('certificate').classList.add('show');
+      document.getElementById('certDate').innerText = new Date().toLocaleDateString('de-DE');
+      document.getElementById('certificate').scrollIntoView({behavior: 'smooth'});
+    }, 800);
+  } else {
+    showFeedback('feedback5', '❌ Bitte schreibt eine ausführlichere Antwort mit Quelle und Nutzungsmöglichkeiten.', false);
+  }
+}
+
+updateProgress();
+</script>
+
+</body>
+</html>
