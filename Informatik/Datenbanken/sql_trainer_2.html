@@ -1,0 +1,825 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<title>SQL Trainer</title>
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        background: #f0f2f5;
+        margin: 0;
+        padding: 20px;
+    }
+    h1 {
+        text-align: center;
+        color: #2c3e50;
+    }
+    .container {
+        max-width: 1150px;
+        margin: 0 auto;
+        display: flex;
+        gap: 20px;
+        flex-wrap: wrap;
+    }
+    .tables-panel {
+        flex: 1;
+        min-width: 320px;
+    }
+    .query-panel {
+        flex: 1.3;
+        min-width: 420px;
+    }
+    .table-box {
+        background: white;
+        border-radius: 8px;
+        padding: 10px 15px;
+        margin-bottom: 15px;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+    .table-box h3 {
+        margin-top: 5px;
+        color: #34495e;
+        border-bottom: 2px solid #3498db;
+        padding-bottom: 5px;
+    }
+    table {
+        border-collapse: collapse;
+        width: 100%;
+        font-size: 13px;
+    }
+    th, td {
+        border: 1px solid #ccc;
+        padding: 5px 8px;
+        text-align: left;
+    }
+    th {
+        background: #3498db;
+        color: white;
+    }
+    th small {
+        display: block;
+        font-weight: normal;
+        font-size: 10px;
+        color: #eaf4fc;
+    }
+    tr:nth-child(even) {
+        background: #f9f9f9;
+    }
+    .box {
+        background: white;
+        border-radius: 8px;
+        padding: 15px;
+        margin-bottom: 15px;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+    .box h3 {
+        margin-top: 0;
+        color: #34495e;
+    }
+    #task {
+        font-size: 15px;
+        background: #eaf4fc;
+        border-left: 4px solid #3498db;
+        padding: 10px;
+        border-radius: 4px;
+    }
+    textarea {
+        width: 100%;
+        height: 80px;
+        font-family: "Consolas", monospace;
+        font-size: 15px;
+        padding: 8px;
+        border: 1px solid #ccc;
+        border-radius: 6px;
+        resize: vertical;
+        box-sizing: border-box;
+    }
+    .btn-row {
+        margin-top: 8px;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+    }
+    .sym-btn {
+        background: #ecf0f1;
+        border: 1px solid #bbb;
+        border-radius: 5px;
+        padding: 6px 10px;
+        font-family: "Consolas", monospace;
+        font-size: 14px;
+        cursor: pointer;
+        transition: background 0.15s;
+    }
+    .sym-btn:hover {
+        background: #dfe6e9;
+    }
+    .action-row {
+        margin-top: 12px;
+        display: flex;
+        gap: 10px;
+    }
+    button.main-btn {
+        background: #3498db;
+        color: white;
+        border: none;
+        padding: 10px 18px;
+        border-radius: 6px;
+        font-size: 14px;
+        cursor: pointer;
+    }
+    button.main-btn:hover {
+        background: #2980b9;
+    }
+    button.secondary-btn {
+        background: #95a5a6;
+        color: white;
+        border: none;
+        padding: 10px 18px;
+        border-radius: 6px;
+        font-size: 14px;
+        cursor: pointer;
+    }
+    button.secondary-btn:hover {
+        background: #7f8c8d;
+    }
+    button.new-task-btn {
+        background: #27ae60;
+        color: white;
+        border: none;
+        padding: 10px 18px;
+        border-radius: 6px;
+        font-size: 14px;
+        cursor: pointer;
+    }
+    button.new-task-btn:hover {
+        background: #219150;
+    }
+    #feedback {
+        margin-top: 12px;
+        padding: 10px;
+        border-radius: 6px;
+        font-weight: bold;
+        white-space: pre-wrap;
+    }
+    .feedback-correct {
+        background: #d4edda;
+        color: #155724;
+        border-left: 4px solid #28a745;
+    }
+    .feedback-wrong {
+        background: #f8d7da;
+        color: #721c24;
+        border-left: 4px solid #dc3545;
+    }
+    .feedback-error {
+        background: #fff3cd;
+        color: #856404;
+        border-left: 4px solid #ffc107;
+    }
+    .result-section {
+        margin-top: 15px;
+    }
+    .result-section h4 {
+        margin: 10px 0 5px 0;
+        color: #34495e;
+    }
+    .type-int {
+        color: #aef1ff;
+    }
+    .type-string {
+        color: #d4ffea;
+    }
+    #solutionBox {
+        display: none;
+        margin-top: 10px;
+        background: #f4f4f4;
+        border-left: 4px solid #95a5a6;
+        padding: 10px;
+        border-radius: 4px;
+        font-family: "Consolas", monospace;
+    }
+</style>
+</head>
+<body>
+
+<h1>SQL Trainer – SELECT, FROM, WHERE</h1>
+
+<div class="container">
+
+    <!-- LINKE SEITE: Tabellen -->
+    <div class="tables-panel">
+        <div id="tablesContainer"></div>
+    </div>
+
+    <!-- RECHTE SEITE: Aufgabe + Abfrage -->
+    <div class="query-panel">
+
+        <div class="box">
+            <h3>Aufgabe</h3>
+            <div id="task">Lade Aufgabe...</div>
+            <div class="result-section">
+                <h4>Zielergebnis (was du erzeugen sollst):</h4>
+                <div id="targetResult"></div>
+            </div>
+        </div>
+
+        <div class="box">
+            <h3>Deine SQL-Abfrage</h3>
+            <textarea id="queryInput" placeholder="SELECT ... FROM ... WHERE ..."></textarea>
+
+            <div class="btn-row" id="btnRow"></div>
+
+            <div class="action-row">
+                <button class="main-btn" onclick="runQuery()">Abfrage ausführen</button>
+                <button class="secondary-btn" onclick="toggleSolution()">Musterlösung anzeigen</button>
+                <button class="new-task-btn" onclick="newTask()">Neue Aufgabe</button>
+            </div>
+
+            <div id="feedback"></div>
+
+            <div class="result-section">
+                <h4>Ergebnis deiner Abfrage:</h4>
+                <div id="ownResult"></div>
+            </div>
+
+            <div id="solutionBox"></div>
+        </div>
+
+    </div>
+</div>
+
+<script>
+/* ==========================================================
+   DATENBANK-DEFINITION
+   ========================================================== */
+
+const DB = {
+    Schueler: {
+        schema: [
+            { name: "SID", type: "int" },
+            { name: "Name", type: "string" },
+            { name: "Alter", type: "int" },
+            { name: "Klasse", type: "string" }
+        ],
+        rows: [
+            { SID: 1, Name: "Anna", Alter: 16, Klasse: "10A" },
+            { SID: 2, Name: "Ben", Alter: 17, Klasse: "10B" },
+            { SID: 3, Name: "Clara", Alter: 16, Klasse: "10A" },
+            { SID: 4, Name: "David", Alter: 15, Klasse: "10C" },
+            { SID: 5, Name: "Emma", Alter: 17, Klasse: "10B" },
+            { SID: 6, Name: "Felix", Alter: 16, Klasse: "10A" },
+            { SID: 7, Name: "Greta", Alter: 15, Klasse: "10C" },
+            { SID: 8, Name: "Hannes", Alter: 17, Klasse: "10B" }
+        ]
+    },
+    Kurse: {
+        schema: [
+            { name: "KID", type: "int" },
+            { name: "Fach", type: "string" },
+            { name: "Lehrer", type: "string" }
+        ],
+        rows: [
+            { KID: 100, Fach: "Mathematik", Lehrer: "Hr. Weber" },
+            { KID: 101, Fach: "Deutsch", Lehrer: "Fr. Klein" },
+            { KID: 102, Fach: "Englisch", Lehrer: "Fr. Braun" },
+            { KID: 103, Fach: "Physik", Lehrer: "Hr. Wolf" }
+        ]
+    },
+    Noten: {
+        schema: [
+            { name: "SID", type: "int" },
+            { name: "KID", type: "int" },
+            { name: "Note", type: "int" }
+        ],
+        rows: [
+            { SID: 1, KID: 100, Note: 2 },
+            { SID: 1, KID: 101, Note: 3 },
+            { SID: 2, KID: 100, Note: 4 },
+            { SID: 2, KID: 102, Note: 1 },
+            { SID: 3, KID: 101, Note: 2 },
+            { SID: 3, KID: 103, Note: 3 },
+            { SID: 4, KID: 100, Note: 5 },
+            { SID: 4, KID: 102, Note: 2 },
+            { SID: 5, KID: 103, Note: 1 },
+            { SID: 6, KID: 101, Note: 3 },
+            { SID: 7, KID: 100, Note: 2 },
+            { SID: 8, KID: 102, Note: 4 }
+        ]
+    }
+};
+
+/* ==========================================================
+   TABELLEN RENDERN
+   ========================================================== */
+
+function renderTables() {
+    const container = document.getElementById("tablesContainer");
+    container.innerHTML = "";
+
+    Object.keys(DB).forEach(tableName => {
+        const table = DB[tableName];
+        const box = document.createElement("div");
+        box.className = "table-box";
+
+        let html = `<h3>${tableName}</h3><table><thead><tr>`;
+        table.schema.forEach(col => {
+            html += `<th>${col.name}<small class="type-${col.type}">${col.type}</small></th>`;
+        });
+        html += `</tr></thead><tbody>`;
+
+        table.rows.forEach(row => {
+            html += "<tr>";
+            table.schema.forEach(col => {
+                html += `<td>${row[col.name]}</td>`;
+            });
+            html += "</tr>";
+        });
+
+        html += `</tbody></table>`;
+        box.innerHTML = html;
+        container.appendChild(box);
+    });
+}
+
+/* ==========================================================
+   BUTTONS FÜR SQL-SYMBOLE / KEYWORDS
+   ========================================================== */
+
+const buttons = [
+    "SELECT", "FROM", "WHERE", "*", "AND", "OR", "NOT",
+    "=", "!=", "<", ">", "<=", ">=", "LIKE", "'%...%'"
+];
+
+function renderButtons() {
+    const row = document.getElementById("btnRow");
+    row.innerHTML = "";
+    buttons.forEach(sym => {
+        const btn = document.createElement("button");
+        btn.className = "sym-btn";
+        btn.textContent = sym;
+        btn.onclick = () => insertAtCursor(sym);
+        row.appendChild(btn);
+    });
+}
+
+function insertAtCursor(text) {
+    const textarea = document.getElementById("queryInput");
+    const start = textarea.selectionStart;
+    const end = textarea.selectionEnd;
+    const value = textarea.value;
+    textarea.value = value.substring(0, start) + text + " " + value.substring(end);
+    textarea.focus();
+    textarea.selectionStart = textarea.selectionEnd = start + text.length + 1;
+}
+
+/* ==========================================================
+   HILFSFUNKTIONEN: WERTE PARSEN & VERGLEICHEN
+   ========================================================== */
+
+function parseValue(raw) {
+    raw = raw.trim();
+    if (/^'.*'$/.test(raw) || /^".*"$/.test(raw)) {
+        return { value: raw.slice(1, -1), type: "string" };
+    }
+    if (/^-?\d+(\.\d+)?$/.test(raw)) {
+        return { value: parseFloat(raw), type: "int" };
+    }
+    return { value: raw, type: "unknown" };
+}
+
+function getColumnType(schema, colName) {
+    const col = schema.find(s => s.name.toLowerCase() === colName.toLowerCase());
+    return col ? col.type : null;
+}
+
+function getActualColumnName(schema, colName) {
+    const col = schema.find(s => s.name.toLowerCase() === colName.toLowerCase());
+    return col ? col.name : null;
+}
+
+/* ==========================================================
+   WHERE-AUSWERTUNG
+   ========================================================== */
+
+function splitTopLevel(str, keyword) {
+    // Teilt einen String an einem Keyword (AND/OR), das nicht in Anführungszeichen steht
+    const regex = new RegExp(`\\s+${keyword}\\s+`, "i");
+    const parts = [];
+    let remaining = str;
+    let match;
+    let safety = 0;
+    while ((match = remaining.match(regex)) && safety < 50) {
+        // Prüfen ob der Treffer außerhalb von Anführungszeichen liegt (einfache Heuristik)
+        const before = remaining.substring(0, match.index);
+        const singleQuotes = (before.match(/'/g) || []).length;
+        if (singleQuotes % 2 === 0) {
+            parts.push(before);
+            remaining = remaining.substring(match.index + match[0].length);
+        } else {
+            break;
+        }
+        safety++;
+    }
+    parts.push(remaining);
+    return parts;
+}
+
+function evaluateCondition(condStr, row, schema) {
+    condStr = condStr.trim();
+
+    // NOT am Anfang
+    let negate = false;
+    if (/^not\s+/i.test(condStr)) {
+        negate = true;
+        condStr = condStr.replace(/^not\s+/i, "");
+    }
+
+    // LIKE-Operator
+    const likeMatch = condStr.match(/^([a-zA-Z_][a-zA-Z0-9_]*)\s+like\s+(.+)$/i);
+    if (likeMatch) {
+        const colName = likeMatch[1].trim();
+        const actualCol = getActualColumnName(schema, colName);
+        if (!actualCol) {
+            throw new Error(`Unbekannte Spalte "${colName}" in WHERE-Bedingung.`);
+        }
+        const patternRaw = parseValue(likeMatch[2].trim());
+        if (patternRaw.type !== "string") {
+            throw new Error(`LIKE erfordert einen Textwert in Anführungszeichen, z.B. LIKE '%A%'`);
+        }
+        const pattern = patternRaw.value
+            .replace(/[.+^${}()|[\]\\]/g, '\\$&')
+            .replace(/%/g, '.*')
+            .replace(/_/g, '.');
+        const regex = new RegExp(`^${pattern}$`, "i");
+        const cellValue = String(row[actualCol]);
+        const result = regex.test(cellValue);
+        return negate ? !result : result;
+    }
+
+    // Vergleichsoperatoren (Reihenfolge wichtig: <= >= vor < >)
+    const opMatch = condStr.match(/^([a-zA-Z_][a-zA-Z0-9_]*)\s*(=|!=|<=|>=|<|>)\s*(.+)$/);
+    if (!opMatch) {
+        throw new Error(`Bedingung "${condStr}" konnte nicht interpretiert werden. Erwartet wird z.B. Spalte = Wert.`);
+    }
+
+    const colName = opMatch[1].trim();
+    const operator = opMatch[2];
+    const rawValue = opMatch[3].trim();
+
+    const actualCol = getActualColumnName(schema, colName);
+    if (!actualCol) {
+        throw new Error(`Unbekannte Spalte "${colName}" in WHERE-Bedingung.`);
+    }
+
+    const columnType = getColumnType(schema, colName);
+    const parsedVal = parseValue(rawValue);
+
+    if (parsedVal.type === "unknown") {
+        throw new Error(`Wert "${rawValue}" konnte nicht interpretiert werden. Texte bitte in Anführungszeichen setzen.`);
+    }
+
+    if (columnType !== parsedVal.type) {
+        throw new Error(
+            `Typkonflikt: Spalte "${actualCol}" ist vom Typ "${columnType}", aber der Vergleichswert "${rawValue}" ist vom Typ "${parsedVal.type}". ` +
+            (columnType === "string" ? `Setze den Wert in Anführungszeichen, z.B. '${rawValue}'.` : `Entferne die Anführungszeichen beim Zahlenwert.`)
+        );
+    }
+
+    const cellValue = row[actualCol];
+    const compareValue = parsedVal.value;
+
+    let result;
+    switch (operator) {
+        case "=": result = cellValue === compareValue; break;
+        case "!=": result = cellValue !== compareValue; break;
+        case "<": result = cellValue < compareValue; break;
+        case ">": result = cellValue > compareValue; break;
+        case "<=": result = cellValue <= compareValue; break;
+        case ">=": result = cellValue >= compareValue; break;
+        default:
+            throw new Error(`Unbekannter Operator "${operator}".`);
+    }
+
+    return negate ? !result : result;
+}
+
+function evaluateWhere(whereStr, row, schema) {
+    // Zuerst nach OR splitten (niedrigere Priorität)
+    const orParts = splitTopLevel(whereStr, "OR");
+    return orParts.some(orPart => {
+        const andParts = splitTopLevel(orPart, "AND");
+        return andParts.every(andPart => evaluateCondition(andPart.trim(), row, schema));
+    });
+}
+
+/* ==========================================================
+   SQL-PARSER (ROBUST)
+   ========================================================== */
+
+function parseSQL(query) {
+    if (!query || !query.trim()) {
+        throw new Error("Bitte gib eine SQL-Abfrage ein.");
+    }
+
+    // Semikolon am Ende entfernen, Whitespace normalisieren
+    let q = query.trim().replace(/;\s*$/, "");
+
+    // Grobe Struktur per Regex: SELECT ... FROM ... [WHERE ...]
+    const match = q.match(/^select\s+(.+?)\s+from\s+([a-zA-Z_][a-zA-Z0-9_]*)\s*(where\s+(.+))?$/is);
+
+    if (!match) {
+        throw new Error("Die Abfrage entspricht nicht dem Muster: SELECT ... FROM ... [WHERE ...]");
+    }
+
+    const columnsPart = match[1].trim();
+    const rawTableName = match[2].trim();
+    const wherePart = match[4] ? match[4].trim() : null;
+
+    // Case-insensitiver Abgleich mit bekannten Tabellen
+    const tableKey = Object.keys(DB).find(
+        key => key.toLowerCase() === rawTableName.toLowerCase()
+    );
+
+    if (!tableKey) {
+        throw new Error(
+            `Unbekannte Tabelle "${rawTableName}". Verfügbare Tabellen: ${Object.keys(DB).join(", ")}`
+        );
+    }
+
+    const table = DB[tableKey];
+
+    if (!table || !table.schema) {
+        throw new Error(`Interner Fehler: Tabelle "${tableKey}" hat kein gültiges Schema.`);
+    }
+
+    // Spalten parsen
+    let selectedColumns;
+    if (columnsPart === "*") {
+        selectedColumns = table.schema.map(col => col.name);
+    } else {
+        selectedColumns = columnsPart.split(",").map(c => c.trim());
+        selectedColumns.forEach(col => {
+            const exists = table.schema.some(s => s.name.toLowerCase() === col.toLowerCase());
+            if (!exists) {
+                throw new Error(`Unbekannte Spalte "${col}" in Tabelle "${tableKey}".`);
+            }
+        });
+        // Auf tatsächliche Schreibweise normalisieren
+        selectedColumns = selectedColumns.map(col => {
+            const actual = getActualColumnName(table.schema, col);
+            return actual || col;
+        });
+    }
+
+    // Zeilen filtern (falls WHERE vorhanden)
+    let rows = table.rows;
+    if (wherePart) {
+        rows = rows.filter(row => evaluateWhere(wherePart, row, table.schema));
+    }
+
+    // Nur gewünschte Spalten zurückgeben
+    const resultRows = rows.map(row => {
+        const newRow = {};
+        selectedColumns.forEach(col => {
+            newRow[col] = row[col];
+        });
+        return newRow;
+    });
+
+    return { columns: selectedColumns, rows: resultRows, tableName: tableKey };
+}
+
+/* ==========================================================
+   ERGEBNIS-RENDERING
+   ========================================================== */
+
+function renderResultTable(result, schema) {
+    if (!result || !result.rows) return "<p><em>Kein Ergebnis</em></p>";
+    if (result.rows.length === 0) {
+        return "<p><em>Ergebnis ist leer (keine Zeilen gefunden).</em></p>";
+    }
+
+    let html = "<table><thead><tr>";
+    result.columns.forEach(col => {
+        const type = schema ? getColumnType(schema, col) : null;
+        html += `<th>${col}${type ? `<small class="type-${type}">${type}</small>` : ""}</th>`;
+    });
+    html += "</tr></thead><tbody>";
+
+    result.rows.forEach(row => {
+        html += "<tr>";
+        result.columns.forEach(col => {
+            html += `<td>${row[col]}</td>`;
+        });
+        html += "</tr>";
+    });
+
+    html += "</tbody></table>";
+    return html;
+}
+
+/* ==========================================================
+   AUFGABEN-GENERIERUNG
+   ========================================================== */
+
+let currentTask = null;
+
+function randomChoice(arr) {
+    return arr[Math.floor(Math.random() * arr.length)];
+}
+
+function generateTask() {
+    const taskTypes = ["simpleSelect", "columnSelect", "whereSimple", "whereCombined", "like"];
+    const type = randomChoice(taskTypes);
+
+    let description, solutionQuery;
+
+    if (type === "simpleSelect") {
+        const tableName = randomChoice(Object.keys(DB));
+        description = `Gib alle Spalten und alle Zeilen der Tabelle "${tableName}" aus.`;
+        solutionQuery = `SELECT * FROM ${tableName}`;
+    }
+
+    else if (type === "columnSelect") {
+        const tableName = randomChoice(Object.keys(DB));
+        const schema = DB[tableName].schema;
+        const numCols = Math.min(schema.length, Math.random() < 0.5 ? 1 : 2);
+        const cols = [...schema].sort(() => 0.5 - Math.random()).slice(0, numCols).map(c => c.name);
+        description = `Gib nur die Spalte(n) ${cols.join(", ")} aus der Tabelle "${tableName}" aus (alle Zeilen).`;
+        solutionQuery = `SELECT ${cols.join(", ")} FROM ${tableName}`;
+    }
+
+    else if (type === "whereSimple") {
+        const tableName = randomChoice(["Schueler", "Kurse", "Noten"]);
+        const schema = DB[tableName].schema;
+        const col = randomChoice(schema.filter(c => c.type === "int" || c.type === "string"));
+        let op, value;
+
+        if (col.type === "int") {
+            op = randomChoice(["=", ">", "<", ">=", "<="]);
+            const sampleVals = DB[tableName].rows.map(r => r[col.name]);
+            value = randomChoice(sampleVals);
+        } else {
+            op = randomChoice(["=", "!="]);
+            const sampleVals = DB[tableName].rows.map(r => r[col.name]);
+            value = randomChoice(sampleVals);
+        }
+
+        const valueStr = col.type === "string" ? `'${value}'` : value;
+        description = `Gib alle Spalten aus der Tabelle "${tableName}" aus, bei denen ${col.name} ${op} ${valueStr} gilt.`;
+        solutionQuery = `SELECT * FROM ${tableName} WHERE ${col.name} ${op} ${valueStr}`;
+    }
+
+    else if (type === "whereCombined") {
+        const tableName = randomChoice(["Schueler", "Noten"]);
+        const schema = DB[tableName].schema;
+        const numericCols = schema.filter(c => c.type === "int");
+        if (numericCols.length >= 2) {
+            const col1 = numericCols[0];
+            const col2 = numericCols[1];
+            const val1 = randomChoice(DB[tableName].rows.map(r => r[col1.name]));
+            const val2 = randomChoice(DB[tableName].rows.map(r => r[col2.name]));
+            const connector = randomChoice(["AND", "OR"]);
+            description = `Gib alle Spalten aus der Tabelle "${tableName}" aus, bei denen ${col1.name} = ${val1} ${connector} ${col2.name} = ${val2} gilt.`;
+            solutionQuery = `SELECT * FROM ${tableName} WHERE ${col1.name} = ${val1} ${connector} ${col2.name} = ${val2}`;
+        } else {
+            description = `Gib alle Spalten aus der Tabelle "Schueler" aus, bei denen Alter >= 16 AND Klasse = '10A' gilt.`;
+            solutionQuery = `SELECT * FROM Schueler WHERE Alter >= 16 AND Klasse = '10A'`;
+        }
+    }
+
+    else if (type === "like") {
+        const tableName = "Schueler";
+        const letter = randomChoice(["A", "B", "C", "E", "F"]);
+        description = `Gib alle Spalten aus der Tabelle "Schueler" aus, bei denen der Name mit "${letter}" beginnt.`;
+        solutionQuery = `SELECT * FROM Schueler WHERE Name LIKE '${letter}%'`;
+    }
+
+    let result;
+    try {
+        result = parseSQL(solutionQuery);
+    } catch (e) {
+        // Fallback, falls Generierung fehlschlägt
+        solutionQuery = "SELECT * FROM Schueler";
+        result = parseSQL(solutionQuery);
+        description = "Gib alle Spalten und Zeilen der Tabelle Schueler aus.";
+    }
+
+    return {
+        description,
+        solutionQuery,
+        targetResult: result
+    };
+}
+
+function newTask() {
+    currentTask = generateTask();
+    document.getElementById("task").textContent = currentTask.description;
+    const schema = DB[currentTask.targetResult.tableName]
+        ? DB[currentTask.targetResult.tableName].schema
+        : null;
+    document.getElementById("targetResult").innerHTML = renderResultTable(currentTask.targetResult, schema);
+    document.getElementById("ownResult").innerHTML = "<p><em>Noch keine Abfrage ausgeführt.</em></p>";
+    document.getElementById("feedback").className = "";
+    document.getElementById("feedback").innerHTML = "";
+    document.getElementById("queryInput").value = "";
+    document.getElementById("solutionBox").style.display = "none";
+    document.getElementById("solutionBox").innerHTML = "";
+}
+
+/* ==========================================================
+   VERGLEICH: SCHÜLERERGEBNIS vs. ZIELERGEBNIS
+   ========================================================== */
+
+function normalizeRowForCompare(row, columns) {
+    return columns
+        .map(col => `${col}=${row[col]}`)
+        .sort()
+        .join("|");
+}
+
+function resultsAreEqual(resultA, resultB) {
+    if (resultA.columns.length !== resultB.columns.length) return false;
+
+    const colsA = [...resultA.columns].map(c => c.toLowerCase()).sort();
+    const colsB = [...resultB.columns].map(c => c.toLowerCase()).sort();
+    if (JSON.stringify(colsA) !== JSON.stringify(colsB)) return false;
+
+    if (resultA.rows.length !== resultB.rows.length) return false;
+
+    const normalizedA = resultA.rows
+        .map(row => normalizeRowForCompare(row, resultA.columns))
+        .sort();
+    const normalizedB = resultB.rows
+        .map(row => normalizeRowForCompare(row, resultB.columns))
+        .sort();
+
+    return JSON.stringify(normalizedA) === JSON.stringify(normalizedB);
+}
+
+/* ==========================================================
+   ABFRAGE AUSFÜHREN
+   ========================================================== */
+
+function runQuery() {
+    const queryText = document.getElementById("queryInput").value;
+    const feedbackEl = document.getElementById("feedback");
+    const ownResultEl = document.getElementById("ownResult");
+
+    let result;
+    try {
+        result = parseSQL(queryText);
+    } catch (e) {
+        feedbackEl.className = "feedback-error";
+        feedbackEl.textContent = "⚠ Fehler in deiner Abfrage: " + e.message;
+        ownResultEl.innerHTML = "<p><em>Kein Ergebnis aufgrund eines Fehlers.</em></p>";
+        return;
+    }
+
+    const schema = DB[result.tableName] ? DB[result.tableName].schema : null;
+    ownResultEl.innerHTML = renderResultTable(result, schema);
+
+    if (!currentTask) {
+        feedbackEl.className = "";
+        feedbackEl.textContent = "";
+        return;
+    }
+
+    const isCorrect = resultsAreEqual(result, currentTask.targetResult);
+
+    if (isCorrect) {
+        feedbackEl.className = "feedback-correct";
+        feedbackEl.textContent = "✔ Richtig! Dein Ergebnis stimmt mit dem Zielergebnis überein.";
+    } else {
+        feedbackEl.className = "feedback-wrong";
+        feedbackEl.textContent = "✘ Leider nicht ganz richtig. Vergleiche dein Ergebnis oben mit dem Zielergebnis.";
+    }
+}
+
+/* ==========================================================
+   MUSTERLÖSUNG ANZEIGEN
+   ========================================================== */
+
+function toggleSolution() {
+    const box = document.getElementById("solutionBox");
+    if (!currentTask) return;
+
+    if (box.style.display === "none" || box.style.display === "") {
+        box.style.display = "block";
+        box.innerHTML = "<strong>Musterlösung:</strong><br>" + currentTask.solutionQuery;
+    } else {
+        box.style.display = "none";
+    }
+}
+
+/* ==========================================================
+   INITIALISIERUNG
+   ========================================================== */
+
+renderTables();
+renderButtons();
+newTask();
+</script>
+
+</body>
+</html>
