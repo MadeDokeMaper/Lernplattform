@@ -1,0 +1,858 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<title>SQL JOIN Trainer</title>
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        background: #f0f2f5;
+        margin: 0;
+        padding: 20px;
+    }
+    h1 {
+        text-align: center;
+        color: #2c3e50;
+    }
+    .container {
+        max-width: 1200px;
+        margin: 0 auto;
+        display: flex;
+        gap: 20px;
+        flex-wrap: wrap;
+    }
+    .tables-panel {
+        flex: 1;
+        min-width: 340px;
+    }
+    .query-panel {
+        flex: 1.3;
+        min-width: 420px;
+    }
+    .table-box {
+        background: white;
+        border-radius: 8px;
+        padding: 10px 15px;
+        margin-bottom: 15px;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+    .table-box h3 {
+        margin-top: 5px;
+        color: #34495e;
+        border-bottom: 2px solid #3498db;
+        padding-bottom: 5px;
+    }
+    table {
+        border-collapse: collapse;
+        width: 100%;
+        font-size: 12px;
+    }
+    th, td {
+        border: 1px solid #ccc;
+        padding: 4px 6px;
+        text-align: left;
+        white-space: nowrap;
+    }
+    th {
+        background: #3498db;
+        color: white;
+    }
+    th small {
+        display: block;
+        font-weight: normal;
+        font-size: 9px;
+        color: #eaf4fc;
+    }
+    th.pk { background: #27ae60; }
+    th.fk { background: #e67e22; }
+    tr:nth-child(even) {
+        background: #f9f9f9;
+    }
+    .box {
+        background: white;
+        border-radius: 8px;
+        padding: 15px;
+        margin-bottom: 15px;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+    .box h3 {
+        margin-top: 0;
+        color: #34495e;
+    }
+    #task {
+        font-size: 15px;
+        background: #eaf4fc;
+        border-left: 4px solid #3498db;
+        padding: 10px;
+        border-radius: 4px;
+    }
+    textarea {
+        width: 100%;
+        height: 90px;
+        font-family: "Consolas", monospace;
+        font-size: 15px;
+        padding: 8px;
+        border: 1px solid #ccc;
+        border-radius: 6px;
+        resize: vertical;
+        box-sizing: border-box;
+    }
+    .btn-row {
+        margin-top: 8px;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+    }
+    .sym-btn {
+        background: #ecf0f1;
+        border: 1px solid #bbb;
+        border-radius: 5px;
+        padding: 6px 10px;
+        font-family: "Consolas", monospace;
+        font-size: 13px;
+        cursor: pointer;
+    }
+    .sym-btn:hover {
+        background: #dfe6e9;
+    }
+    .action-row {
+        margin-top: 12px;
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+    }
+    button.main-btn {
+        background: #3498db;
+        color: white;
+        border: none;
+        padding: 10px 18px;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 14px;
+    }
+    button.main-btn:hover {
+        background: #2980b9;
+    }
+    button.secondary-btn {
+        background: #95a5a6;
+    }
+    button.secondary-btn:hover {
+        background: #7f8c8d;
+    }
+    #feedback {
+        margin-top: 10px;
+        padding: 10px;
+        border-radius: 6px;
+        font-weight: bold;
+    }
+    .feedback-correct {
+        background: #d4efdf;
+        color: #196f3d;
+    }
+    .feedback-wrong {
+        background: #fadbd8;
+        color: #922b21;
+    }
+    .feedback-error {
+        background: #fdebd0;
+        color: #9c640c;
+    }
+    #solutionBox {
+        margin-top: 10px;
+        background: #f4ecf7;
+        border-left: 4px solid #8e44ad;
+        padding: 10px;
+        border-radius: 4px;
+        display: none;
+        font-family: "Consolas", monospace;
+    }
+    .result-wrap {
+        overflow-x: auto;
+    }
+</style>
+</head>
+<body>
+
+<h1>SQL Trainer – INNER JOIN üben</h1>
+
+<div class="container">
+
+    <div class="tables-panel">
+        <div id="tablesContainer"></div>
+    </div>
+
+    <div class="query-panel">
+        <div class="box">
+            <h3>Aufgabe</h3>
+            <div id="task">Lade Aufgabe...</div>
+            <div class="result-wrap">
+                <h4>Zielergebnis:</h4>
+                <div id="targetResult"></div>
+            </div>
+        </div>
+
+        <div class="box">
+            <h3>Deine SQL-Abfrage</h3>
+            <textarea id="queryInput" placeholder="SELECT ... FROM ... INNER JOIN ... ON ... WHERE ..."></textarea>
+            <div class="btn-row" id="btnRow"></div>
+            <div class="action-row">
+                <button class="main-btn" onclick="runQuery()">Abfrage ausführen</button>
+                <button class="main-btn secondary-btn" onclick="newTask()">Neue Aufgabe</button>
+                <button class="main-btn secondary-btn" onclick="toggleSolution()">Musterlösung anzeigen</button>
+            </div>
+            <div id="feedback"></div>
+            <div id="solutionBox"></div>
+        </div>
+
+        <div class="box">
+            <h3>Ergebnis deiner Abfrage</h3>
+            <div class="result-wrap">
+                <div id="ownResult"></div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<script>
+
+/* ==========================================================
+   DATENBANK: Onlineshop mit 4 Tabellen
+   ========================================================== */
+
+const DB = {
+    Kunden: {
+        schema: [
+            { name: "KID", type: "int", key: "pk" },
+            { name: "Name", type: "string" },
+            { name: "Stadt", type: "string" }
+        ],
+        rows: [
+            { KID: 1, Name: "Müller", Stadt: "Berlin" },
+            { KID: 2, Name: "Schmidt", Stadt: "Hamburg" },
+            { KID: 3, Name: "Fischer", Stadt: "München" },
+            { KID: 4, Name: "Weber", Stadt: "Köln" },
+            { KID: 5, Name: "Wagner", Stadt: "Frankfurt" },
+            { KID: 6, Name: "Becker", Stadt: "Berlin" },
+            { KID: 7, Name: "Hoffmann", Stadt: "Stuttgart" },
+            { KID: 8, Name: "Schäfer", Stadt: "Leipzig" }
+        ]
+    },
+    Bestellungen: {
+        schema: [
+            { name: "BID", type: "int", key: "pk" },
+            { name: "KID", type: "int", key: "fk" },
+            { name: "Datum", type: "string" }
+        ],
+        rows: [
+            { BID: 100, KID: 1, Datum: "2026-01-05" },
+            { BID: 101, KID: 2, Datum: "2026-01-10" },
+            { BID: 102, KID: 1, Datum: "2026-02-01" },
+            { BID: 103, KID: 3, Datum: "2026-02-14" },
+            { BID: 104, KID: 4, Datum: "2026-03-02" },
+            { BID: 105, KID: 5, Datum: "2026-03-15" },
+            { BID: 106, KID: 2, Datum: "2026-04-01" },
+            { BID: 107, KID: 6, Datum: "2026-04-20" },
+            { BID: 108, KID: 7, Datum: "2026-05-05" },
+            { BID: 109, KID: 3, Datum: "2026-05-18" }
+        ]
+    },
+    Produkte: {
+        schema: [
+            { name: "PID", type: "int", key: "pk" },
+            { name: "Bezeichnung", type: "string" },
+            { name: "Preis", type: "int" }
+        ],
+        rows: [
+            { PID: 1, Bezeichnung: "Laptop", Preis: 899 },
+            { PID: 2, Bezeichnung: "Maus", Preis: 25 },
+            { PID: 3, Bezeichnung: "Tastatur", Preis: 45 },
+            { PID: 4, Bezeichnung: "Monitor", Preis: 199 },
+            { PID: 5, Bezeichnung: "Headset", Preis: 60 },
+            { PID: 6, Bezeichnung: "Webcam", Preis: 35 },
+            { PID: 7, Bezeichnung: "Drucker", Preis: 120 }
+        ]
+    },
+    Bestellpositionen: {
+        schema: [
+            { name: "BPID", type: "int", key: "pk" },
+            { name: "BID", type: "int", key: "fk" },
+            { name: "PID", type: "int", key: "fk" },
+            { name: "Menge", type: "int" }
+        ],
+        rows: [
+            { BPID: 1, BID: 100, PID: 1, Menge: 1 },
+            { BPID: 2, BID: 100, PID: 2, Menge: 2 },
+            { BPID: 3, BID: 101, PID: 3, Menge: 1 },
+            { BPID: 4, BID: 102, PID: 4, Menge: 1 },
+            { BPID: 5, BID: 103, PID: 5, Menge: 2 },
+            { BPID: 6, BID: 104, PID: 1, Menge: 1 },
+            { BPID: 7, BID: 105, PID: 6, Menge: 3 },
+            { BPID: 8, BID: 106, PID: 7, Menge: 1 },
+            { BPID: 9, BID: 107, PID: 2, Menge: 5 },
+            { BPID: 10, BID: 108, PID: 3, Menge: 2 },
+            { BPID: 11, BID: 109, PID: 4, Menge: 1 },
+            { BPID: 12, BID: 100, PID: 5, Menge: 1 }
+        ]
+    }
+};
+
+const SYMBOLS = [
+    "SELECT", "FROM", "INNER JOIN", "ON", "WHERE",
+    "AND", "OR", "NOT", "LIKE",
+    "=", "!=", "<", ">", "<=", ">=",
+    "*", ".", ","
+];
+
+let currentTask = null;
+
+/* ==========================================================
+   TABELLEN RENDERN
+   ========================================================== */
+
+function renderTables() {
+    const container = document.getElementById("tablesContainer");
+    if (!container) return;
+
+    let html = "";
+    for (const tableName in DB) {
+        const table = DB[tableName];
+        html += `<div class="table-box"><h3>${tableName}</h3>`;
+        html += renderDataTable(table.schema, table.rows);
+        html += "</div>";
+    }
+    container.innerHTML = html;
+}
+
+function renderDataTable(schema, rows) {
+    let html = "<table><thead><tr>";
+    schema.forEach(col => {
+        let cls = "";
+        if (col.key === "pk") cls = "pk";
+        else if (col.key === "fk") cls = "fk";
+        const keyLabel = col.key === "pk" ? " (PK)" : (col.key === "fk" ? " (FK)" : "");
+        html += `<th class="${cls}">${col.name}${keyLabel}<small>${col.type}</small></th>`;
+    });
+    html += "</tr></thead><tbody>";
+
+    if (rows.length === 0) {
+        html += `<tr><td colspan="${schema.length}"><em>Keine Datensätze</em></td></tr>`;
+    } else {
+        rows.forEach(row => {
+            html += "<tr>";
+            schema.forEach(col => {
+                html += `<td>${row[col.name]}</td>`;
+            });
+            html += "</tr>";
+        });
+    }
+
+    html += "</tbody></table>";
+    return html;
+}
+
+function renderResultTable(result) {
+    if (!result || !result.columns || result.columns.length === 0) {
+        return "<p><em>Keine Spalten im Ergebnis.</em></p>";
+    }
+    let html = "<table><thead><tr>";
+    result.columns.forEach(col => {
+        html += `<th>${col}</th>`;
+    });
+    html += "</tr></thead><tbody>";
+
+    if (result.rows.length === 0) {
+        html += `<tr><td colspan="${result.columns.length}"><em>Keine Ergebniszeilen</em></td></tr>`;
+    } else {
+        result.rows.forEach(row => {
+            html += "<tr>";
+            result.columns.forEach(col => {
+                html += `<td>${row[col]}</td>`;
+            });
+            html += "</tr>";
+        });
+    }
+
+    html += "</tbody></table>";
+    return html;
+}
+
+/* ==========================================================
+   BUTTONS FÜR SYMBOLE
+   ========================================================== */
+
+function renderButtons() {
+    const btnRow = document.getElementById("btnRow");
+    btnRow.innerHTML = "";
+    SYMBOLS.forEach(sym => {
+        const btn = document.createElement("button");
+        btn.className = "sym-btn";
+        btn.textContent = sym;
+        btn.onclick = () => insertAtCursor(sym);
+        btnRow.appendChild(btn);
+    });
+}
+
+function insertAtCursor(text) {
+    const textarea = document.getElementById("queryInput");
+    const start = textarea.selectionStart;
+    const end = textarea.selectionEnd;
+    const before = textarea.value.substring(0, start);
+    const after = textarea.value.substring(end);
+    textarea.value = before + text + " " + after;
+    const cursorPos = start + text.length + 1;
+    textarea.focus();
+    textarea.setSelectionRange(cursorPos, cursorPos);
+}
+
+/* ==========================================================
+   SQL PARSER (SELECT / FROM / INNER JOIN / ON / WHERE)
+   ========================================================== */
+
+function parseSQL(query) {
+    let q = query.trim().replace(/;\s*$/, "");
+    if (q.length === 0) {
+        throw new Error("Die Abfrage ist leer.");
+    }
+
+    // WHERE abtrennen
+    let wherePart = null;
+    const whereMatch = q.match(/^(.*?)\bWHERE\b(.*)$/is);
+    let mainPart = q;
+    if (whereMatch) {
+        mainPart = whereMatch[1].trim();
+        wherePart = whereMatch[2].trim();
+    }
+
+    // SELECT ... FROM ...
+    const selectMatch = mainPart.match(/^SELECT\s+(.+?)\s+FROM\s+(.+)$/is);
+    if (!selectMatch) {
+        throw new Error("Die Abfrage muss die Form SELECT ... FROM ... haben.");
+    }
+
+    const columnsPart = selectMatch[1].trim();
+    let fromPart = selectMatch[2].trim();
+
+    // FROM-Teil in Basistabelle + JOINs zerlegen
+    const joinRegex = /\bINNER\s+JOIN\b/i;
+    const fromSegments = fromPart.split(joinRegex);
+
+    const baseTableRaw = fromSegments[0].trim();
+    const baseTableName = resolveTableName(baseTableRaw);
+    if (!baseTableName) {
+        throw new Error(`Unbekannte Tabelle "${baseTableRaw}".`);
+    }
+
+    // Aliase-Map: aktueller Tabellenname (so wie geschrieben) -> tatsächlicher Tabellenname
+    const usedTables = [baseTableName];
+
+    // Basiszeilen: jede Zeile bekommt Präfix pro Tabelle
+    let joinedRows = DB[baseTableName].rows.map(row => {
+        return { [baseTableName]: row };
+    });
+
+    // Joins abarbeiten
+    for (let i = 1; i < fromSegments.length; i++) {
+        const seg = fromSegments[i].trim();
+        const onMatch = seg.match(/^(.+?)\s+ON\s+(.+)$/is);
+        if (!onMatch) {
+            throw new Error("Jeder INNER JOIN benötigt eine ON-Bedingung, z.B. INNER JOIN Tabelle ON A.Spalte = B.Spalte");
+        }
+        const joinTableRaw = onMatch[1].trim();
+        const onCondition = onMatch[2].trim();
+
+        const joinTableName = resolveTableName(joinTableRaw);
+        if (!joinTableName) {
+            throw new Error(`Unbekannte Tabelle "${joinTableRaw}" im JOIN.`);
+        }
+
+        const onParts = onCondition.match(/^([a-zA-Z_][a-zA-Z0-9_]*)\.([a-zA-Z_][a-zA-Z0-9_]*)\s*=\s*([a-zA-Z_][a-zA-Z0-9_]*)\.([a-zA-Z_][a-zA-Z0-9_]*)$/);
+        if (!onParts) {
+            throw new Error("Die ON-Bedingung muss die Form Tabelle1.Spalte = Tabelle2.Spalte haben.");
+        }
+
+        const leftTable = resolveTableName(onParts[1]);
+        const leftCol = onParts[2];
+        const rightTable = resolveTableName(onParts[3]);
+        const rightCol = onParts[4];
+
+        if (!leftTable || !rightTable) {
+            throw new Error("In der ON-Bedingung wird eine unbekannte Tabelle verwendet.");
+        }
+
+        const newJoinedRows = [];
+        joinedRows.forEach(leftRow => {
+            DB[joinTableName].rows.forEach(rightRow => {
+                const combined = Object.assign({}, leftRow, { [joinTableName]: rightRow });
+
+                const leftVal = combined[leftTable] ? combined[leftTable][leftCol] : undefined;
+                const rightVal = combined[rightTable] ? combined[rightTable][rightCol] : undefined;
+
+                if (leftVal !== undefined && rightVal !== undefined && leftVal === rightVal) {
+                    newJoinedRows.push(combined);
+                }
+            });
+        });
+
+        joinedRows = newJoinedRows;
+        usedTables.push(joinTableName);
+    }
+
+    // Flache Zeilen erzeugen für WHERE und SELECT (mit Kollisionsprüfung)
+    const flatRows = joinedRows.map(combined => flattenRow(combined, usedTables));
+
+    // WHERE anwenden
+    let filteredRows = flatRows;
+    if (wherePart) {
+        filteredRows = flatRows.filter(row => evaluateWhere(wherePart, row, usedTables));
+    }
+
+    // Spalten auflösen
+    let selectedColumns;
+    if (columnsPart.trim() === "*") {
+        selectedColumns = getAllColumnNames(usedTables, flatRows[0]);
+    } else {
+        selectedColumns = columnsPart.split(",").map(c => c.trim());
+        selectedColumns = selectedColumns.map(col => resolveColumnName(col, usedTables));
+    }
+
+    const resultRows = filteredRows.map(row => {
+        const newRow = {};
+        selectedColumns.forEach(col => {
+            newRow[col.label] = row[col.key];
+        });
+        return newRow;
+    });
+
+    return {
+        columns: selectedColumns.map(c => c.label),
+        rows: resultRows,
+        tables: usedTables
+    };
+}
+
+function resolveTableName(name) {
+    const clean = name.trim();
+    const found = Object.keys(DB).find(t => t.toLowerCase() === clean.toLowerCase());
+    return found || null;
+}
+
+// Erzeugt ein flaches Objekt aus den kombinierten Tabellenzeilen,
+// Schlüssel im Format "Tabelle.Spalte" um Kollisionen zu vermeiden
+function flattenRow(combined, usedTables) {
+    const flat = {};
+    usedTables.forEach(t => {
+        const row = combined[t];
+        if (!row) return;
+        DB[t].schema.forEach(col => {
+            flat[`${t}.${col.name}`] = row[col.name];
+        });
+    });
+    return flat;
+}
+
+function getAllColumnNames(usedTables, sampleFlatRow) {
+    const cols = [];
+    usedTables.forEach(t => {
+        DB[t].schema.forEach(col => {
+            cols.push({ key: `${t}.${col.name}`, label: col.name, table: t });
+        });
+    });
+    return cols;
+}
+
+// Löst "Spalte" oder "Tabelle.Spalte" zu { key, label } auf,
+// wirft Fehler bei Mehrdeutigkeit oder Unbekanntheit
+function resolveColumnName(colExpr, usedTables) {
+    if (colExpr.includes(".")) {
+        const [tablePart, colPart] = colExpr.split(".").map(s => s.trim());
+        const tableName = resolveTableName(tablePart);
+        if (!tableName || !usedTables.includes(tableName)) {
+            throw new Error(`Unbekannte oder nicht verwendete Tabelle "${tablePart}" in "${colExpr}".`);
+        }
+        const colDef = DB[tableName].schema.find(c => c.name.toLowerCase() === colPart.toLowerCase());
+        if (!colDef) {
+            throw new Error(`Unbekannte Spalte "${colPart}" in Tabelle "${tableName}".`);
+        }
+        return { key: `${tableName}.${colDef.name}`, label: colDef.name };
+    } else {
+        const matches = [];
+        usedTables.forEach(t => {
+            const colDef = DB[t].schema.find(c => c.name.toLowerCase() === colExpr.toLowerCase());
+            if (colDef) {
+                matches.push({ key: `${t}.${colDef.name}`, label: colDef.name, table: t });
+            }
+        });
+        if (matches.length === 0) {
+            throw new Error(`Unbekannte Spalte "${colExpr}".`);
+        }
+        if (matches.length > 1) {
+            throw new Error(`Die Spalte "${colExpr}" ist mehrdeutig (kommt in mehreren Tabellen vor: ${matches.map(m => m.table).join(", ")}). Bitte mit Tabelle.Spalte angeben.`);
+        }
+        return { key: matches[0].key, label: matches[0].label };
+    }
+}
+
+/* ==========================================================
+   WHERE-AUSWERTUNG
+   ========================================================== */
+
+function evaluateWhere(whereStr, flatRow, usedTables) {
+    // Tokenize grob nach AND/OR, unterstützt einfache Klammer-lose Ausdrücke
+    // Wir ersetzen zuerst Bedingungen durch true/false, dann werten wir das Boolesche Ergebnis aus
+
+    // Zuerst NOT am Anfang einzelner Bedingungen erkennen wir in evaluateCondition
+    // Split nach OR (niedrigste Priorität), dann AND
+    const orParts = splitTopLevel(whereStr, /\bOR\b/i);
+    return orParts.some(andGroup => {
+        const andParts = splitTopLevel(andGroup, /\bAND\b/i);
+        return andParts.every(cond => evaluateSingleCondition(cond.trim(), flatRow, usedTables));
+    });
+}
+
+function splitTopLevel(str, regex) {
+    // Einfache Version ohne Klammerunterstützung
+    return str.split(regex).map(s => s.trim()).filter(s => s.length > 0);
+}
+
+function evaluateSingleCondition(cond, flatRow, usedTables) {
+    let negate = false;
+    let c = cond.trim();
+    if (/^NOT\s+/i.test(c)) {
+        negate = true;
+        c = c.replace(/^NOT\s+/i, "").trim();
+    }
+
+    let result;
+
+    const likeMatch = c.match(/^(.+?)\s+LIKE\s+'(.*)'$/i);
+    const opMatch = c.match(/^(.+?)\s*(!=|>=|<=|=|>|<)\s*(.+)$/);
+
+    if (likeMatch) {
+        const colExpr = likeMatch[1].trim();
+        const pattern = likeMatch[2];
+        const colInfo = resolveColumnName(colExpr, usedTables);
+        const value = flatRow[colInfo.key];
+        const regexPattern = "^" + pattern.replace(/%/g, ".*").replace(/_/g, ".") + "$";
+        result = new RegExp(regexPattern, "i").test(String(value));
+    } else if (opMatch) {
+        const colExpr = opMatch[1].trim();
+        const operator = opMatch[2];
+        let rawValue = opMatch[3].trim();
+
+        const colInfo = resolveColumnName(colExpr, usedTables);
+        let value = flatRow[colInfo.key];
+
+        let compareValue;
+        if (/^'.*'$/.test(rawValue)) {
+            compareValue = rawValue.slice(1, -1);
+        } else if (!isNaN(Number(rawValue))) {
+            compareValue = Number(rawValue);
+            value = Number(value);
+        } else {
+            compareValue = rawValue;
+        }
+
+        switch (operator) {
+            case "=": result = value === compareValue; break;
+            case "!=": result = value !== compareValue; break;
+            case ">": result = value > compareValue; break;
+            case "<": result = value < compareValue; break;
+            case ">=": result = value >= compareValue; break;
+            case "<=": result = value <= compareValue; break;
+            default: throw new Error(`Unbekannter Operator "${operator}".`);
+        }
+    } else {
+        throw new Error(`Die Bedingung "${cond}" konnte nicht ausgewertet werden.`);
+    }
+
+    return negate ? !result : result;
+}
+
+/* ==========================================================
+   ERGEBNISVERGLEICH
+   ========================================================== */
+
+function resultsAreEqual(resultA, resultB) {
+    if (!resultA || !resultB) return false;
+    const colsA = [...resultA.columns].sort();
+    const colsB = [...resultB.columns].sort();
+    if (colsA.length !== colsB.length) return false;
+    for (let i = 0; i < colsA.length; i++) {
+        if (colsA[i].toLowerCase() !== colsB[i].toLowerCase()) return false;
+    }
+
+    if (resultA.rows.length !== resultB.rows.length) return false;
+
+    const normalize = (rows) => rows.map(row => {
+        const sortedRow = {};
+        Object.keys(row).sort().forEach(k => {
+            sortedRow[k.toLowerCase()] = row[k];
+        });
+        return JSON.stringify(sortedRow);
+    }).sort();
+
+    const normA = normalize(resultA.rows);
+    const normB = normalize(resultB.rows);
+
+    for (let i = 0; i < normA.length; i++) {
+        if (normA[i] !== normB[i]) return false;
+    }
+    return true;
+}
+
+/* ==========================================================
+   AUFGABENGENERIERUNG
+   ========================================================== */
+
+const TASK_TEMPLATES = [
+    {
+        desc: "Zeige die Namen aller Kunden und das Datum ihrer Bestellungen (Kunden + Bestellungen verknüpfen).",
+        query: "SELECT Kunden.Name, Bestellungen.Datum FROM Kunden INNER JOIN Bestellungen ON Kunden.KID = Bestellungen.KID"
+    },
+    {
+        desc: "Zeige alle Bestellungen (BID, Datum) zusammen mit dem Namen des jeweiligen Kunden.",
+        query: "SELECT Bestellungen.BID, Bestellungen.Datum, Kunden.Name FROM Bestellungen INNER JOIN Kunden ON Bestellungen.KID = Kunden.KID"
+    },
+    {
+        desc: "Zeige zu jeder Bestellposition die Bezeichnung des bestellten Produkts (Bestellpositionen + Produkte verknüpfen).",
+        query: "SELECT Bestellpositionen.BPID, Produkte.Bezeichnung FROM Bestellpositionen INNER JOIN Produkte ON Bestellpositionen.PID = Produkte.PID"
+    },
+    {
+        desc: "Zeige zu jeder Bestellposition die Menge und den Preis des Produkts.",
+        query: "SELECT Bestellpositionen.Menge, Produkte.Preis FROM Bestellpositionen INNER JOIN Produkte ON Bestellpositionen.PID = Produkte.PID"
+    },
+    {
+        desc: "Zeige den Namen aller Kunden aus Berlin zusammen mit dem Datum ihrer Bestellungen.",
+        query: "SELECT Kunden.Name, Bestellungen.Datum FROM Kunden INNER JOIN Bestellungen ON Kunden.KID = Bestellungen.KID WHERE Kunden.Stadt = 'Berlin'"
+    },
+    {
+        desc: "Zeige alle Bestellungen mit Kundennamen, bei denen das Datum nach dem 01.03.2026 liegt.",
+        query: "SELECT Bestellungen.BID, Kunden.Name, Bestellungen.Datum FROM Bestellungen INNER JOIN Kunden ON Bestellungen.KID = Kunden.KID WHERE Bestellungen.Datum > '2026-03-01'"
+    },
+    {
+        desc: "Zeige zu jeder Bestellposition die Produktbezeichnung, aber nur für Produkte mit einem Preis über 50.",
+        query: "SELECT Bestellpositionen.BPID, Produkte.Bezeichnung, Produkte.Preis FROM Bestellpositionen INNER JOIN Produkte ON Bestellpositionen.PID = Produkte.PID WHERE Produkte.Preis > 50"
+    },
+    {
+        desc: "Verknüpfe Kunden, Bestellungen und Bestellpositionen: Zeige Kundenname, Bestelldatum und Menge.",
+        query: "SELECT Kunden.Name, Bestellungen.Datum, Bestellpositionen.Menge FROM Kunden INNER JOIN Bestellungen ON Kunden.KID = Bestellungen.KID INNER JOIN Bestellpositionen ON Bestellungen.BID = Bestellpositionen.BID"
+    },
+    {
+        desc: "Verknüpfe alle vier Tabellen: Zeige Kundenname, Produktbezeichnung und Menge.",
+        query: "SELECT Kunden.Name, Produkte.Bezeichnung, Bestellpositionen.Menge FROM Kunden INNER JOIN Bestellungen ON Kunden.KID = Bestellungen.KID INNER JOIN Bestellpositionen ON Bestellungen.BID = Bestellpositionen.BID INNER JOIN Produkte ON Bestellpositionen.PID = Produkte.PID"
+    },
+    {
+        desc: "Zeige Kundenname und Produktbezeichnung für alle Bestellungen mit einer Menge größer als 1.",
+        query: "SELECT Kunden.Name, Produkte.Bezeichnung, Bestellpositionen.Menge FROM Kunden INNER JOIN Bestellungen ON Kunden.KID = Bestellungen.KID INNER JOIN Bestellpositionen ON Bestellungen.BID = Bestellpositionen.BID INNER JOIN Produkte ON Bestellpositionen.PID = Produkte.PID WHERE Bestellpositionen.Menge > 1"
+    },
+    {
+        desc: "Zeige alle Kunden (Name, Stadt) deren Name mit 'S' beginnt.",
+        query: "SELECT Name, Stadt FROM Kunden WHERE Name LIKE 'S%'"
+    },
+    {
+        desc: "Zeige alle Produkte mit einem Preis unter 100.",
+        query: "SELECT Bezeichnung, Preis FROM Produkte WHERE Preis < 100"
+    },
+    {
+        desc: "Zeige zu jeder Bestellung den Kundennamen, aber nur für Kunden, die NICHT aus Berlin kommen.",
+        query: "SELECT Bestellungen.BID, Kunden.Name, Kunden.Stadt FROM Bestellungen INNER JOIN Kunden ON Bestellungen.KID = Kunden.KID WHERE NOT Kunden.Stadt = 'Berlin'"
+    },
+    {
+        desc: "Zeige alle Bestellpositionen mit Produktbezeichnung für das Produkt 'Maus' oder 'Tastatur'.",
+        query: "SELECT Bestellpositionen.BPID, Produkte.Bezeichnung, Bestellpositionen.Menge FROM Bestellpositionen INNER JOIN Produkte ON Bestellpositionen.PID = Produkte.PID WHERE Produkte.Bezeichnung = 'Maus' OR Produkte.Bezeichnung = 'Tastatur'"
+    }
+];
+
+function newTask() {
+    const template = TASK_TEMPLATES[Math.floor(Math.random() * TASK_TEMPLATES.length)];
+
+    let targetResult;
+    try {
+        targetResult = parseSQL(template.query);
+    } catch (e) {
+        document.getElementById("task").textContent = "Fehler beim Laden der Aufgabe: " + e.message;
+        return;
+    }
+
+    currentTask = {
+        description: template.desc,
+        solutionQuery: template.query,
+        targetResult: targetResult
+    };
+
+    document.getElementById("task").textContent = currentTask.description;
+    document.getElementById("targetResult").innerHTML = renderResultTable(targetResult);
+    document.getElementById("queryInput").value = "";
+    document.getElementById("feedback").className = "";
+    document.getElementById("feedback").textContent = "";
+    document.getElementById("ownResult").innerHTML = "";
+    document.getElementById("solutionBox").style.display = "none";
+}
+
+/* ==========================================================
+   ABFRAGE AUSFÜHREN UND BEWERTEN
+   ========================================================== */
+
+function runQuery() {
+    const queryText = document.getElementById("queryInput").value;
+    const feedbackEl = document.getElementById("feedback");
+    const ownResultEl = document.getElementById("ownResult");
+
+    let result;
+    try {
+        result = parseSQL(queryText);
+    } catch (e) {
+        feedbackEl.className = "feedback-error";
+        feedbackEl.textContent = "⚠ Fehler in deiner Abfrage: " + e.message;
+        ownResultEl.innerHTML = "<p><em>Kein Ergebnis aufgrund eines Fehlers.</em></p>";
+        return;
+    }
+
+    ownResultEl.innerHTML = renderResultTable(result);
+
+    if (!currentTask) {
+        feedbackEl.className = "";
+        feedbackEl.textContent = "";
+        return;
+    }
+
+    const isCorrect = resultsAreEqual(result, currentTask.targetResult);
+
+    if (isCorrect) {
+        feedbackEl.className = "feedback-correct";
+        feedbackEl.textContent = "✔ Richtig! Dein Ergebnis stimmt mit dem Zielergebnis überein.";
+    } else {
+        feedbackEl.className = "feedback-wrong";
+        feedbackEl.textContent = "✘ Leider nicht ganz richtig. Vergleiche dein Ergebnis oben mit dem Zielergebnis.";
+    }
+}
+
+/* ==========================================================
+   MUSTERLÖSUNG ANZEIGEN
+   ========================================================== */
+
+function toggleSolution() {
+    const box = document.getElementById("solutionBox");
+    if (!currentTask) return;
+
+    if (box.style.display === "none" || box.style.display === "") {
+        box.style.display = "block";
+        box.innerHTML = "<strong>Musterlösung:</strong><br>" + currentTask.solutionQuery;
+    } else {
+        box.style.display = "none";
+    }
+}
+
+/* ==========================================================
+   INITIALISIERUNG
+   ========================================================== */
+
+renderTables();
+renderButtons();
+newTask();
+
+</script>
+
+</body>
+</html>
