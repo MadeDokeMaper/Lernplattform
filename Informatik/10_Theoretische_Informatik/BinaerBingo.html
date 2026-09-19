@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<title>Binär-Bingo Karten Generator</title>
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        background-color: #f0f4f8;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 30px;
+    }
+
+    h1 {
+        color: #2c3e50;
+        margin-bottom: 5px;
+    }
+
+    .subtitle {
+        color: #7f8c8d;
+        margin-bottom: 25px;
+        text-align: center;
+    }
+
+    .controls {
+        display: flex;
+        gap: 15px;
+        margin-bottom: 30px;
+        flex-wrap: wrap;
+        justify-content: center;
+        align-items: center;
+    }
+
+    button.action-btn {
+        padding: 12px 24px;
+        font-size: 1em;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        color: white;
+        transition: background-color 0.2s, transform 0.1s;
+    }
+
+    button.action-btn:active {
+        transform: scale(0.96);
+    }
+
+    #newCardBtn {
+        background-color: #27ae60;
+    }
+    #newCardBtn:hover {
+        background-color: #219150;
+    }
+
+    #printBtn {
+        background-color: #2980b9;
+    }
+    #printBtn:hover {
+        background-color: #21618c;
+    }
+
+    .settings {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        background-color: white;
+        padding: 8px 16px;
+        border-radius: 8px;
+        box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+    }
+
+    .settings label {
+        font-size: 0.95em;
+        color: #34495e;
+    }
+
+    .settings input {
+        width: 60px;
+        padding: 4px;
+        border: 1px solid #bdc3c7;
+        border-radius: 4px;
+    }
+
+    .bingo-card {
+        background-color: white;
+        border-radius: 14px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+        padding: 25px;
+        max-width: 480px;
+        width: 100%;
+    }
+
+    .card-title {
+        text-align: center;
+        font-size: 1.8em;
+        font-weight: bold;
+        color: #2c3e50;
+        margin-bottom: 15px;
+        letter-spacing: 4px;
+    }
+
+    .bingo-grid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 8px;
+    }
+
+    .bingo-cell {
+        aspect-ratio: 1 / 1;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.6em;
+        font-weight: bold;
+        color: #2c3e50;
+        background-color: #ecf0f1;
+        border: 2px solid #bdc3c7;
+        border-radius: 10px;
+        cursor: pointer;
+        user-select: none;
+        transition: background-color 0.2s, transform 0.1s;
+    }
+
+    .bingo-cell:hover {
+        background-color: #dfe6e9;
+    }
+
+    .bingo-cell.marked {
+        background-color: #e67e22;
+        color: white;
+        border-color: #ca6510;
+        transform: scale(0.95);
+    }
+
+    .bingo-cell.free {
+        background-color: #3498db;
+        color: white;
+        font-size: 1.1em;
+        border-color: #2471a3;
+    }
+
+    .footer-note {
+        text-align: center;
+        margin-top: 20px;
+        color: #95a5a6;
+        font-size: 0.9em;
+    }
+
+    @media print {
+        .controls, .footer-note {
+            display: none;
+        }
+        body {
+            padding: 0;
+        }
+        .bingo-card {
+            box-shadow: none;
+            border: 2px solid #333;
+        }
+    }
+</style>
+</head>
+<body>
+
+<h1>🎯 Binär-Bingo Kartengenerator</h1>
+<p class="subtitle">Zufällige 4×4-Bingo-Karten mit Dezimalzahlen von 1 bis 255</p>
+
+<div class="controls">
+    <button class="action-btn" id="newCardBtn" onclick="generateCard()">🔄 Neue Karte generieren</button>
+    <button class="action-btn" id="printBtn" onclick="window.print()">🖨️ Drucken</button>
+    <div class="settings">
+        <label for="freeCenter">Freies Feld in der Mitte:</label>
+        <input type="checkbox" id="freeCenter" checked onchange="generateCard()">
+    </div>
+</div>
+
+<div class="bingo-card">
+    <div class="card-title">BINGO</div>
+    <div class="bingo-grid" id="bingoGrid">
+        <!-- Zellen werden per JavaScript eingefügt -->
+    </div>
+</div>
+
+<p class="footer-note">Klicke auf ein Feld, um es zu markieren.</p>
+
+<script>
+    const MIN_NUMBER = 1;
+    const MAX_NUMBER = 255;
+    const GRID_SIZE = 4;
+    const TOTAL_CELLS = GRID_SIZE * GRID_SIZE;
+
+    function getRandomNumbers(count, min, max) {
+        const numbers = new Set();
+        while (numbers.size < count) {
+            const num = Math.floor(Math.random() * (max - min + 1)) + min;
+            numbers.add(num);
+        }
+        return Array.from(numbers);
+    }
+
+    function generateCard() {
+        const grid = document.getElementById('bingoGrid');
+        grid.innerHTML = '';
+
+        const useFreeCenter = document.getElementById('freeCenter').checked;
+        const centerIndex = Math.floor(TOTAL_CELLS / 2) - 1; // z.B. Index 9 bei 16 Feldern (Reihe 3)
+
+        // Anzahl benötigter Zufallszahlen bestimmen
+        const numbersNeeded = useFreeCenter ? TOTAL_CELLS - 1 : TOTAL_CELLS;
+        const randomNumbers = getRandomNumbers(numbersNeeded, MIN_NUMBER, MAX_NUMBER);
+
+        let numberIndex = 0;
+
+        for (let i = 0; i < TOTAL_CELLS; i++) {
+            const cell = document.createElement('div');
+            cell.className = 'bingo-cell';
+
+            if (useFreeCenter && isFreeField(i)) {
+                cell.classList.add('free');
+                cell.classList.add('marked');
+                cell.textContent = 'FREI';
+            } else {
+                cell.textContent = randomNumbers[numberIndex];
+                numberIndex++;
+                cell.addEventListener('click', () => {
+                    cell.classList.toggle('marked');
+                });
+            }
+
+            grid.appendChild(cell);
+        }
+    }
+
+    // Bestimmt, welches Feld bei geradem Raster als "frei" markiert wird
+    // Bei 4x4 gibt es kein exaktes Zentrum, daher wählen wir Feld Index 5, 6, 9 oder 10 (mittlere 4 Felder)
+    // Wir nehmen hier eines der mittleren Felder, z.B. Index 5 (Reihe 2, Spalte 2)
+    function isFreeField(index) {
+        const freeIndex = 5; // Reihe 2, Spalte 2 (0-basiert)
+        return index === freeIndex;
+    }
+
+    // Erste Karte beim Laden generieren
+    generateCard();
+</script>
+
+</body>
+</html>
