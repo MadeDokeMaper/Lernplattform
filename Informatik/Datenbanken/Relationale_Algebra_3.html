@@ -342,9 +342,9 @@ function generateTask() {
                 data: Schueler.filter(s => s.Alter > 16)
             },
             {
-                text: "Gib alle Kurse aus, die von 'Fr. Schmidt' unterrichtet werden.",
-                solution: "σ Lehrer = 'Fr. Schmidt' (Kurse)",
-                data: Kurse.filter(k => k.Lehrer === "Fr. Schmidt")
+                text: "Gib alle Kurse aus, die von 'Fr_Schmidt' unterrichtet werden.",
+                solution: "σ Lehrer = 'Fr_Schmidt' (Kurse)",
+                data: Kurse.filter(k => k.Lehrer === "Fr_Schmidt")
             }
         ];
         return randomItem(options);
