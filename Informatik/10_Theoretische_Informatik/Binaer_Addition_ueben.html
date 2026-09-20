@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Binärzahlen addieren</title>
+
+  <style>
+    :root {
+      --blau: #2563eb;
+      --blau-dunkel: #1d4ed8;
+      --gruen: #15803d;
+      --rot: #b91c1c;
+      --hintergrund: #eff6ff;
+      --karte: #ffffff;
+      --text: #1e293b;
+      --grau: #64748b;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+      font-family: Arial, Helvetica, sans-serif;
+      color: var(--text);
+      background: linear-gradient(135deg, #dbeafe, #f8fafc);
+    }
+
+    .container {
+      width: 100%;
+      max-width: 650px;
+      background: var(--karte);
+      border-radius: 18px;
+      padding: 30px;
+      box-shadow: 0 10px 30px rgba(15, 23, 42, 0.15);
+    }
+
+    h1 {
+      margin-top: 0;
+      text-align: center;
+      color: var(--blau-dunkel);
+    }
+
+    .beschreibung {
+      text-align: center;
+      color: var(--grau);
+      margin-bottom: 25px;
+    }
+
+    .einstellungen {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 25px;
+      flex-wrap: wrap;
+    }
+
+    select,
+    input {
+      font: inherit;
+      border: 2px solid #cbd5e1;
+      border-radius: 8px;
+      padding: 10px;
+    }
+
+    select:focus,
+    input:focus {
+      outline: none;
+      border-color: var(--blau);
+    }
+
+    .aufgabe {
+      margin: 25px auto;
+      width: 100%;
+      max-width: 500px;
+      padding: 25px;
+      border-radius: 14px;
+      background: #f8fafc;
+      border: 2px solid #dbeafe;
+      font-family: "Courier New", monospace;
+      font-size: clamp(1.7rem, 7vw, 3rem);
+      font-weight: bold;
+      text-align: right;
+      line-height: 1.4;
+    }
+
+    .aufgabe .operator {
+      display: inline-block;
+      width: 45px;
+      text-align: left;
+    }
+
+    .trennlinie {
+      border-top: 3px solid var(--text);
+      margin: 8px 0 15px;
+    }
+
+    .antwort-bereich {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin: 20px 0;
+    }
+
+    #antwort {
+      width: 220px;
+      font-family: "Courier New", monospace;
+      font-size: 1.3rem;
+      text-align: center;
+    }
+
+    button {
+      border: none;
+      border-radius: 8px;
+      padding: 11px 18px;
+      font: inherit;
+      font-weight: bold;
+      color: white;
+      background: var(--blau);
+      cursor: pointer;
+      transition: background 0.2s, transform 0.1s;
+    }
+
+    button:hover {
+      background: var(--blau-dunkel);
+    }
+
+    button:active {
+      transform: scale(0.97);
+    }
+
+    button.zweitbutton {
+      background: #64748b;
+    }
+
+    button.zweitbutton:hover {
+      background: #475569;
+    }
+
+    #meldung {
+      min-height: 30px;
+      text-align: center;
+      font-size: 1.1rem;
+      font-weight: bold;
+      margin: 15px 0;
+    }
+
+    .richtig {
+      color: var(--gruen);
+    }
+
+    .falsch {
+      color: var(--rot);
+    }
+
+    .statistik {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      margin-top: 25px;
+    }
+
+    .statistik-box {
+      padding: 15px 8px;
+      text-align: center;
+      background: #f1f5f9;
+      border-radius: 10px;
+    }
+
+    .statistik-box strong {
+      display: block;
+      font-size: 1.5rem;
+      color: var(--blau-dunkel);
+    }
+
+    .hinweis {
+      margin-top: 20px;
+      padding: 12px;
+      border-radius: 8px;
+      background: #fefce8;
+      color: #713f12;
+      font-size: 0.9rem;
+      text-align: center;
+    }
+
+    @media (max-width: 500px) {
+      .container {
+        padding: 20px;
+      }
+
+      .statistik {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <main class="container">
+    <h1>Binärzahlen addieren</h1>
+
+    <p class="beschreibung">
+      Berechne die Summe der beiden Binärzahlen und trage dein Ergebnis ein.
+    </p>
+
+    <div class="einstellungen">
+      <label for="bits">Schwierigkeitsgrad:</label>
+
+      <select id="bits">
+        <option value="3">Leicht – bis zu 3 Stellen</option>
+        <option value="4" selected>Mittel – bis zu 4 Stellen</option>
+        <option value="6">Schwer – bis zu 6 Stellen</option>
+        <option value="8">Sehr schwer – bis zu 8 Stellen</option>
+      </select>
+    </div>
+
+    <section class="aufgabe" aria-label="Aktuelle Rechenaufgabe">
+      <div>
+        <span class="operator">&nbsp;</span>
+        <span id="zahl1">0000</span>
+      </div>
+
+      <div class="zweite-zahl">
+  <span class="operator">+</span>
+  <span id="zahl2">0000</span>
+	</div>
+
+      <div class="trennlinie"></div>
+
+      <div>
+        <span class="operator">&nbsp;</span>
+        <span>?</span>
+      </div>
+    </section>
+
+    <div class="antwort-bereich">
+      <input
+        id="antwort"
+        type="text"
+        inputmode="numeric"
+        maxlength="20"
+        placeholder="z. B. 10101"
+        aria-label="Deine Antwort in Binärschreibweise"
+      >
+
+      <button id="pruefenButton">Prüfen</button>
+      <button id="neueAufgabeButton" class="zweitbutton">
+        Neue Aufgabe
+      </button>
+    </div>
+
+    <div id="meldung" role="status"></div>
+
+    <div class="statistik">
+      <div class="statistik-box">
+        <strong id="richtigAnzeige">0</strong>
+        Richtig
+      </div>
+
+      <div class="statistik-box">
+        <strong id="falschAnzeige">0</strong>
+        Falsch
+      </div>
+
+      <div class="statistik-box">
+        <strong id="quoteAnzeige">0 %</strong>
+        Erfolgsquote
+      </div>
+    </div>
+
+    <div class="hinweis">
+      Hinweis: Verwende nur die Ziffern <strong>0</strong> und <strong>1</strong>.
+    </div>
+  </main>
+
+  <script>
+    let zahl1;
+    let zahl2;
+    let richtigeAntwort;
+
+    let richtig = 0;
+    let falsch = 0;
+
+    const zahl1Anzeige = document.getElementById("zahl1");
+    const zahl2Anzeige = document.getElementById("zahl2");
+    const antwortFeld = document.getElementById("antwort");
+    const meldung = document.getElementById("meldung");
+
+    const richtigAnzeige = document.getElementById("richtigAnzeige");
+    const falschAnzeige = document.getElementById("falschAnzeige");
+    const quoteAnzeige = document.getElementById("quoteAnzeige");
+
+    const bitsAuswahl = document.getElementById("bits");
+    const pruefenButton = document.getElementById("pruefenButton");
+    const neueAufgabeButton = document.getElementById("neueAufgabeButton");
+
+    function zufallszahl(max) {
+      return Math.floor(Math.random() * (max + 1));
+    }
+
+    function binaerDarstellung(zahl, stellen) {
+      return zahl.toString(2).padStart(stellen, "0");
+    }
+
+    function neueAufgabe() {
+      const stellen = Number(bitsAuswahl.value);
+      const maximalwert = Math.pow(2, stellen) - 1;
+
+      zahl1 = zufallszahl(maximalwert);
+      zahl2 = zufallszahl(maximalwert);
+
+      richtigeAntwort = (zahl1 + zahl2).toString(2);
+
+      zahl1Anzeige.textContent = binaerDarstellung(zahl1, stellen);
+      zahl2Anzeige.textContent = binaerDarstellung(zahl2, stellen);
+
+      antwortFeld.value = "";
+      antwortFeld.disabled = false;
+      pruefenButton.disabled = false;
+      meldung.textContent = "";
+      meldung.className = "";
+
+      antwortFeld.focus();
+    }
+
+    function statistikAktualisieren() {
+      const versuche = richtig + falsch;
+      const quote = versuche === 0
+        ? 0
+        : Math.round((richtig / versuche) * 100);
+
+      richtigAnzeige.textContent = richtig;
+      falschAnzeige.textContent = falsch;
+      quoteAnzeige.textContent = quote + " %";
+    }
+
+    function antwortPruefen() {
+      const eingabe = antwortFeld.value.trim();
+
+      if (eingabe === "") {
+        meldung.textContent = "Bitte gib zuerst eine Antwort ein.";
+        meldung.className = "falsch";
+        return;
+      }
+
+      if (!/^[01]+$/.test(eingabe)) {
+        meldung.textContent =
+          "Ungültige Eingabe. Verwende ausschließlich 0 und 1.";
+        meldung.className = "falsch";
+        return;
+      }
+
+      const eingegebeneAntwort = eingabe.replace(/^0+(?=1)/, "");
+      const korrekteAntwort = richtigeAntwort.replace(/^0+(?=1)/, "");
+
+      if (eingegebeneAntwort === korrekteAntwort) {
+        richtig++;
+
+        meldung.textContent =
+          "Richtig! Sehr gut gerechnet.";
+        meldung.className = "richtig";
+
+        antwortFeld.disabled = true;
+        pruefenButton.disabled = true;
+      } else {
+        falsch++;
+
+        meldung.innerHTML =
+          "Leider noch nicht richtig. " +
+          "Die korrekte Lösung wäre <strong>" +
+          richtigeAntwort +
+          "</strong>.";
+
+        meldung.className = "falsch";
+      }
+
+      statistikAktualisieren();
+    }
+
+    pruefenButton.addEventListener("click", antwortPruefen);
+    neueAufgabeButton.addEventListener("click", neueAufgabe);
+
+    bitsAuswahl.addEventListener("change", neueAufgabe);
+
+    antwortFeld.addEventListener("keydown", function(event) {
+      if (event.key === "Enter") {
+        antwortPruefen();
+      }
+    });
+
+    neueAufgabe();
+  </script>
+</body>
+</html>
