@@ -1,0 +1,639 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<title>Pythagoras-Duell - Klasse 9</title>
+<style>
+    * {
+        box-sizing: border-box;
+    }
+    body {
+        font-family: 'Segoe UI', Arial, sans-serif;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        margin: 0;
+        padding: 20px;
+        min-height: 100vh;
+    }
+    h1 {
+        text-align: center;
+        color: white;
+        text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        margin-bottom: 10px;
+    }
+    .container {
+        display: flex;
+        gap: 20px;
+        max-width: 1300px;
+        margin: 0 auto;
+        align-items: flex-start;
+    }
+    .team-box {
+        flex: 1;
+        background: white;
+        border-radius: 15px;
+        padding: 25px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+    }
+    .team-a {
+        border-top: 8px solid #ff6b6b;
+    }
+    .team-b {
+        border-top: 8px solid #4ecdc4;
+    }
+    .team-title {
+        font-size: 28px;
+        text-align: center;
+        margin-bottom: 15px;
+        font-weight: bold;
+    }
+    .team-a .team-title { color: #ff6b6b; }
+    .team-b .team-title { color: #4ecdc4; }
+
+    .wins-counter {
+        text-align: center;
+        font-size: 18px;
+        margin-bottom: 10px;
+        color: #333;
+    }
+    .win-dots {
+        display: flex;
+        justify-content: center;
+        gap: 8px;
+        margin-bottom: 15px;
+    }
+    .dot {
+        width: 20px;
+        height: 20px;
+        border-radius: 50%;
+        background: #ddd;
+        border: 2px solid #999;
+    }
+    .dot.filled-a { background: #ff6b6b; border-color: #ff6b6b; }
+    .dot.filled-b { background: #4ecdc4; border-color: #4ecdc4; }
+
+    .task-box {
+        background: #f7f7f7;
+        border-radius: 10px;
+        padding: 15px;
+        margin: 10px 0;
+        min-height: 130px;
+    }
+    .task-text {
+        font-size: 18px;
+        line-height: 1.5;
+        color: #333;
+        margin-bottom: 10px;
+        white-space: pre-line;
+    }
+    .values {
+        font-size: 20px;
+        font-weight: bold;
+        color: #2c3e50;
+        text-align: center;
+        margin: 10px 0;
+    }
+    .unknown-marker {
+        color: #e74c3c;
+        font-size: 24px;
+    }
+
+    /* Eingabefeld + Zahlenblock */
+    .input-area {
+        margin-top: 15px;
+    }
+    .answer-display {
+        width: 100%;
+        padding: 14px;
+        font-size: 26px;
+        text-align: center;
+        border: 3px solid #ccc;
+        border-radius: 8px;
+        margin-bottom: 10px;
+        background: #fafafa;
+        min-height: 25px;
+        letter-spacing: 2px;
+        font-weight: bold;
+        color: #2c3e50;
+    }
+    .answer-display.correct-border {
+        border-color: #27ae60;
+        background: #d4edda;
+    }
+    .answer-display.wrong-border {
+        border-color: #e74c3c;
+        background: #f8d7da;
+    }
+
+    .keypad {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 8px;
+    }
+    .keypad button {
+        padding: 15px;
+        font-size: 20px;
+        font-weight: bold;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        background: #ecf0f1;
+        color: #2c3e50;
+        transition: transform 0.1s, background 0.2s;
+    }
+    .keypad button:hover {
+        background: #dfe6e9;
+    }
+    .keypad button:active {
+        transform: scale(0.93);
+    }
+    .team-a .keypad button.key-action {
+        background: #ff6b6b;
+        color: white;
+    }
+    .team-a .keypad button.key-action:hover {
+        background: #ee5a5a;
+    }
+    .team-b .keypad button.key-action {
+        background: #4ecdc4;
+        color: white;
+    }
+    .team-b .keypad button.key-action:hover {
+        background: #3dbdb5;
+    }
+    .key-clear {
+        background: #f39c12 !important;
+        color: white !important;
+    }
+    .key-clear:hover {
+        background: #e08e0b !important;
+    }
+    .key-back {
+        background: #95a5a6 !important;
+        color: white !important;
+    }
+    .key-back:hover {
+        background: #839192 !important;
+    }
+
+    .btn-check-team {
+        width: 100%;
+        margin-top: 10px;
+        padding: 14px;
+        font-size: 18px;
+        font-weight: bold;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        color: white;
+    }
+    .team-a .btn-check-team {
+        background: #c0392b;
+    }
+    .team-a .btn-check-team:hover {
+        background: #a93226;
+    }
+    .team-b .btn-check-team {
+        background: #16a085;
+    }
+    .team-b .btn-check-team:hover {
+        background: #138a72;
+    }
+
+    .feedback-team {
+        margin-top: 10px;
+        font-size: 16px;
+        font-weight: bold;
+        text-align: center;
+        min-height: 24px;
+        padding: 8px;
+        border-radius: 8px;
+    }
+    .feedback-team.correct {
+        background: #d4edda;
+        color: #155724;
+    }
+    .feedback-team.wrong {
+        background: #f8d7da;
+        color: #721c24;
+    }
+
+    /* Mittleres Panel */
+    .middle-panel {
+        flex: 0 0 260px;
+        background: white;
+        border-radius: 15px;
+        padding: 25px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 15px;
+    }
+    .middle-title {
+        font-size: 20px;
+        font-weight: bold;
+        color: #333;
+        text-align: center;
+    }
+    button.btn-new-round {
+        width: 100%;
+        background: #3498db;
+        color: white;
+        padding: 15px;
+        font-size: 16px;
+        font-weight: bold;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+    }
+    button.btn-new-round:hover {
+        background: #2980b9;
+    }
+    button.btn-reset {
+        width: 100%;
+        background: #e67e22;
+        color: white;
+        padding: 12px;
+        font-size: 14px;
+        font-weight: bold;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        margin-top: 10px;
+    }
+    button.btn-reset:hover {
+        background: #d35400;
+    }
+
+    .round-status {
+        text-align: center;
+        font-size: 14px;
+        color: #555;
+        background: #f0f0f0;
+        border-radius: 8px;
+        padding: 10px;
+        width: 100%;
+    }
+
+    .winner-banner {
+        text-align: center;
+        font-size: 32px;
+        font-weight: bold;
+        color: white;
+        background: linear-gradient(135deg, #f39c12, #e67e22);
+        padding: 30px;
+        border-radius: 15px;
+        margin: 20px auto;
+        max-width: 600px;
+        box-shadow: 0 10px 40px rgba(0,0,0,0.4);
+        display: none;
+    }
+    .instructions {
+        color: white;
+        text-align: center;
+        max-width: 800px;
+        margin: 0 auto 20px auto;
+        font-size: 14px;
+        background: rgba(255,255,255,0.15);
+        padding: 12px;
+        border-radius: 10px;
+    }
+    .locked-msg {
+        text-align:center;
+        color:#888;
+        font-size:14px;
+        margin-top:5px;
+    }
+</style>
+</head>
+<body>
+
+<h1>📐 Pythagoras-Duell 📐</h1>
+<div class="instructions">
+    Team A und Team B bekommen unterschiedliche Aufgaben. Je ein Schüler pro Team geht zur Tafel.
+    Das restliche Team berechnet die Lösung und der Schüler an der Tafel tippt sie über sein eigenes Tastenfeld ein.
+    Wer zuerst die richtige Lösung eingibt, gewinnt die Runde. Wer zuerst 5 Runden gewinnt, gewinnt das Spiel!
+</div>
+
+<div class="winner-banner" id="winnerBanner"></div>
+
+<div class="container">
+
+    <!-- TEAM A -->
+    <div class="team-box team-a" id="teamBoxA">
+        <div class="team-title">🔴 Team A</div>
+        <div class="win-dots" id="dotsA"></div>
+        <div class="wins-counter">Gewonnene Runden: <span id="winsA">0</span> / 5</div>
+
+        <div class="task-box">
+            <div class="task-text" id="taskTextA">Klicke auf "Neue Runde starten"</div>
+            <div class="values" id="valuesA"></div>
+        </div>
+
+        <div class="input-area">
+            <div class="answer-display" id="displayA">&nbsp;</div>
+            <div class="keypad">
+                <button onclick="taste('A','1')">1</button>
+                <button onclick="taste('A','2')">2</button>
+                <button onclick="taste('A','3')">3</button>
+                <button onclick="taste('A','4')">4</button>
+                <button onclick="taste('A','5')">5</button>
+                <button onclick="taste('A','6')">6</button>
+                <button onclick="taste('A','7')">7</button>
+                <button onclick="taste('A','8')">8</button>
+                <button onclick="taste('A','9')">9</button>
+                <button onclick="taste('A',',')">,</button>
+                <button onclick="taste('A','0')">0</button>
+                <button class="key-back" onclick="loeschenLetztes('A')">⌫</button>
+            </div>
+            <button class="key-clear" style="width:100%; margin-top:8px;" onclick="loeschenAlles('A')">Alles löschen</button>
+            <button class="btn-check-team" onclick="pruefeAntwort('A')">✅ Antwort von Team A prüfen</button>
+            <div class="feedback-team" id="feedbackA"></div>
+        </div>
+    </div>
+
+    <!-- MITTLERES PANEL -->
+    <div class="middle-panel">
+        <div class="middle-title">🏆 Rundenkontrolle</div>
+        <button class="btn-new-round" onclick="neueRunde()">▶️ Neue Runde starten</button>
+        <div class="round-status" id="roundStatus">Noch keine Runde gestartet.</div>
+        <button class="btn-reset" onclick="spielZuruecksetzen()">🔄 Spiel zurücksetzen</button>
+    </div>
+
+    <!-- TEAM B -->
+    <div class="team-box team-b" id="teamBoxB">
+        <div class="team-title">🔵 Team B</div>
+        <div class="win-dots" id="dotsB"></div>
+        <div class="wins-counter">Gewonnene Runden: <span id="winsB">0</span> / 5</div>
+
+        <div class="task-box">
+            <div class="task-text" id="taskTextB">Klicke auf "Neue Runde starten"</div>
+            <div class="values" id="valuesB"></div>
+        </div>
+
+        <div class="input-area">
+            <div class="answer-display" id="displayB">&nbsp;</div>
+            <div class="keypad">
+                <button onclick="taste('B','1')">1</button>
+                <button onclick="taste('B','2')">2</button>
+                <button onclick="taste('B','3')">3</button>
+                <button onclick="taste('B','4')">4</button>
+                <button onclick="taste('B','5')">5</button>
+                <button onclick="taste('B','6')">6</button>
+                <button onclick="taste('B','7')">7</button>
+                <button onclick="taste('B','8')">8</button>
+                <button onclick="taste('B','9')">9</button>
+                <button onclick="taste('B',',')">,</button>
+                <button onclick="taste('B','0')">0</button>
+                <button class="key-back" onclick="loeschenLetztes('B')">⌫</button>
+            </div>
+            <button class="key-clear" style="width:100%; margin-top:8px;" onclick="loeschenAlles('B')">Alles löschen</button>
+            <button class="btn-check-team" onclick="pruefeAntwort('B')">✅ Antwort von Team B prüfen</button>
+            <div class="feedback-team" id="feedbackB"></div>
+        </div>
+    </div>
+
+</div>
+
+<script>
+let winsA = 0;
+let winsB = 0;
+let currentSolutionA = null;
+let currentSolutionB = null;
+let gameOver = false;
+let roundActive = false;
+
+let inputA = "";
+let inputB = "";
+let lockedA = false; // true, wenn Team A schon eine korrekte Antwort in dieser Runde gegeben hat
+let lockedB = false;
+
+function zufallszahl(min, max) {
+    return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+
+function rund(zahl) {
+    return Math.round(zahl * 100) / 100;
+}
+
+function erzeugeAufgabe() {
+    const modus = zufallszahl(0, 1); // 0 = Hypotenuse gesucht, 1 = Kathete gesucht
+
+    if (modus === 0) {
+        const a = zufallszahl(3, 15);
+        const b = zufallszahl(3, 15);
+        const c = Math.sqrt(a * a + b * b);
+        return {
+            typ: "hypotenuse",
+            loesung: rund(c),
+            text: `Berechne die Hypotenuse c des rechtwinkligen Dreiecks.`,
+            werte: `a = ${a} cm &nbsp;&nbsp;&nbsp; b = ${b} cm &nbsp;&nbsp;&nbsp; c = <span class="unknown-marker">?</span>`
+        };
+    } else {
+        let b = zufallszahl(3, 12);
+        let c = zufallszahl(b + 2, b + 15);
+        const a = Math.sqrt(c * c - b * b);
+        return {
+            typ: "kathete",
+            loesung: rund(a),
+            text: `Berechne die fehlende Kathete a des rechtwinkligen Dreiecks.`,
+            werte: `b = ${b} cm &nbsp;&nbsp;&nbsp; c = ${c} cm &nbsp;&nbsp;&nbsp; a = <span class="unknown-marker">?</span>`
+        };
+    }
+}
+
+function neueRunde() {
+    if (gameOver) return;
+
+    const aufgabeA = erzeugeAufgabe();
+    const aufgabeB = erzeugeAufgabe();
+
+    currentSolutionA = aufgabeA.loesung;
+    currentSolutionB = aufgabeB.loesung;
+
+    document.getElementById('taskTextA').textContent = aufgabeA.text;
+    document.getElementById('valuesA').innerHTML = aufgabeA.werte;
+
+    document.getElementById('taskTextB').textContent = aufgabeB.text;
+    document.getElementById('valuesB').innerHTML = aufgabeB.werte;
+
+    inputA = "";
+    inputB = "";
+    lockedA = false;
+    lockedB = false;
+    roundActive = true;
+
+    aktualisiereDisplay('A');
+    aktualisiereDisplay('B');
+
+    document.getElementById('feedbackA').textContent = '';
+    document.getElementById('feedbackA').className = 'feedback-team';
+    document.getElementById('feedbackB').textContent = '';
+    document.getElementById('feedbackB').className = 'feedback-team';
+
+    document.getElementById('displayA').className = 'answer-display';
+    document.getElementById('displayB').className = 'answer-display';
+
+    document.getElementById('roundStatus').textContent = "Runde läuft! Wer zuerst richtig liegt, gewinnt.";
+}
+
+function aktualisiereDisplay(team) {
+    const display = document.getElementById('display' + team);
+    const wert = team === 'A' ? inputA : inputB;
+    display.textContent = wert.length > 0 ? wert : '\u00A0';
+}
+
+function taste(team, zeichen) {
+    if (gameOver || !roundActive) return;
+    if (team === 'A' && lockedA) return;
+    if (team === 'B' && lockedB) return;
+
+    if (team === 'A') {
+        if (zeichen === ',' && inputA.includes(',')) return; // nur ein Komma
+        inputA += zeichen;
+    } else {
+        if (zeichen === ',' && inputB.includes(',')) return;
+        inputB += zeichen;
+    }
+    aktualisiereDisplay(team);
+}
+
+function loeschenLetztes(team) {
+    if (gameOver || !roundActive) return;
+    if (team === 'A' && lockedA) return;
+    if (team === 'B' && lockedB) return;
+
+    if (team === 'A') {
+        inputA = inputA.slice(0, -1);
+    } else {
+        inputB = inputB.slice(0, -1);
+    }
+    aktualisiereDisplay(team);
+}
+
+function loeschenAlles(team) {
+    if (gameOver || !roundActive) return;
+    if (team === 'A' && lockedA) return;
+    if (team === 'B' && lockedB) return;
+
+    if (team === 'A') {
+        inputA = "";
+    } else {
+        inputB = "";
+    }
+    aktualisiereDisplay(team);
+}
+
+function pruefeAntwort(team) {
+    if (gameOver || !roundActive) return;
+    if (team === 'A' && lockedA) return;
+    if (team === 'B' && lockedB) return;
+
+    const rohwert = team === 'A' ? inputA : inputB;
+    const eingabeStr = rohwert.replace(',', '.');
+    const eingabe = parseFloat(eingabeStr);
+
+    const feedback = document.getElementById('feedback' + team);
+    const display = document.getElementById('display' + team);
+
+    if (rohwert === "" || isNaN(eingabe)) {
+        feedback.textContent = "Bitte eine Zahl eingeben!";
+        feedback.className = 'feedback-team wrong';
+        return;
+    }
+
+    const loesung = team === 'A' ? currentSolutionA : currentSolutionB;
+    const toleranz = 0.1;
+
+    if (Math.abs(eingabe - loesung) <= toleranz) {
+        feedback.textContent = `✅ Richtig! Team ${team} gewinnt diese Runde!`;
+        feedback.className = 'feedback-team correct';
+        display.className = 'answer-display correct-border';
+
+        if (team === 'A') {
+            winsA++;
+            document.getElementById('winsA').textContent = winsA;
+            lockedA = true;
+        } else {
+            winsB++;
+            document.getElementById('winsB').textContent = winsB;
+            lockedB = true;
+        }
+
+        roundActive = false; // Runde ist entschieden
+        aktualisiereDots();
+        document.getElementById('roundStatus').textContent = `Team ${team} hat die Runde gewonnen! Klicke auf "Neue Runde starten".`;
+        pruefeSpielEnde();
+
+    } else {
+        feedback.textContent = `❌ Falsch! Bitte nochmal versuchen.`;
+        feedback.className = 'feedback-team wrong';
+        display.className = 'answer-display wrong-border';
+    }
+}
+
+function aktualisiereDots() {
+    const dotsA = document.getElementById('dotsA');
+    const dotsB = document.getElementById('dotsB');
+    dotsA.innerHTML = '';
+    dotsB.innerHTML = '';
+
+    for (let i = 0; i < 5; i++) {
+        const dotA = document.createElement('div');
+        dotA.className = 'dot' + (i < winsA ? ' filled-a' : '');
+        dotsA.appendChild(dotA);
+
+        const dotB = document.createElement('div');
+        dotB.className = 'dot' + (i < winsB ? ' filled-b' : '');
+        dotsB.appendChild(dotB);
+    }
+}
+
+function pruefeSpielEnde() {
+    if (winsA >= 5 || winsB >= 5) {
+        gameOver = true;
+        roundActive = false;
+        const banner = document.getElementById('winnerBanner');
+        const gewinner = winsA >= 5 ? "Team A 🔴" : "Team B 🔵";
+        banner.textContent = `🎉 ${gewinner} hat gewonnen! 🎉`;
+        banner.style.display = 'block';
+        document.getElementById('roundStatus').textContent = "Spiel beendet! Zurücksetzen für ein neues Spiel.";
+    }
+}
+
+function spielZuruecksetzen() {
+    winsA = 0;
+    winsB = 0;
+    gameOver = false;
+    roundActive = false;
+    inputA = "";
+    inputB = "";
+    lockedA = false;
+    lockedB = false;
+
+    document.getElementById('winsA').textContent = 0;
+    document.getElementById('winsB').textContent = 0;
+    document.getElementById('winnerBanner').style.display = 'none';
+    document.getElementById('taskTextA').textContent = 'Klicke auf "Neue Runde starten"';
+    document.getElementById('taskTextB').textContent = 'Klicke auf "Neue Runde starten"';
+    document.getElementById('valuesA').innerHTML = '';
+    document.getElementById('valuesB').innerHTML = '';
+    document.getElementById('feedbackA').textContent = '';
+    document.getElementById('feedbackA').className = 'feedback-team';
+    document.getElementById('feedbackB').textContent = '';
+    document.getElementById('feedbackB').className = 'feedback-team';
+    document.getElementById('displayA').className = 'answer-display';
+    document.getElementById('displayB').className = 'answer-display';
+    document.getElementById('roundStatus').textContent = "Noch keine Runde gestartet.";
+
+    aktualisiereDisplay('A');
+    aktualisiereDisplay('B');
+    aktualisiereDots();
+}
+
+// Initiale Anzeige
+aktualisiereDots();
+</script>
+
+</body>
+</html>
