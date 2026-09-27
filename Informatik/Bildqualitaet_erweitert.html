@@ -1,0 +1,512 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<title>Bildkompression, Bildgröße & Farbtiefe entdecken</title>
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        background: #f0f2f5;
+        margin: 0;
+        padding: 20px;
+        color: #222;
+    }
+    h1 {
+        text-align: center;
+        color: #2b3a55;
+    }
+    .container {
+        max-width: 1100px;
+        margin: 0 auto;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 20px;
+    }
+    .controls {
+        flex: 1;
+        min-width: 280px;
+        background: white;
+        border-radius: 10px;
+        padding: 20px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    .display {
+        flex: 2;
+        min-width: 320px;
+        background: white;
+        border-radius: 10px;
+        padding: 20px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        text-align: center;
+    }
+    label {
+        display: block;
+        margin-top: 15px;
+        font-weight: bold;
+    }
+    input[type="range"] {
+        width: 100%;
+    }
+    .value-display {
+        font-weight: normal;
+        color: #555;
+        font-size: 0.9em;
+    }
+    input[type="file"] {
+        margin-top: 10px;
+    }
+    #canvasWrapper {
+        margin-top: 15px;
+        border: 1px solid #ccc;
+        display: inline-block;
+        background: repeating-conic-gradient(#e0e0e0 0% 25%, #ffffff 0% 50%) 
+                    50% / 20px 20px;
+        max-width: 100%;
+        overflow: auto;
+    }
+    canvas {
+        display: block;
+        max-width: 100%;
+    }
+    .info-box {
+        margin-top: 15px;
+        background: #eef3fb;
+        border-left: 4px solid #2b6cb0;
+        padding: 10px 15px;
+        border-radius: 6px;
+        font-size: 0.9em;
+        line-height: 1.4;
+    }
+    .stats {
+        margin-top: 10px;
+        font-size: 0.9em;
+        color: #333;
+    }
+    button {
+        margin-top: 15px;
+        background: #2b6cb0;
+        color: white;
+        border: none;
+        padding: 10px 16px;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 0.95em;
+    }
+    button:hover {
+        background: #1f4e80;
+    }
+    .explain {
+        max-width: 1100px;
+        margin: 20px auto 0;
+        background: white;
+        border-radius: 10px;
+        padding: 20px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    .explain h2 {
+        color: #2b3a55;
+    }
+    .metadata-section {
+        max-width: 1100px;
+        margin: 20px auto 0;
+        background: white;
+        border-radius: 10px;
+        padding: 20px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    .metadata-section h2 {
+        color: #2b3a55;
+    }
+    table.metadata-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 10px;
+        font-size: 0.9em;
+    }
+    table.metadata-table th,
+    table.metadata-table td {
+        text-align: left;
+        padding: 8px 10px;
+        border-bottom: 1px solid #e0e0e0;
+    }
+    table.metadata-table th {
+        background: #f4f7fb;
+        width: 40%;
+        color: #2b3a55;
+    }
+    .no-metadata {
+        color: #888;
+        font-style: italic;
+        margin-top: 10px;
+    }
+</style>
+</head>
+<body>
+
+<h1>🎛️ Digitale Bilder verstehen: Bildgröße, Farbtiefe & Kompression</h1>
+
+<div class="container">
+    <div class="controls">
+        <h2>Bild hochladen</h2>
+        <input type="file" id="imageLoader" accept="image/*">
+
+        <label for="scaleRange">
+            Bildgröße (Skalierung): <span class="value-display" id="scaleValue">100%</span>
+        </label>
+        <input type="range" id="scaleRange" min="1" max="100" value="100">
+
+        <label for="colorDepthRange">
+            Farbtiefe (Stufen pro Farbkanal): <span class="value-display" id="colorDepthValue">256 (8 Bit)</span>
+        </label>
+        <input type="range" id="colorDepthRange" min="1" max="8" value="8">
+
+        <label for="qualityRange">
+            Kompression (JPEG-Qualität): <span class="value-display" id="qualityValue">100%</span>
+        </label>
+        <input type="range" id="qualityRange" min="1" max="100" value="100">
+
+        <button id="resetBtn">Zurücksetzen</button>
+
+        <div class="info-box" id="infoBox">
+            Lade ein Bild hoch, um die Regler auszuprobieren!
+        </div>
+    </div>
+
+    <div class="display">
+        <h2>Ergebnis</h2>
+        <div id="canvasWrapper">
+            <canvas id="canvas"></canvas>
+        </div>
+        <div class="stats" id="stats"></div>
+    </div>
+</div>
+
+<div class="explain">
+    <h2>📚 Was passiert hier eigentlich?</h2>
+    <p><strong>Bildgröße:</strong> Ein Bild besteht aus einzelnen Bildpunkten (Pixeln). Reduzierst du die Bildgröße, werden weniger Pixel verwendet – das Bild wird "grober" oder "verpixelt", aber die Datei wird kleiner.</p>
+    <p><strong>Farbtiefe:</strong> Sie gibt an, wie viele unterschiedliche Farbwerte pro Pixel gespeichert werden können (Bits pro Farbkanal). Bei voller Farbtiefe (8 Bit) gibt es 256 Abstufungen pro Farbkanal (Rot, Grün, Blau) – das ergibt über 16 Millionen Farben. Reduzierst du die Farbtiefe, werden ähnliche Farben zusammengefasst, wodurch sichtbare "Farbstufen" (Banding) entstehen und die Datei kleiner werden kann.</p>
+    <p><strong>Kompression:</strong> Beim JPEG-Format können Bilddaten verlustbehaftet komprimiert werden. Eine niedrigere Qualität bedeutet mehr Kompression – die Datei wird kleiner, aber es entstehen sichtbare Artefakte (z.B. "Blockbildung").</p>
+    <p>Probiere die Regler aus und beobachte, wie sich Bildqualität und Dateigröße gegenseitig beeinflussen!</p>
+</div>
+
+<div class="metadata-section">
+    <h2>📋 Metadaten des Originalbildes</h2>
+    <p>Metadaten sind zusätzliche Informationen, die zusammen mit dem eigentlichen Bild gespeichert werden – zum Beispiel Angaben zur Kamera, zum Aufnahmedatum oder zur Dateigröße. Sie verändern nicht das Bild selbst, geben aber wichtige Zusatzinformationen.</p>
+    <table class="metadata-table" id="metadataTable" style="display: none;">
+        <tbody id="metadataBody"></tbody>
+    </table>
+    <p class="no-metadata" id="noMetadataText">Noch kein Bild hochgeladen.</p>
+</div>
+
+<script>
+const imageLoader = document.getElementById('imageLoader');
+const canvas = document.getElementById('canvas');
+const ctx = canvas.getContext('2d');
+
+const scaleRange = document.getElementById('scaleRange');
+const colorDepthRange = document.getElementById('colorDepthRange');
+const qualityRange = document.getElementById('qualityRange');
+
+const scaleValue = document.getElementById('scaleValue');
+const colorDepthValue = document.getElementById('colorDepthValue');
+const qualityValue = document.getElementById('qualityValue');
+
+const statsDiv = document.getElementById('stats');
+const infoBox = document.getElementById('infoBox');
+const resetBtn = document.getElementById('resetBtn');
+
+const metadataTable = document.getElementById('metadataTable');
+const metadataBody = document.getElementById('metadataBody');
+const noMetadataText = document.getElementById('noMetadataText');
+
+let originalImage = null;
+let originalWidth = 0;
+let originalHeight = 0;
+
+imageLoader.addEventListener('change', handleImage, false);
+
+function handleImage(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = function(event) {
+        const img = new Image();
+        img.onload = function() {
+            originalImage = img;
+            originalWidth = img.width;
+            originalHeight = img.height;
+
+            // Reset Regler
+            scaleRange.value = 100;
+            colorDepthRange.value = 8;
+            qualityRange.value = 100;
+            updateLabels();
+
+            render();
+            infoBox.innerHTML = `Bild geladen: <strong>${originalWidth} × ${originalHeight} px</strong>. Probiere jetzt die Regler aus!`;
+
+            // Metadaten anzeigen
+            displayBasicMetadata(file, originalWidth, originalHeight);
+        };
+        img.src = event.target.result;
+    };
+    reader.readAsDataURL(file);
+
+    // Für EXIF-Daten brauchen wir die rohen Bytes
+    const arrayReader = new FileReader();
+    arrayReader.onload = function(event) {
+        const arrayBuffer = event.target.result;
+        const exifData = parseEXIF(arrayBuffer);
+        appendEXIFMetadata(exifData);
+    };
+    arrayReader.readAsArrayBuffer(file);
+}
+
+function formatBytes(bytes) {
+    if (bytes < 1024) return bytes + " Bytes";
+    if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + " KB";
+    return (bytes / (1024 * 1024)).toFixed(2) + " MB";
+}
+
+function displayBasicMetadata(file, width, height) {
+    metadataBody.innerHTML = "";
+
+    const rows = [
+        ["Dateiname", file.name],
+        ["Dateityp", file.type || "Unbekannt"],
+        ["Dateigröße", formatBytes(file.size)],
+        ["Originalbildgröße", `${width} × ${height} px`],
+        ["Seitenverhältnis", (width / height).toFixed(2)],
+        ["Letztes Änderungsdatum", new Date(file.lastModified).toLocaleString('de-DE')]
+    ];
+
+    rows.forEach(([key, value]) => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `<th>${key}</th><td>${value}</td>`;
+        metadataBody.appendChild(tr);
+    });
+
+    metadataTable.style.display = "table";
+    noMetadataText.style.display = "none";
+}
+
+function appendEXIFMetadata(exifData) {
+    if (!exifData || Object.keys(exifData).length === 0) {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `<th>EXIF-Daten</th><td><em>Keine EXIF-Daten gefunden (z. B. bei PNG-Dateien oder bearbeiteten Bildern üblich)</em></td>`;
+        metadataBody.appendChild(tr);
+        return;
+    }
+
+    const labels = {
+        Make: "Kamera-Hersteller",
+        Model: "Kameramodell",
+        DateTimeOriginal: "Aufnahmedatum",
+        ExposureTime: "Belichtungszeit",
+        FNumber: "Blende (F-Zahl)",
+        ISOSpeedRatings: "ISO-Wert",
+        FocalLength: "Brennweite",
+        Orientation: "Ausrichtung"
+    };
+
+    Object.keys(exifData).forEach(key => {
+        if (labels[key]) {
+            const tr = document.createElement('tr');
+            tr.innerHTML = `<th>${labels[key]}</th><td>${exifData[key]}</td>`;
+            metadataBody.appendChild(tr);
+        }
+    });
+}
+
+// --- Minimaler EXIF-Parser (nur für JPEG-Dateien) ---
+function parseEXIF(buffer) {
+    const result = {};
+    const view = new DataView(buffer);
+
+    if (view.byteLength < 4 || view.getUint16(0) !== 0xFFD8) {
+        return result; // Kein JPEG
+    }
+
+    let offset = 2;
+    while (offset < view.byteLength) {
+        if (view.getUint16(offset) === 0xFFE1) {
+            // APP1-Marker = EXIF
+            const exifOffset = offset + 4;
+            if (view.getUint32(exifOffset) !== 0x45786966) return result; // "Exif"
+            const tiffOffset = exifOffset + 6;
+
+            const littleEndian = view.getUint16(tiffOffset) === 0x4949;
+            const firstIFDOffset = view.getUint32(tiffOffset + 4, littleEndian);
+            readIFD(view, tiffOffset, tiffOffset + firstIFDOffset, littleEndian, result);
+            return result;
+        } else if ((view.getUint16(offset) & 0xFF00) !== 0xFF00) {
+            break;
+        } else {
+            offset += 2 + view.getUint16(offset + 2);
+        }
+    }
+    return result;
+}
+
+function readIFD(view, tiffStart, dirStart, littleEndian, result) {
+    const tags = {
+        0x010F: "Make",
+        0x0110: "Model",
+        0x0112: "Orientation",
+        0x9003: "DateTimeOriginal",
+        0x829A: "ExposureTime",
+        0x829D: "FNumber",
+        0x8827: "ISOSpeedRatings",
+        0x920A: "FocalLength"
+    };
+
+    const entries = view.getUint16(dirStart, littleEndian);
+    for (let i = 0; i < entries; i++) {
+        const entryOffset = dirStart + 2 + i * 12;
+        const tag = view.getUint16(entryOffset, littleEndian);
+        const type = view.getUint16(entryOffset + 2, littleEndian);
+        const count = view.getUint32(entryOffset + 4, littleEndian);
+        const valueOffset = entryOffset + 8;
+
+        if (tags[tag]) {
+            let value = null;
+
+            try {
+                if (type === 2) { // ASCII string
+                    let strOffset = count > 4 ? tiffStart + view.getUint32(valueOffset, littleEndian) : valueOffset;
+                    let str = "";
+                    for (let j = 0; j < count - 1; j++) {
+                        str += String.fromCharCode(view.getUint8(strOffset + j));
+                    }
+                    value = str;
+                } else if (type === 3) { // SHORT
+                    value = view.getUint16(valueOffset, littleEndian);
+                } else if (type === 4) { // LONG
+                    value = view.getUint32(valueOffset, littleEndian);
+                } else if (type === 5) { // RATIONAL
+                    const rationalOffset = tiffStart + view.getUint32(valueOffset, littleEndian);
+                    const numerator = view.getUint32(rationalOffset, littleEndian);
+                    const denominator = view.getUint32(rationalOffset + 4, littleEndian);
+                    value = denominator !== 0 ? (numerator / denominator) : numerator;
+
+                    if (tags[tag] === "ExposureTime" && value < 1) {
+                        value = "1/" + Math.round(1 / value) + " s";
+                    } else if (tags[tag] === "FNumber") {
+                        value = "f/" + value.toFixed(1);
+                    } else if (tags[tag] === "FocalLength") {
+                        value = value.toFixed(1) + " mm";
+                    }
+                }
+            } catch (err) {
+                value = null;
+            }
+
+            if (value !== null) {
+                result[tags[tag]] = value;
+            }
+        }
+    }
+}
+
+function updateLabels() {
+    const scale = parseInt(scaleRange.value);
+    scaleValue.textContent = scale + "%";
+
+    const bits = parseInt(colorDepthRange.value);
+    const levels = Math.pow(2, bits);
+    colorDepthValue.textContent = levels + " (" + bits + " Bit)";
+
+    qualityValue.textContent = qualityRange.value + "%";
+}
+
+function reduceColorDepth(imageData, bits) {
+    const levels = Math.pow(2, bits);
+    const step = 255 / (levels - 1);
+    const data = imageData.data;
+
+    for (let i = 0; i < data.length; i += 4) {
+        data[i]     = Math.round(Math.round(data[i]     / step) * step); // R
+        data[i + 1] = Math.round(Math.round(data[i + 1] / step) * step); // G
+        data[i + 2] = Math.round(Math.round(data[i + 2] / step) * step); // B
+        // Alpha bleibt unverändert
+    }
+    return imageData;
+}
+
+function render() {
+    if (!originalImage) return;
+
+    const scalePercent = parseInt(scaleRange.value) / 100;
+    const bits = parseInt(colorDepthRange.value);
+    const quality = parseInt(qualityRange.value) / 100;
+
+    // Zielgröße basierend auf Skalierung (verkleinerte Pixelanzahl = geringere Auflösung)
+    const targetWidth = Math.max(1, Math.round(originalWidth * scalePercent));
+    const targetHeight = Math.max(1, Math.round(originalHeight * scalePercent));
+
+    // Schritt 1: Bild in kleiner Auflösung zeichnen (Offscreen)
+    const offCanvas = document.createElement('canvas');
+    offCanvas.width = targetWidth;
+    offCanvas.height = targetHeight;
+    const offCtx = offCanvas.getContext('2d');
+    offCtx.imageSmoothingEnabled = true;
+    offCtx.drawImage(originalImage, 0, 0, targetWidth, targetHeight);
+
+    // Schritt 2: Farbtiefe reduzieren
+    if (bits < 8) {
+        let imageData = offCtx.getImageData(0, 0, targetWidth, targetHeight);
+        imageData = reduceColorDepth(imageData, bits);
+        offCtx.putImageData(imageData, 0, 0);
+    }
+
+    // Schritt 3: Wieder auf Originalgröße hochskalieren, damit man den Bildgrößenverlust sieht
+    canvas.width = originalWidth;
+    canvas.height = originalHeight;
+    ctx.imageSmoothingEnabled = false; // Pixelig lassen, damit man Bildgröße sieht
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.drawImage(offCanvas, 0, 0, targetWidth, targetHeight, 0, 0, originalWidth, originalHeight);
+
+    // Schritt 4: JPEG-Kompression simulieren durch Export & erneutes Laden
+    const dataURL = canvas.toDataURL('image/jpeg', quality);
+
+    const compressedImg = new Image();
+    compressedImg.onload = function() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.drawImage(compressedImg, 0, 0, canvas.width, canvas.height);
+        updateStats(dataURL, targetWidth, targetHeight, bits, quality);
+    };
+    compressedImg.src = dataURL;
+}
+
+function updateStats(dataURL, w, h, bits, quality) {
+    // Grobe Dateigrößen-Schätzung aus Base64-Länge
+    const base64Length = dataURL.length - (dataURL.indexOf(',') + 1);
+    const sizeInBytes = Math.round(base64Length * 3 / 4);
+    const sizeKB = (sizeInBytes / 1024).toFixed(1);
+
+    statsDiv.innerHTML = `
+        <strong>Aktuelle Bildgröße:</strong> ${w} × ${h} px<br>
+        <strong>Farbtiefe:</strong> ${Math.pow(2, bits)} Stufen pro Kanal (${bits} Bit)<br>
+        <strong>JPEG-Qualität:</strong> ${Math.round(quality * 100)}%<br>
+        <strong>Geschätzte Dateigröße:</strong> ~${sizeKB} KB
+    `;
+}
+
+scaleRange.addEventListener('input', () => { updateLabels(); render(); });
+colorDepthRange.addEventListener('input', () => { updateLabels(); render(); });
+qualityRange.addEventListener('input', () => { updateLabels(); render(); });
+
+resetBtn.addEventListener('click', () => {
+    scaleRange.value = 100;
+    colorDepthRange.value = 8;
+    qualityRange.value = 100;
+    updateLabels();
+    render();
+});
+
+updateLabels();
+</script>
+
+</body>
+</html>
