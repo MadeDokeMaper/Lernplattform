@@ -1,0 +1,603 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🕵️ Der Prolog-Detektiv - Schreib deine Abfrage!</title>
+<style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    
+    body {
+        font-family: 'Courier New', monospace;
+        background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+        color: #e0e0e0;
+        min-height: 100vh;
+        padding: 20px;
+    }
+
+    .container { max-width: 900px; margin: 0 auto; }
+
+    header {
+        text-align: center;
+        margin-bottom: 30px;
+        padding: 20px;
+        background: rgba(0,0,0,0.3);
+        border-radius: 10px;
+        border: 2px solid #00ff41;
+    }
+
+    h1 { color: #00ff41; font-size: 2em; text-shadow: 0 0 10px rgba(0,255,65,0.5); }
+    .timer { font-size: 1.5em; color: #ff4444; margin-top: 10px; font-weight: bold; }
+
+    .progress-bar {
+        background: #333; border-radius: 10px; height: 20px;
+        margin: 15px 0; overflow: hidden;
+    }
+    .progress-fill {
+        background: linear-gradient(90deg, #00ff41, #00cc33);
+        height: 100%; width: 0%; transition: width 0.5s ease;
+    }
+
+    .room {
+        display: none; background: rgba(255,255,255,0.05);
+        border-radius: 10px; padding: 30px; border: 1px solid #444;
+        animation: fadeIn 0.5s ease;
+    }
+    .room.active { display: block; }
+
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    .story {
+        background: rgba(0,255,65,0.1); border-left: 4px solid #00ff41;
+        padding: 15px; margin-bottom: 20px; font-style: italic; line-height: 1.6;
+    }
+
+    .prolog-box {
+        background: #0a0a0a; border: 2px solid #00ff41; border-radius: 5px;
+        padding: 20px; margin: 20px 0; overflow-x: auto;
+    }
+
+    .prolog-box .comment { color: #6272a4; font-style: italic; }
+    .prolog-box .fact { color: #50fa7b; }
+    .prolog-box .rule { color: #8be9fd; }
+    .prolog-box .var { color: #ff79c6; }
+    .prolog-box .operator { color: #ff5555; font-weight: bold; }
+
+    .explanation-box {
+        background: rgba(33,150,243,0.1); border: 2px solid #2196F3;
+        border-radius: 5px; padding: 15px; margin: 15px 0;
+        font-size: 0.95em; line-height: 1.5;
+    }
+
+    .task-box {
+        background: rgba(255,215,0,0.1); border: 2px solid #ffd700;
+        border-radius: 5px; padding: 15px; margin: 15px 0;
+    }
+
+    .terminal-container {
+        background: #000; border: 2px solid #00ff41; border-radius: 5px;
+        padding: 15px; margin: 15px 0; font-family: monospace;
+    }
+
+    .terminal-prompt {
+        display: flex; align-items: center; gap: 5px;
+    }
+
+    .terminal-prompt::before {
+        content: "?-"; color: #ff79c6; font-weight: bold; font-size: 1.1em;
+    }
+
+    input[type="text"].prolog-input {
+        background: transparent; border: none; color: #00ff41;
+        font-family: 'Courier New', monospace; font-size: 1.1em;
+        flex: 1; padding: 5px;
+    }
+
+    input[type="text"].prolog-input:focus { outline: none; }
+
+    .output-line {
+        color: #f8f8f2; margin-top: 10px; padding-top: 10px;
+        border-top: 1px dashed #333; min-height: 20px;
+    }
+
+    .output-line.result-true { color: #50fa7b; }
+    .output-line.result-false { color: #ff5555; }
+    .output-line.result-vars { color: #ffb86c; }
+
+    button {
+        background: linear-gradient(135deg, #00ff41, #00cc33); color: #0a0a0a;
+        border: none; padding: 12px 30px; border-radius: 5px; cursor: pointer;
+        font-size: 1em; font-weight: bold; transition: transform 0.2s;
+        margin-top: 10px; margin-right: 10px;
+    }
+    button:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(0,255,65,0.4); }
+
+    .hint-btn { background: linear-gradient(135deg, #ff9800, #f57c00); color: white; }
+    .syntax-btn { background: linear-gradient(135deg, #9c27b0, #7b1fa2); color: white; }
+
+    .feedback {
+        padding: 15px; border-radius: 5px; margin-top: 15px; display: none;
+    }
+    .feedback.success { background: rgba(0,255,65,0.2); border: 2px solid #00ff41; color: #50fa7b; display: block; }
+    .feedback.error { background: rgba(244,67,54,0.2); border: 2px solid #f44336; color: #ff6b6b; display: block; }
+    .feedback.info { background: rgba(33,150,243,0.2); border: 2px solid #2196F3; color: #64b5f6; display: block; }
+
+    .hint {
+        background: rgba(255,152,0,0.1); border: 1px dashed #ff9800;
+        padding: 10px; margin-top: 10px; border-radius: 5px; display: none; font-size: 0.9em;
+    }
+    .hint.show { display: block; }
+
+    .syntax-help {
+        background: rgba(156,39,176,0.1); border: 1px dashed #9c27b0;
+        padding: 12px; margin-top: 10px; border-radius: 5px; display: none; font-size: 0.9em;
+    }
+    .syntax-help.show { display: block; }
+
+    .syntax-help code {
+        background: rgba(0,0,0,0.4); padding: 2px 6px; border-radius: 3px; color: #ffb86c;
+    }
+
+    .clue-counter {
+        position: fixed; top: 20px; right: 20px; background: rgba(0,0,0,0.7);
+        padding: 10px 20px; border-radius: 20px; border: 2px solid #00ff41;
+    }
+
+    .lock-icon { font-size: 3em; text-align: center; margin: 20px 0; }
+
+    .success-screen { text-align: center; animation: fadeIn 1s ease; }
+    .success-screen h1 { font-size: 3em; margin-bottom: 20px; animation: pulse 2s infinite; color: #00ff41; }
+    @keyframes pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.05); } }
+
+    .attempts-counter {
+        font-size: 0.85em; color: #999; margin-top: 5px;
+    }
+</style>
+</head>
+<body>
+
+<div class="clue-counter">🔍 Gelöste Rätsel: <span id="clueCount">0</span>/4</div>
+
+<div class="container">
+    <header>
+        <h1>🕵️ DER PROLOG-DETEKTIV</h1>
+        <p>Schreib deine eigenen Prolog-Abfragen, um den Fall zu lösen!</p>
+        <div class="timer" id="timer">⏱️ 00:00</div>
+        <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+    </header>
+
+    <!-- RAUM 0: EINFÜHRUNG -->
+    <div class="room active" id="room0">
+        <div class="story">
+            📰 <strong>BREAKING NEWS:</strong> Im Schulmuseum wurde die "Goldene Kreidebox" gestohlen! 
+            Als Prolog-Detektiv musst du <strong>selbst Abfragen formulieren</strong>, 
+            um die Wissensbasis zu durchsuchen und den Täter zu finden.
+        </div>
+        <div class="explanation-box">
+            💡 <strong>Prolog-Grundlagen:</strong><br>
+            • <strong>Fakten</strong>: <code>im_gebaeude(lisa, spaete_zeit).</code><br>
+            • <strong>Regeln</strong>: <code>verdaechtig(X) :- im_gebaeude(X, spaete_zeit).</code><br>
+            • <strong>Anfragen</strong> (was DU schreiben musst): <code>?- verdaechtig(lisa).</code><br><br>
+            Eine Anfrage endet immer mit einem <strong>Punkt (.)</strong> und beginnt (gedanklich) mit <code>?-</code>
+        </div>
+        <button onclick="nextRoom(1)">🔓 Ermittlung starten</button>
+    </div>
+
+    <!-- RAUM 1: FAKTEN ABFRAGEN MIT VARIABLE -->
+    <div class="room" id="room1">
+        <div class="story">
+            🔍 <strong>Hinweis 1:</strong> Der Wachmann hat protokolliert, wer sich zur Tatzeit im Gebäude aufhielt.
+        </div>
+
+        <div class="prolog-box">
+<span class="comment">% Wissensbasis: Fakten</span>
+<span class="fact">im_gebaeude(max, fruehe_zeit).</span>
+<span class="fact">im_gebaeude(lisa, spaete_zeit).</span>
+<span class="fact">im_gebaeude(tom, fruehe_zeit).</span>
+<span class="fact">im_gebaeude(anna, fruehe_zeit).</span>
+<span class="fact">im_gebaeude(ben, spaete_zeit).</span>
+        </div>
+
+        <div class="task-box">
+            📝 <strong>Aufgabe:</strong> Schreibe eine Prolog-Anfrage, die herausfindet, 
+            <strong>WER</strong> zur "spaete_zeit" im Gebäude war. Benutze eine Variable 
+            (Variablen beginnen immer mit einem <strong>Großbuchstaben</strong>, z.B. <code>Person</code> oder <code>X</code>).
+        </div>
+
+        <div class="terminal-container">
+            <div class="terminal-prompt">
+                <input type="text" class="prolog-input" id="query1" placeholder="im_gebaeude(...)." autocomplete="off">
+            </div>
+            <div class="output-line" id="output1"></div>
+        </div>
+
+        <button onclick="checkQuery1()">▶ Anfrage ausführen</button>
+        <button class="hint-btn" onclick="toggleHint('hintBox1')">💡 Hinweis</button>
+        <button class="syntax-btn" onclick="toggleHint('syntaxBox1')">📖 Syntax-Hilfe</button>
+        <div class="attempts-counter" id="attempts1"></div>
+
+        <div class="hint" id="hintBox1">
+            Ersetze in <code>im_gebaeude(max, fruehe_zeit).</code> den Namen "max" durch eine Variable 
+            und "fruehe_zeit" durch "spaete_zeit".
+        </div>
+        <div class="syntax-help" id="syntaxBox1">
+            <strong>Syntax-Regeln:</strong><br>
+            • Variablen: Großbuchstabe am Anfang (<code>X</code>, <code>Person</code>, <code>Wer</code>)<br>
+            • Klein geschriebene Wörter = konkrete Werte (Atome)<br>
+            • Jede Anfrage endet mit einem Punkt <code>.</code><br>
+            • Beispiel-Struktur: <code>praedikat(Variable, wert).</code>
+        </div>
+        <div class="feedback" id="feedback1"></div>
+    </div>
+
+    <!-- RAUM 2: NEGATION -->
+    <div class="room" id="room2">
+        <div class="story">
+            🔍 <strong>Hinweis 2:</strong> Lisa und Ben waren beide spät im Gebäude. 
+            Aber wer hat kein Alibi?
+        </div>
+
+        <div class="prolog-box">
+<span class="comment">% Fakten: hat_alibi(Person).</span>
+<span class="fact">hat_alibi(ben).</span>
+        </div>
+
+        <div class="task-box">
+            📝 <strong>Aufgabe 1:</strong> Schreibe eine Anfrage, die prüft, ob 
+            <strong>lisa</strong> ein Alibi hat.
+        </div>
+
+        <div class="terminal-container">
+            <div class="terminal-prompt">
+                <input type="text" class="prolog-input" id="query2a" placeholder="hat_alibi(...)." autocomplete="off">
+            </div>
+            <div class="output-line" id="output2a"></div>
+        </div>
+        <button onclick="checkQuery2a()">▶ Ausführen</button>
+
+        <div class="task-box" style="margin-top: 20px;">
+            📝 <strong>Aufgabe 2:</strong> Jetzt schreibe eine Anfrage mit <strong>Negation</strong> 
+            (<code>\+</code> bedeutet "NICHT"), um zu prüfen, ob <strong>lisa KEIN</strong> Alibi hat.
+        </div>
+
+        <div class="terminal-container">
+            <div class="terminal-prompt">
+                <input type="text" class="prolog-input" id="query2b" placeholder="\+ hat_alibi(...)." autocomplete="off">
+            </div>
+            <div class="output-line" id="output2b"></div>
+        </div>
+        <button onclick="checkQuery2b()">▶ Ausführen</button>
+        <button class="hint-btn" onclick="toggleHint('hintBox2')">💡 Hinweis</button>
+        <button class="syntax-btn" onclick="toggleHint('syntaxBox2')">📖 Syntax-Hilfe</button>
+
+        <div class="hint" id="hintBox2">
+            Für Aufgabe 2: Stelle einfach <code>\+</code> (Backslash + Plus) vor die Anfrage aus Aufgabe 1.
+        </div>
+        <div class="syntax-help" id="syntaxBox2">
+            <strong>Negation in Prolog:</strong><br>
+            <code>\+ ziel.</code> bedeutet "ziel ist NICHT beweisbar"<br>
+            Beispiel: <code>\+ hat_alibi(ben).</code> → false (weil Ben ein Alibi HAT)<br>
+            Beispiel: <code>\+ hat_alibi(lisa).</code> → true (weil Lisa KEIN Alibi hat)
+        </div>
+        <div class="feedback" id="feedback2"></div>
+    </div>
+
+    <!-- RAUM 3: KOMBINIERTE ANFRAGE MIT UND -->
+    <div class="room" id="room3">
+        <div class="story">
+            🔍 <strong>Hinweis 3:</strong> Wer hatte Zugang zur Vitrine? Schlüssel ODER Erlaubnis reicht.
+        </div>
+
+        <div class="prolog-box">
+<span class="comment">% Fakten</span>
+<span class="fact">hat_schluessel(lisa).</span>
+<span class="fact">erlaubnis(anna).</span>
+
+<span class="comment">% Regel: ODER-Verknüpfung durch zwei Regeln</span>
+<span class="rule">hat_zugang(<span class="var">X</span>) <span class="operator">:-</span> hat_schluessel(<span class="var">X</span>).</span>
+<span class="rule">hat_zugang(<span class="var">X</span>) <span class="operator">:-</span> erlaubnis(<span class="var">X</span>).</span>
+        </div>
+
+        <div class="task-box">
+            📝 <strong>Aufgabe:</strong> Schreibe eine Anfrage, die prüft, ob 
+            <strong>lisa</strong> Zugang zur Vitrine hatte (nutze das Prädikat <code>hat_zugang</code>, 
+            NICHT die einzelnen Fakten!).
+        </div>
+
+        <div class="terminal-container">
+            <div class="terminal-prompt">
+                <input type="text" class="prolog-input" id="query3" placeholder="hat_zugang(...)." autocomplete="off">
+            </div>
+            <div class="output-line" id="output3"></div>
+        </div>
+        <button onclick="checkQuery3()">▶ Ausführen</button>
+        <button class="hint-btn" onclick="toggleHint('hintBox3')">💡 Hinweis</button>
+        <button class="syntax-btn" onclick="toggleHint('syntaxBox3')">📖 Syntax-Hilfe</button>
+
+        <div class="hint" id="hintBox3">
+            Verwende das Prädikat <code>hat_zugang</code> mit "lisa" als Argument – genau wie 
+            bei den anderen Fakten-Abfragen.
+        </div>
+        <div class="syntax-help" id="syntaxBox3">
+            <strong>Wichtig:</strong> Auch wenn <code>hat_zugang</code> eine Regel (kein direkter Fakt) ist, 
+            fragt man sie genauso ab wie einen Fakt: <code>hat_zugang(name).</code><br>
+            Prolog prüft dann automatisch beide Regeln (Schlüssel ODER Erlaubnis)!
+        </div>
+        <div class="feedback" id="feedback3"></div>
+    </div>
+
+    <!-- RAUM 4: FINALE - KOMPLEXE ANFRAGE SELBST SCHREIBEN -->
+    <div class="room final-room" id="room4">
+        <div class="story">
+            🎯 <strong>FINALE:</strong> Jetzt kommt die finale Regel, die bereits in der 
+            Wissensbasis vordefiniert ist:
+        </div>
+
+        <div class="prolog-box">
+<span class="rule">taeter(<span class="var">X</span>) <span class="operator">:-</span>
+im_gebaeude(<span class="var">X</span>, spaete_zeit),
+<span class="operator">\+</span> hat_alibi(<span class="var">X</span>),
+hat_zugang(<span class="var">X</span>).</span>
+        </div>
+
+        <div class="task-box">
+            📝 <strong>Finale Aufgabe:</strong> Schreibe eine Anfrage mit einer <strong>Variable</strong>, 
+            die Prolog dazu bringt, <strong>automatisch den Täter zu finden</strong> 
+            (ohne dass du einen Namen einsetzt!).
+        </div>
+
+        <div class="lock-icon">🔒</div>
+
+        <div class="terminal-container">
+            <div class="terminal-prompt">
+                <input type="text" class="prolog-input" id="query4" placeholder="taeter(...)." autocomplete="off">
+            </div>
+            <div class="output-line" id="output4"></div>
+        </div>
+
+        <button onclick="checkQuery4()">🔓 Fall lösen!</button>
+        <button class="hint-btn" onclick="toggleHint('hintBox4')">💡 Hinweis</button>
+        <div class="attempts-counter" id="attempts4"></div>
+
+        <div class="hint" id="hintBox4">
+            Denk an Raum 1 zurück: Dort hast du eine Variable statt eines Namens verwendet. 
+            Mach das jetzt mit <code>taeter</code>!
+        </div>
+        <div class="feedback" id="feedbackFinal"></div>
+    </div>
+
+    <!-- ERFOLGS-SCREEN -->
+    <div class="room success-screen" id="roomSuccess">
+        <h1>🎉 FALL GELÖST! 🎉</h1>
+        <div class="story">
+            Deine Anfrage <code id="finalQueryDisplay"></code> hat ergeben:<br><br>
+            <strong style="font-size: 1.3em; color: #ffd700;">X = lisa</strong><br><br>
+            Prolog hat automatisch alle drei Bedingungen der <code>taeter</code>-Regel geprüft 
+            und <strong>lisa</strong> als einzige Person gefunden, die alle erfüllt!
+        </div>
+        <div class="explanation-box">
+            📚 <strong>Was du gelernt hast:</strong>
+            <ul style="text-align: left; margin-top: 10px; padding-left: 20px;">
+                <li>Prolog-Anfragen enden immer mit einem <strong>Punkt</strong></li>
+                <li><strong>Variablen</strong> (Großbuchstabe) lassen Prolog nach Lösungen suchen</li>
+                <li><strong>Kleine Buchstaben</strong> = konkrete Werte (Atome)</li>
+                <li><code>\+</code> negiert eine Bedingung</li>
+                <li>Man kann <strong>Regeln genauso abfragen wie Fakten</strong> – Prolog löst die Logik im Hintergrund</li>
+                <li>Mit der richtigen Variable findet Prolog <strong>automatisch alle passenden Lösungen</strong>!</li>
+            </ul>
+        </div>
+        <p style="margin-top: 20px; font-size: 1.5em;">Deine Zeit: <span id="finalTime"></span></p>
+        <button onclick="location.reload()">🔄 Nochmal spielen</button>
+    </div>
+</div>
+
+<script>
+    let currentRoom = 0;
+    let clueCount = 0;
+    let startTime = Date.now();
+    let timerInterval;
+    let attempts1 = 0, attempts4 = 0;
+
+    function startTimer() {
+        timerInterval = setInterval(() => {
+            const elapsed = Math.floor((Date.now() - startTime) / 1000);
+            const minutes = Math.floor(elapsed / 60).toString().padStart(2, '0');
+            const seconds = (elapsed % 60).toString().padStart(2, '0');
+            document.getElementById('timer').textContent = `⏱️ ${minutes}:${seconds}`;
+        }, 1000);
+    }
+    startTimer();
+
+    function nextRoom(roomNum) {
+        document.getElementById('room' + currentRoom).classList.remove('active');
+        document.getElementById('room' + roomNum).classList.add('active');
+        currentRoom = roomNum;
+        updateProgress();
+    }
+
+    function updateProgress() {
+        document.getElementById('progressFill').style.width = (currentRoom / 4) * 100 + '%';
+    }
+
+    function toggleHint(id) {
+        document.getElementById(id).classList.toggle('show');
+    }
+
+    // Hilfsfunktion: Normalisiert Eingabe (Leerzeichen, Groß/Klein bei Atomen)
+    function normalize(str) {
+        return str.replace(/\s+/g, '').toLowerCase();
+    }
+
+    // Prüft ob die Struktur einer Prolog-Anfrage stimmt (Prädikat + Variable erkannt)
+    function matchesPattern(input, predicate, expectedAtom) {
+        const norm = input.trim();
+        // Muster: praedikat(VARIABLE, atom). mit variabler Reihenfolge möglich
+        const regex = new RegExp(`^${predicate}\\(\\s*([A-Z][a-zA-Z0-9_]*)\\s*,\\s*${expectedAtom}\\s*\\)\\s*\\.$`, 'i');
+        return regex.test(norm);
+    }
+
+    // RAUM 1: im_gebaeude(X, spaete_zeit).
+    function checkQuery1() {
+        const input = document.getElementById('query1').value.trim();
+        const output = document.getElementById('output1');
+        const feedback = document.getElementById('feedback1');
+        attempts1++;
+        document.getElementById('attempts1').textContent = `Versuche: ${attempts1}`;
+
+        if (matchesPattern(input, 'im_gebaeude', 'spaete_zeit')) {
+            output.className = 'output-line result-vars';
+            output.innerHTML = 'X = lisa ;<br>X = ben.';
+            feedback.className = 'feedback success';
+            feedback.innerHTML = '✅ Perfekte Syntax! Prolog findet Lisa und Ben als Lösungen.';
+            clueCount++;
+            document.getElementById('clueCount').textContent = clueCount;
+            setTimeout(() => nextRoom(2), 2000);
+        } else if (input.toLowerCase().includes('im_gebaeude') && !input.includes(',')) {
+            output.className = 'output-line result-false';
+            output.textContent = 'Syntax-Fehler: Fehlendes Komma oder Argument.';
+            feedback.className = 'feedback error';
+            feedback.innerHTML = '❌ Fast! Denk an die Struktur: <code>praedikat(Argument1, Argument2).</code>';
+        } else if (!input.match(/^[a-z_]+\(/i)) {
+            output.className = 'output-line result-false';
+            output.textContent = 'Syntax-Fehler: Unbekanntes Prädikat.';
+            feedback.className = 'feedback error';
+            feedback.innerHTML = '❌ Nutze das Prädikat <code>im_gebaeude</code> aus der Wissensbasis!';
+        } else {
+            output.className = 'output-line result-false';
+            output.textContent = 'false.';
+            feedback.className = 'feedback error';
+            feedback.innerHTML = '❌ Fast richtig, aber prüfe: Hast du eine <strong>Variable</strong> (Großbuchstabe) UND das Wort "spaete_zeit" verwendet? Endet die Zeile mit einem Punkt?';
+        }
+    }
+
+    // RAUM 2a: hat_alibi(lisa).
+    function checkQuery2a() {
+        const input = normalize(document.getElementById('query2a').value);
+        const output = document.getElementById('output2a');
+
+        if (input === 'hat_alibi(lisa).') {
+            output.className = 'output-line result-false';
+            output.textContent = 'false.';
+            document.getElementById('feedback2').className = 'feedback info';
+            document.getElementById('feedback2').innerHTML = 'ℹ️ Richtig abgefragt! Lisa hat kein Alibi in der Wissensbasis → false. Weiter zu Aufgabe 2!';
+        } else if (input === 'hat_alibi(ben).') {
+            output.className = 'output-line result-true';
+            output.textContent = 'true.';
+        } else {
+            output.className = 'output-line result-false';
+            output.textContent = 'Syntax-Fehler oder falscher Name.';
+        }
+    }
+
+    // RAUM 2b: \+ hat_alibi(lisa).
+    function checkQuery2b() {
+        const input = document.getElementById('query2b').value.trim();
+        const norm = normalize(input);
+        const output = document.getElementById('output2b');
+        const feedback = document.getElementById('feedback2');
+
+        if (norm === '\\+hat_alibi(lisa).') {
+            output.className = 'output-line result-true';
+            output.textContent = 'true.';
+            feedback.className = 'feedback success';
+            feedback.innerHTML = '✅ Exakt richtig! <code>\\+ hat_alibi(lisa)</code> ist wahr, weil Lisa KEIN Alibi hat.';
+            clueCount++;
+            document.getElementById('clueCount').textContent = clueCount;
+            setTimeout(() => nextRoom(3), 2000);
+        } else if (!input.includes('\\+')) {
+            output.className = 'output-line result-false';
+            output.textContent = 'Syntax-Fehler: Negation fehlt.';
+            feedback.className = 'feedback error';
+            feedback.innerHTML = '❌ Du brauchst das Negationssymbol <code>\\+</code> VOR der Abfrage!';
+        } else {
+            output.className = 'output-line result-false';
+            output.textContent = 'Syntax-Fehler.';
+            feedback.className = 'feedback error';
+            feedback.innerHTML = '❌ Prüfe die genaue Syntax: <code>\\+ hat_alibi(lisa).</code>';
+        }
+    }
+
+    // RAUM 3: hat_zugang(lisa).
+    function checkQuery3() {
+        const input = normalize(document.getElementById('query3').value);
+        const output = document.getElementById('output3');
+        const feedback = document.getElementById('feedback3');
+
+        if (input === 'hat_zugang(lisa).') {
+            output.className = 'output-line result-true';
+            output.textContent = 'true.';
+            feedback.className = 'feedback success';
+            feedback.innerHTML = '✅ Richtig! Prolog prüft beide Regeln automatisch und findet: Lisa hat einen Schlüssel → Zugang bestätigt!';
+            clueCount++;
+            document.getElementById('clueCount').textContent = clueCount;
+            setTimeout(() => nextRoom(4), 2000);
+        } else if (input.includes('hat_schluessel') || input.includes('erlaubnis')) {
+            output.className = 'output-line result-false';
+            output.textContent = 'Das funktioniert, ist aber nicht die Aufgabe!';
+            feedback.className = 'feedback error';
+            feedback.innerHTML = '❌ Nutze das <strong>Regel-Prädikat</strong> <code>hat_zugang</code>, nicht die einzelnen Fakten!';
+        } else {
+            output.className = 'output-line result-false';
+            output.textContent = 'Syntax-Fehler.';
+            feedback.className = 'feedback error';
+            feedback.innerHTML = '❌ Prüfe die Syntax: <code>hat_zugang(lisa).</code>';
+        }
+    }
+
+    // RAUM 4: taeter(X).
+    function checkQuery4() {
+        const input = document.getElementById('query4').value.trim();
+        const output = document.getElementById('output4');
+        const feedback = document.getElementById('feedbackFinal');
+        attempts4++;
+        document.getElementById('attempts4').textContent = `Versuche: ${attempts4}`;
+
+        // Erkennt taeter(VARIABLE).
+        const regex = /^taeter\(\s*([A-Z][a-zA-Z0-9_]*)\s*\)\s*\.$/i;
+        const match = input.match(regex);
+
+        if (match) {
+            output.className = 'output-line result-vars';
+            output.innerHTML = `${match[1]} = lisa.`;
+            feedback.className = 'feedback success';
+            feedback.innerHTML = `✅ PERFEKT! Deine Anfrage <code>${input}</code> hat automatisch 
+                den Täter gefunden: <strong>lisa</strong>!`;
+            
+            document.getElementById('finalQueryDisplay').textContent = input;
+            clueCount++;
+            document.getElementById('clueCount').textContent = clueCount;
+            clearInterval(timerInterval);
+            const elapsed = Math.floor((Date.now() - startTime) / 1000);
+            const minutes = Math.floor(elapsed / 60).toString().padStart(2, '0');
+            const seconds = (elapsed % 60).toString().padStart(2, '0');
+            document.getElementById('finalTime').textContent = `${minutes}:${seconds}`;
+            
+            setTimeout(() => {
+                document.getElementById('room4').classList.remove('active');
+                document.getElementById('roomSuccess').classList.add('active');
+                document.getElementById('progressFill').style.width = '100%';
+            }, 2500);
+        } else if (normalize(input) === 'taeter(lisa).') {
+            output.className = 'output-line result-true';
+            output.textContent = 'true.';
+            feedback.className = 'feedback error';
+            feedback.innerHTML = '⚠️ Das funktioniert, aber du musst den Namen schon KENNEN! Nutze stattdessen eine <strong>Variable</strong>, damit Prolog selbst sucht.';
+        } else if (!input.match(/^taeter\(/i)) {
+            output.className = 'output-line result-false';
+            output.textContent = 'Syntax-Fehler: Falsches Prädikat.';
+            feedback.className = 'feedback error';
+            feedback.innerHTML = '❌ Nutze das Prädikat <code>taeter</code>!';
+        } else {
+            output.className = 'output-line result-false';
+            output.textContent = 'Syntax-Fehler.';
+            feedback.className = 'feedback error';
+            feedback.innerHTML = '❌ Denk an die richtige Syntax: <code>taeter(Name).</code> mit einer Variable (Großbuchstabe)!';
+        }
+    }
+</script>
+
+</body>
+</html>
