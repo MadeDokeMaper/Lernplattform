@@ -1,0 +1,791 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<title>ER-Modell Editor (Chen-Notation) → SQL Generator</title>
+<style>
+    * { box-sizing: border-box; }
+    body {
+        font-family: 'Segoe UI', Arial, sans-serif;
+        margin: 0;
+        background: #f0f2f5;
+        color: #333;
+    }
+    header {
+        background: #2c3e50;
+        color: white;
+        padding: 12px 20px;
+        text-align: center;
+    }
+    header h1 { margin: 0; font-size: 22px; }
+    header p { margin: 4px 0 0; font-size: 13px; color: #bdc3c7; }
+
+    .container {
+        display: flex;
+        height: calc(100vh - 72px);
+    }
+
+    .toolbar {
+        width: 260px;
+        background: white;
+        padding: 15px;
+        border-right: 2px solid #ddd;
+        overflow-y: auto;
+    }
+    .toolbar h3 {
+        border-bottom: 2px solid #3498db;
+        padding-bottom: 5px;
+        color: #2c3e50;
+        font-size: 15px;
+    }
+    .toolbar button {
+        width: 100%;
+        padding: 10px;
+        margin: 5px 0;
+        background: #3498db;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        font-size: 13px;
+    }
+    .toolbar button:hover { background: #2980b9; }
+    .toolbar button.danger { background: #e74c3c; }
+    .toolbar button.danger:hover { background: #c0392b; }
+    .toolbar button.success { background: #27ae60; }
+    .toolbar button.success:hover { background: #229954; }
+    .toolbar button.relation-btn { background: #9b59b6; }
+    .toolbar button.relation-btn:hover { background: #8e44ad; }
+    .toolbar button.attr-btn { background: #16a085; }
+    .toolbar button.attr-btn:hover { background: #138d75; }
+
+    .instructions {
+        background: #eaf4fb;
+        border: 1px solid #3498db;
+        border-radius: 5px;
+        padding: 10px;
+        font-size: 11px;
+        margin-bottom: 10px;
+        line-height: 1.5;
+    }
+
+    #canvas-area {
+        flex: 1;
+        position: relative;
+        overflow: auto;
+        background-image:
+            linear-gradient(#e0e0e0 1px, transparent 1px),
+            linear-gradient(90deg, #e0e0e0 1px, transparent 1px);
+        background-size: 20px 20px;
+    }
+    #canvas {
+        position: relative;
+        width: 2400px;
+        height: 1600px;
+    }
+
+    svg#connections {
+        position: absolute;
+        top: 0; left: 0;
+        width: 100%; height: 100%;
+        pointer-events: none;
+        z-index: 1;
+    }
+
+    /* ---------- ENTITÄT: Rechteck ---------- */
+    .er-entity {
+        position: absolute;
+        min-width: 140px;
+        min-height: 60px;
+        background: #d6eaf8;
+        border: 2px solid #2980b9;
+        border-radius: 4px;
+        cursor: move;
+        z-index: 10;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 10px;
+        text-align: center;
+    }
+    .er-entity.weak {
+        border-style: double;
+        border-width: 6px;
+    }
+    .er-entity input {
+        background: transparent;
+        border: none;
+        font-weight: bold;
+        font-size: 15px;
+        text-align: center;
+        width: 100%;
+        color: #1a5276;
+    }
+    .er-entity .remove-btn {
+        position: absolute;
+        top: -10px; right: -10px;
+        width: 20px; height: 20px;
+        background: #e74c3c;
+        color: white;
+        border-radius: 50%;
+        text-align: center;
+        line-height: 20px;
+        cursor: pointer;
+        font-size: 12px;
+        font-weight: bold;
+        z-index: 25;
+    }
+
+    /* ---------- BEZIEHUNG: Raute ---------- */
+    .er-relation {
+        position: absolute;
+        width: 130px;
+        height: 70px;
+        background: #fdebd0;
+        border: 2px solid #e67e22;
+        cursor: move;
+        z-index: 10;
+        clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    .er-relation input {
+        background: transparent;
+        border: none;
+        font-weight: bold;
+        font-size: 12px;
+        text-align: center;
+        width: 85%;
+        color: #9a5b0f;
+    }
+    .er-relation .remove-btn {
+        position: absolute;
+        top: -8px; right: 10px;
+        width: 20px; height: 20px;
+        background: #e74c3c;
+        color: white;
+        border-radius: 50%;
+        text-align: center;
+        line-height: 20px;
+        cursor: pointer;
+        font-size: 12px;
+        font-weight: bold;
+        z-index: 25;
+    }
+
+    /* ---------- ATTRIBUT: Ellipse ---------- */
+    .er-attribute {
+        position: absolute;
+        width: 110px;
+        height: 50px;
+        background: #ebf5fb;
+        border: 2px solid #5dade2;
+        border-radius: 50%;
+        cursor: move;
+        z-index: 10;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        font-size: 11px;
+        padding: 4px;
+    }
+    .er-attribute.key {
+        text-decoration: underline;
+        background: #fef9e7;
+        border-color: #f1c40f;
+    }
+    .er-attribute.multivalued {
+        border-style: double;
+        border-width: 5px;
+    }
+    .er-attribute input[type="text"] {
+        background: transparent;
+        border: none;
+        font-size: 11px;
+        text-align: center;
+        width: 90%;
+    }
+    .er-attribute select {
+        font-size: 9px;
+        width: 90%;
+        border: none;
+        background: transparent;
+        margin-top: 2px;
+    }
+    .er-attribute .attr-controls {
+        display: flex;
+        gap: 3px;
+        font-size: 8px;
+        margin-top: 2px;
+    }
+    .er-attribute .attr-controls label {
+        display: flex;
+        align-items: center;
+        gap: 1px;
+    }
+    .er-attribute .remove-btn {
+        position: absolute;
+        top: -8px; right: 5px;
+        width: 16px; height: 16px;
+        background: #e74c3c;
+        color: white;
+        border-radius: 50%;
+        text-align: center;
+        line-height: 16px;
+        cursor: pointer;
+        font-size: 10px;
+        font-weight: bold;
+        z-index: 25;
+    }
+
+    /* ---------- Verbindungspunkte ---------- */
+    .connect-point {
+        position: absolute;
+        width: 12px;
+        height: 12px;
+        background: #27ae60;
+        border: 2px solid white;
+        border-radius: 50%;
+        cursor: crosshair;
+        z-index: 30;
+    }
+    .connect-point:hover { background: #1e8449; transform: scale(1.3); }
+    .cp-right { right: -7px; top: 50%; transform: translateY(-50%); }
+    .cp-left { left: -7px; top: 50%; transform: translateY(-50%); }
+    .cp-bottom { bottom: -7px; left: 50%; transform: translateX(-50%); }
+    .cp-top { top: -7px; left: 50%; transform: translateX(-50%); }
+
+    /* ---------- Kardinalitäts-Label an Linien ---------- */
+    .cardinality-label {
+        position: absolute;
+        background: white;
+        border: 1px solid #888;
+        border-radius: 3px;
+        padding: 1px 5px;
+        font-size: 11px;
+        font-weight: bold;
+        z-index: 15;
+        cursor: pointer;
+        color: #2c3e50;
+    }
+    .cardinality-label:hover { background: #f1f1f1; }
+
+    /* ---------- SQL Ausgabe ---------- */
+    #sql-output-area {
+        width: 460px;
+        background: #1e1e1e;
+        color: #dcdcdc;
+        padding: 15px;
+        overflow-y: auto;
+        display: flex;
+        flex-direction: column;
+    }
+    #sql-output-area h3 { color: #4ec9b0; margin-top: 0; font-size: 16px; }
+    #sql-code {
+        flex: 1;
+        background: #252526;
+        padding: 10px;
+        border-radius: 5px;
+        font-family: 'Consolas', monospace;
+        font-size: 12px;
+        white-space: pre-wrap;
+        word-break: break-word;
+        overflow-y: auto;
+        border: 1px solid #3c3c3c;
+    }
+    #sql-output-area button {
+        margin-top: 10px;
+        padding: 10px;
+        background: #27ae60;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        font-size: 14px;
+    }
+    #sql-output-area button:hover { background: #229954; }
+
+    .legend {
+        font-size: 11px;
+        line-height: 1.8;
+    }
+    .legend-shape {
+        display: inline-block;
+        width: 16px;
+        height: 16px;
+        margin-right: 6px;
+        vertical-align: middle;
+    }
+    .legend-rect { background: #d6eaf8; border: 2px solid #2980b9; }
+    .legend-diamond { background: #fdebd0; border: 2px solid #e67e22; clip-path: polygon(50% 0%,100% 50%,50% 100%,0% 50%); }
+    .legend-ellipse { background: #ebf5fb; border: 2px solid #5dade2; border-radius: 50%; }
+</style>
+</head>
+<body>
+
+<header>
+    <h1>🗂️ ER-Modell Editor (klassische Chen-Notation)</h1>
+    <p>Entitäten (Rechtecke), Attribute (Ellipsen) und Beziehungen (Rauten) erstellen und verbinden → automatisch SQL generieren</p>
+</header>
+
+<div class="container">
+    <div class="toolbar">
+        <div class="instructions">
+            <b>Anleitung:</b><br>
+            1. Entität erstellen (Rechteck)<br>
+            2. Attribute hinzufügen und mit Entität verbinden (grüne Punkte ziehen)<br>
+            3. Ein Attribut als Primärschlüssel markieren (PK-Haken)<br>
+            4. Beziehung (Raute) erstellen und mit zwei Entitäten verbinden<br>
+            5. Auf die Kardinalitäts-Labels an den Linien klicken, um sie zu ändern<br>
+            6. SQL generieren!
+        </div>
+
+        <h3>Elemente hinzufügen</h3>
+        <button onclick="addEntity()">▭ Neue Entität</button>
+        <button class="attr-btn" onclick="addAttribute()">⬭ Neues Attribut</button>
+        <button class="relation-btn" onclick="addRelation()">◇ Neue Beziehung</button>
+
+        <h3>Aktionen</h3>
+        <button class="success" onclick="generateSQL()">⚙️ SQL generieren</button>
+        <button class="danger" onclick="clearAll()">🗑️ Alles löschen</button>
+
+        <h3>Legende</h3>
+        <div class="legend">
+            <span class="legend-shape legend-rect"></span> Entität<br>
+            <span class="legend-shape legend-ellipse"></span> Attribut<br>
+            <span class="legend-shape legend-diamond"></span> Beziehung<br>
+            <u>Unterstrichen</u> = Primärschlüssel
+        </div>
+    </div>
+
+    <div id="canvas-area">
+        <div id="canvas">
+            <svg id="connections"></svg>
+        </div>
+    </div>
+
+    <div id="sql-output-area">
+        <h3>📄 Generierter SQL-Code</h3>
+        <div id="sql-code">-- Klicke auf "SQL generieren", um den Code zu erstellen --</div>
+        <button onclick="copySQL()">📋 SQL kopieren</button>
+    </div>
+</div>
+
+<script>
+// ============ DATENMODELL ============
+let elements = {}; // id -> {type:'entity'|'attribute'|'relation', name, x, y, el, ...}
+let connections = []; // {id, from, to, cardinality (nur bei entity-relation)}
+let counter = 0;
+let connCounter = 0;
+
+function uid(prefix) {
+    counter++;
+    return prefix + '_' + counter;
+}
+
+// ============ ENTITÄT ERSTELLEN ============
+function addEntity(x = 150, y = 150, name = null) {
+    const id = uid('ent');
+    const entityName = name || ('Entitaet' + counter);
+    elements[id] = { type: 'entity', name: entityName, x, y };
+
+    const div = document.createElement('div');
+    div.className = 'er-entity';
+    div.id = id;
+    div.style.left = x + 'px';
+    div.style.top = y + 'px';
+    div.innerHTML = `
+        <span class="remove-btn" onclick="removeElement('${id}')">✕</span>
+        <input type="text" value="${entityName}" onchange="renameElement('${id}', this.value)">
+        <div class="connect-point cp-right" onmousedown="startConnect(event,'${id}')"></div>
+        <div class="connect-point cp-left" onmousedown="startConnect(event,'${id}')"></div>
+        <div class="connect-point cp-bottom" onmousedown="startConnect(event,'${id}')"></div>
+        <div class="connect-point cp-top" onmousedown="startConnect(event,'${id}')"></div>
+    `;
+    document.getElementById('canvas').appendChild(div);
+    makeDraggable(div);
+}
+
+// ============ BEZIEHUNG ERSTELLEN ============
+function addRelation(x = 400, y = 150, name = null) {
+    const id = uid('rel');
+    const relName = name || ('hat' + counter);
+    elements[id] = { type: 'relation', name: relName, x, y };
+
+    const div = document.createElement('div');
+    div.className = 'er-relation';
+    div.id = id;
+    div.style.left = x + 'px';
+    div.style.top = y + 'px';
+    div.innerHTML = `
+        <span class="remove-btn" onclick="removeElement('${id}')">✕</span>
+        <input type="text" value="${relName}" onchange="renameElement('${id}', this.value)">
+        <div class="connect-point cp-right" onmousedown="startConnect(event,'${id}')"></div>
+        <div class="connect-point cp-left" onmousedown="startConnect(event,'${id}')"></div>
+        <div class="connect-point cp-bottom" onmousedown="startConnect(event,'${id}')"></div>
+        <div class="connect-point cp-top" onmousedown="startConnect(event,'${id}')"></div>
+    `;
+    document.getElementById('canvas').appendChild(div);
+    makeDraggable(div);
+}
+
+// ============ ATTRIBUT ERSTELLEN ============
+function addAttribute(x = 150, y = 320, name = null) {
+    const id = uid('attr');
+    const attrName = name || 'attribut';
+    elements[id] = { type: 'attribute', name: attrName, dataType: 'VARCHAR(255)', pk: false, multivalued: false, x, y };
+
+    const div = document.createElement('div');
+    div.className = 'er-attribute';
+    div.id = id;
+    div.style.left = x + 'px';
+    div.style.top = y + 'px';
+    div.innerHTML = `
+        <span class="remove-btn" onclick="removeElement('${id}')">✕</span>
+        <input type="text" value="${attrName}" onchange="renameElement('${id}', this.value)">
+        <select onchange="updateAttrField('${id}','dataType',this.value)">
+            ${['INT','VARCHAR(255)','TEXT','DATE','DATETIME','FLOAT','DECIMAL(10,2)','BOOLEAN'].map(t =>
+                `<option value="${t}">${t}</option>`).join('')}
+        </select>
+        <div class="attr-controls">
+            <label><input type="checkbox" onchange="toggleAttrFlag('${id}','pk',this.checked)"> PK</label>
+            <label><input type="checkbox" onchange="toggleAttrFlag('${id}','multivalued',this.checked)"> Multi</label>
+        </div>
+        <div class="connect-point cp-right" onmousedown="startConnect(event,'${id}')"></div>
+        <div class="connect-point cp-left" onmousedown="startConnect(event,'${id}')"></div>
+        <div class="connect-point cp-bottom" onmousedown="startConnect(event,'${id}')"></div>
+        <div class="connect-point cp-top" onmousedown="startConnect(event,'${id}')"></div>
+    `;
+    document.getElementById('canvas').appendChild(div);
+    makeDraggable(div);
+}
+
+function updateAttrField(id, field, value) {
+    elements[id][field] = value;
+}
+
+function toggleAttrFlag(id, field, value) {
+    elements[id][field] = value;
+    const el = document.getElementById(id);
+    if (field === 'pk') el.classList.toggle('key', value);
+    if (field === 'multivalued') el.classList.toggle('multivalued', value);
+}
+
+function renameElement(id, newName) {
+    elements[id].name = newName.trim() || elements[id].name;
+    redrawConnections();
+}
+
+function removeElement(id) {
+    delete elements[id];
+    const el = document.getElementById(id);
+    if (el) el.remove();
+    connections = connections.filter(c => c.from !== id && c.to !== id);
+    redrawConnections();
+}
+
+// ============ DRAG & DROP ============
+function makeDraggable(el) {
+    let offsetX, offsetY, dragging = false;
+
+    el.addEventListener('mousedown', (e) => {
+        if (e.target.tagName === 'INPUT' || e.target.tagName === 'SELECT' ||
+            e.target.classList.contains('remove-btn') ||
+            e.target.classList.contains('connect-point')) return;
+        dragging = true;
+        offsetX = e.clientX - el.offsetLeft;
+        offsetY = e.clientY - el.offsetTop;
+        e.preventDefault();
+    });
+
+    document.addEventListener('mousemove', (e) => {
+        if (dragging) {
+            const newX = e.clientX - offsetX;
+            const newY = e.clientY - offsetY;
+            el.style.left = newX + 'px';
+            el.style.top = newY + 'px';
+            if (elements[el.id]) {
+                elements[el.id].x = newX;
+                elements[el.id].y = newY;
+            }
+            redrawConnections();
+        }
+    });
+
+    document.addEventListener('mouseup', () => dragging = false);
+}
+
+// ============ VERBINDUNGEN ============
+function startConnect(e, startId) {
+    e.stopPropagation();
+    e.preventDefault();
+
+    function onMouseUp(ev) {
+        const targetEl = ev.target.closest('.er-entity, .er-relation, .er-attribute');
+        if (targetEl && targetEl.id !== startId) {
+            const targetId = targetEl.id;
+            const startType = elements[startId].type;
+            const targetType = elements[targetId].type;
+
+            // Gültige Verbindungen: entity<->attribute, relation<->attribute, entity<->relation
+            const validPairs = [
+                ['entity', 'attribute'], ['attribute', 'entity'],
+                ['relation', 'attribute'], ['attribute', 'relation'],
+                ['entity', 'relation'], ['relation', 'entity']
+            ];
+            const pairValid = validPairs.some(p => p[0] === startType && p[1] === targetType);
+
+            if (pairValid) {
+                // Doppelte Verbindung vermeiden
+                const exists = connections.some(c =>
+                    (c.from === startId && c.to === targetId) ||
+                    (c.from === targetId && c.to === startId)
+                );
+                if (!exists) {
+                    connCounter++;
+                    const conn = { id: 'conn_' + connCounter, from: startId, to: targetId };
+                    // Kardinalität nur sinnvoll bei entity-relation
+                    if ((startType === 'entity' && targetType === 'relation') ||
+                        (startType === 'relation' && targetType === 'entity')) {
+                        conn.cardinality = '1';
+                    }
+                    connections.push(conn);
+                    redrawConnections();
+                }
+            } else {
+                alert('Diese Verbindung ist nicht erlaubt!\nErlaubt: Entität↔Attribut, Beziehung↔Attribut, Entität↔Beziehung');
+            }
+        }
+        document.removeEventListener('mouseup', onMouseUp);
+    }
+    document.addEventListener('mouseup', onMouseUp);
+}
+
+function getElementCenter(id) {
+    const el = document.getElementById(id);
+    if (!el) return null;
+    return {
+        x: el.offsetLeft + el.offsetWidth / 2,
+        y: el.offsetTop + el.offsetHeight / 2
+    };
+}
+
+function redrawConnections() {
+    const svg = document.getElementById('connections');
+    svg.innerHTML = '';
+    document.querySelectorAll('.cardinality-label').forEach(l => l.remove());
+
+    connections.forEach(conn => {
+        const a = getElementCenter(conn.from);
+        const b = getElementCenter(conn.to);
+        if (!a || !b) return;
+
+        const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+        line.setAttribute('x1', a.x);
+        line.setAttribute('y1', a.y);
+        line.setAttribute('x2', b.x);
+        line.setAttribute('y2', b.y);
+        line.setAttribute('stroke', '#555');
+        line.setAttribute('stroke-width', '2');
+        svg.appendChild(line);
+
+        // Kardinalitäts-Label nur zwischen Entität und Beziehung anzeigen
+        if (conn.cardinality) {
+            const midX = a.x + (b.x - a.x) * 0.25;
+            const midY = a.y + (b.y - a.y) * 0.25;
+            const label = document.createElement('div');
+            label.className = 'cardinality-label';
+            label.style.left = midX + 'px';
+            label.style.top = midY + 'px';
+            label.textContent = conn.cardinality;
+            label.title = 'Klicken, um Kardinalität zu ändern';
+            label.onclick = () => cycleCardinality(conn.id);
+            document.getElementById('canvas').appendChild(label);
+        }
+    });
+}
+
+function cycleCardinality(connId) {
+    const options = ['1', 'n', 'm', 'c'];
+    const conn = connections.find(c => c.id === connId);
+    let idx = options.indexOf(conn.cardinality);
+    conn.cardinality = options[(idx + 1) % options.length];
+    redrawConnections();
+}
+
+function clearAll() {
+    if (!confirm('Wirklich alles löschen?')) return;
+    elements = {};
+    connections = [];
+    document.querySelectorAll('.er-entity, .er-relation, .er-attribute').forEach(e => e.remove());
+    document.querySelectorAll('.cardinality-label').forEach(l => l.remove());
+    document.getElementById('connections').innerHTML = '';
+    document.getElementById('sql-code').textContent = '-- Klicke auf "SQL generieren", um den Code zu erstellen --';
+    counter = 0;
+    connCounter = 0;
+}
+
+// ============ SQL GENERIERUNG ============
+function sanitize(name) {
+    return name.replace(/[^a-zA-Z0-9_äöüÄÖÜß]/g, '_');
+}
+
+function getConnectedElements(id, type) {
+    // Gibt alle direkt verbundenen Elemente eines bestimmten Typs zurück
+    const result = [];
+    connections.forEach(c => {
+        if (c.from === id && elements[c.to]?.type === type) result.push({ id: c.to, conn: c });
+        if (c.to === id && elements[c.from]?.type === type) result.push({ id: c.from, conn: c });
+    });
+    return result;
+}
+
+function generateSQL() {
+    let sql = '-- Automatisch generiertes SQL-Tabellenschema\n-- Erstellt mit dem ER-Modell Editor (Chen-Notation)\n\n';
+
+    const entityIds = Object.keys(elements).filter(id => elements[id].type === 'entity');
+    const relationIds = Object.keys(elements).filter(id => elements[id].type === 'relation');
+
+    // Für jede Entität: eigene Attribute sammeln
+    let entityAttributes = {}; // entId -> [{name, type, pk}]
+    entityIds.forEach(entId => {
+        const attrs = getConnectedElements(entId, 'attribute');
+        entityAttributes[entId] = attrs.map(a => {
+            const attrEl = elements[a.id];
+            return { name: attrEl.name, type: attrEl.dataType, pk: attrEl.pk };
+        });
+        // Falls kein PK gesetzt wurde, automatisch id hinzufügen
+        if (!entityAttributes[entId].some(a => a.pk)) {
+            entityAttributes[entId].unshift({ name: 'id', type: 'INT', pk: true });
+        }
+    });
+
+    // Zusätzliche FK-Spalten durch Beziehungen bestimmen
+    let extraFKs = {}; // entId -> [{col, type, refTable, refCol}]
+    entityIds.forEach(id => extraFKs[id] = []);
+
+    relationIds.forEach(relId => {
+        const connectedEntities = getConnectedElements(relId, 'entity');
+        const relationAttrs = getConnectedElements(relId, 'attribute').map(a => elements[a.id]);
+
+        if (connectedEntities.length === 2) {
+            const [e1, e2] = connectedEntities;
+            const card1 = e1.conn.cardinality || '1';
+            const card2 = e2.conn.cardinality || '1';
+
+            const pk1 = entityAttributes[e1.id].find(a => a.pk);
+            const pk2 = entityAttributes[e2.id].find(a => a.pk);
+
+            // 1:n -> FK auf "n"-Seite
+            if (card1 === '1' && card2 === 'n') {
+                extraFKs[e2.id].push({
+                    col: `${sanitize(elements[e1.id].name).toLowerCase()}_${pk1.name}`,
+                    type: pk1.type,
+                    refTable: sanitize(elements[e1.id].name),
+                    refCol: pk1.name
+                });
+            } else if (card1 === 'n' && card2 === '1') {
+                extraFKs[e1.id].push({
+                    col: `${sanitize(elements[e2.id].name).toLowerCase()}_${pk2.name}`,
+                    type: pk2.type,
+                    refTable: sanitize(elements[e2.id].name),
+                    refCol: pk2.name
+                });
+            } else if (card1 === '1' && card2 === '1') {
+                extraFKs[e2.id].push({
+                    col: `${sanitize(elements[e1.id].name).toLowerCase()}_${pk1.name}`,
+                    type: pk1.type,
+                    refTable: sanitize(elements[e1.id].name),
+                    refCol: pk1.name
+                });
+            } else if (card1 === 'n' && card2 === 'n' || card1 === 'm' || card2 === 'm') {
+                // n:m -> Verknüpfungstabelle inkl. Beziehungs-Attributen
+                const junctionName = sanitize(elements[relId].name) || `${sanitize(elements[e1.id].name)}_${sanitize(elements[e2.id].name)}`;
+                sql += `-- Verknüpfungstabelle für Beziehung "${elements[relId].name}" (n:m)\n`;
+                sql += `CREATE TABLE ${junctionName} (\n`;
+                let jLines = [];
+                jLines.push(`    ${sanitize(elements[e1.id].name).toLowerCase()}_${pk1.name} ${pk1.type} NOT NULL`);
+                jLines.push(`    ${sanitize(elements[e2.id].name).toLowerCase()}_${pk2.name} ${pk2.type} NOT NULL`);
+                // Beziehungsattribute mit aufnehmen
+                relationAttrs.forEach(attr => {
+                    jLines.push(`    ${sanitize(attr.name)} ${attr.dataType}`);
+                });
+                jLines.push(`    PRIMARY KEY (${sanitize(elements[e1.id].name).toLowerCase()}_${pk1.name}, ${sanitize(elements[e2.id].name).toLowerCase()}_${pk2.name})`);
+                jLines.push(`    FOREIGN KEY (${sanitize(elements[e1.id].name).toLowerCase()}_${pk1.name}) REFERENCES ${sanitize(elements[e1.id].name)}(${pk1.name})`);
+                jLines.push(`    FOREIGN KEY (${sanitize(elements[e2.id].name).toLowerCase()}_${pk2.name}) REFERENCES ${sanitize(elements[e2.id].name)}(${pk2.name})`);
+                sql += jLines.join(',\n').replace(/,(\s+PRIMARY KEY)/, '$1').replace(/,(\s+FOREIGN KEY)/g, ',$1');
+                sql += '\n);\n\n';
+            }
+        }
+    });
+
+    // Tabellen für Entitäten erstellen
+    entityIds.forEach(id => {
+        const ent = elements[id];
+        const tableName = sanitize(ent.name);
+        sql += `-- Tabelle: ${ent.name}\n`;
+        sql += `CREATE TABLE ${tableName} (\n`;
+
+        let lines = [];
+        let pkCols = [];
+
+        entityAttributes[id].forEach(attr => {
+            let line = `    ${sanitize(attr.name)} ${attr.type}`;
+            lines.push(line);
+            if (attr.pk) pkCols.push(sanitize(attr.name));
+        });
+
+        extraFKs[id].forEach(fk => {
+            lines.push(`    ${sanitize(fk.col)} ${fk.type}`);
+        });
+
+        if (pkCols.length > 0) {
+            lines.push(`    PRIMARY KEY (${pkCols.join(', ')})`);
+        }
+
+        extraFKs[id].forEach(fk => {
+            lines.push(`    FOREIGN KEY (${sanitize(fk.col)}) REFERENCES ${fk.refTable}(${fk.refCol})`);
+        });
+
+        sql += lines.join(',\n');
+        sql += '\n);\n\n';
+    });
+
+    document.getElementById('sql-code').textContent = sql;
+}
+
+function copySQL() {
+    const text = document.getElementById('sql-code').textContent;
+    navigator.clipboard.writeText(text).then(() => {
+        alert('SQL-Code wurde in die Zwischenablage kopiert!');
+    });
+}
+
+// ============ BEISPIEL BEIM START ============
+window.onload = () => {
+    addEntity(100, 100, 'Kunde');
+    addAttribute(80, 250, 'kunden_id');
+    toggleAttrFlagAuto('attr_2', 'pk', true);
+    addAttribute(220, 250, 'name');
+};
+
+function toggleAttrFlagAuto(id, field, value) {
+    // Hilfsfunktion, um beim Start automatisch PK zu setzen
+    setTimeout(() => {
+        if (elements[id]) {
+            elements[id][field] = value;
+            const el = document.getElementById(id);
+            if (el) {
+                el.classList.toggle('key', value);
+                const checkbox = el.querySelector('input[type="checkbox"]');
+                if (checkbox) checkbox.checked = value;
+            }
+        }
+    }, 50);
+}
+</script>
+
+</body>
+</html>
