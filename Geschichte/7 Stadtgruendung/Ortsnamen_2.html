@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<title>Ortsendungen in Deutschland</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+  :root { --bg:#10151c; --panel:#1a222d; --text:#e6edf3; --muted:#8b98a7; --land:#232e3b; --border:#3a4859; }
+  * { box-sizing:border-box; }
+  body { margin:0; font-family:system-ui,sans-serif; background:var(--bg); color:var(--text); display:flex; height:100vh; }
+  #side { width:300px; background:var(--panel); padding:14px; display:flex; flex-direction:column; gap:10px; overflow:hidden; }
+  #side h1 { font-size:18px; margin:0; }
+  #search { padding:8px; border-radius:6px; border:1px solid var(--border); background:var(--bg); color:var(--text); }
+  #list { overflow-y:auto; flex:1; }
+  .item { display:flex; align-items:center; gap:8px; padding:5px 6px; border-radius:5px; cursor:pointer; }
+  .item:hover { background:#243040; }
+  .item input { margin:0; }
+  .dot { width:12px; height:12px; border-radius:50%; flex:none; }
+  .count { margin-left:auto; color:var(--muted); font-size:12px; }
+  #map { flex:1; position:relative; }
+  svg { width:100%; height:100%; }
+  .land { fill:var(--land); stroke:var(--border); stroke-width:.6; }
+  .place { fill-opacity:.75; }
+  #tip { position:absolute; pointer-events:none; background:#000c; padding:4px 8px; border-radius:4px; font-size:13px; display:none; }
+  #status { color:var(--muted); font-size:12px; }
+  button { padding:6px; border-radius:6px; border:1px solid var(--border); background:var(--bg); color:var(--text); cursor:pointer; }
+</style>
+</head>
+<body>
+<div id="side">
+  <h1>Ortsendungen</h1>
+  <input id="search" placeholder="Endung suchen oder eigene eingeben, z. B. -rode">
+  <button id="clear">Alle abwählen</button>
+  <div id="status">Lade Daten …</div>
+  <div id="list"></div>
+</div>
+<div id="map">
+  <svg id="svg"></svg>
+  <div id="tip"></div>
+</div>
+
+<script>
+/* ===== Zentrale Konfiguration: alle Einstellungen nur hier ===== */
+const CONFIG = {
+  sources: {
+    geo: "4_niedrig.geo.json",
+    places: "GN250.csv"
+  },
+  csv: {
+    delimiter: ";",
+    columns: { name: "NAME", kind: "OBA", east: "RECHTS", north: "HOCH" }
+  },
+  // Zulässige Objektarten (Spalte OBA). null = alle Objekte verwenden.
+  allowedKinds: ["AX_Ortslage"],
+  // Koordinatensystem der CSV: UTM-Zone 32N, ETRS89 (EPSG:25832)
+  utm: { zone: 32, northern: true },
+  suffixes: ["-dorf", "-hausen", "-heim", "-bach", "-berg", "-burg", "-stadt", "-feld",
+             "-rode", "-ingen", "-au", "-dorf", "-hofen", "-kirchen", "-see", "-stein",
+             "-wald", "-tal", "-brück", "-weiler", "-hagen", "-bruch", "-lohe", "-büttel"],
+  minPlaces: 5,
+  dotRadius: 2.5,
+  palette: ["#ff6b6b","#4dabf7","#69db7c","#ffd43b","#da77f2","#ff922b","#38d9a9","#f783ac"]
+};
+
+/* ===== Hilfsfunktionen ===== */
+const $ = id => document.getElementById(id);
+const norm = s => s.toLowerCase().replace(/^-/, "");
+
+async function loadText(url) {
+  const r = await fetch(url);
+  if (!r.ok) throw new Error(`${url} (HTTP ${r.status})`);
+  return r.text();
+}
+
+/* ===== UTM (ETRS89 / GRS80) -> WGS84 Länge/Breite ===== */
+function utmToLonLat(east, north, { zone, northern }) {
+  const a = 6378137, f = 1 / 298.257222101, k0 = 0.9996;
+  const e2 = f * (2 - f), ep2 = e2 / (1 - e2);
+  const x = east - 500000, y = northern ? north : north - 10000000;
+  const M = y / k0;
+  const mu = M / (a * (1 - e2 / 4 - 3 * e2 ** 2 / 64 - 5 * e2 ** 3 / 256));
+  const e1 = (1 - Math.sqrt(1 - e2)) / (1 + Math.sqrt(1 - e2));
+  const phi1 = mu
+    + (3 * e1 / 2 - 27 * e1 ** 3 / 32) * Math.sin(2 * mu)
+    + (21 * e1 ** 2 / 16 - 55 * e1 ** 4 / 32) * Math.sin(4 * mu)
+    + (151 * e1 ** 3 / 96) * Math.sin(6 * mu);
+  const s = Math.sin(phi1), c = Math.cos(phi1), t = Math.tan(phi1);
+  const N1 = a / Math.sqrt(1 - e2 * s * s);
+  const T1 = t * t, C1 = ep2 * c * c;
+  const R1 = a * (1 - e2) / Math.pow(1 - e2 * s * s, 1.5);
+  const D = x / (N1 * k0);
+  const lat = phi1 - (N1 * t / R1) * (D ** 2 / 2
+    - (5 + 3 * T1 + 10 * C1 - 4 * C1 ** 2 - 9 * ep2) * D ** 4 / 24
+    + (61 + 90 * T1 + 298 * C1 + 45 * T1 ** 2 - 252 * ep2 - 3 * C1 ** 2) * D ** 6 / 720);
+  const lon0 = ((zone - 1) * 6 - 180 + 3) * Math.PI / 180;
+  const lon = lon0 + (D - (1 + 2 * T1 + C1) * D ** 3 / 6
+    + (5 - 2 * C1 + 28 * T1 - 3 * C1 ** 2 + 8 * ep2 + 24 * T1 ** 2) * D ** 5 / 120) / c;
+  return [lon * 180 / Math.PI, lat * 180 / Math.PI];
+}
+
+/* ===== CSV-Parser: nur Spalten aus CONFIG.csv.columns werden gelesen ===== */
+function parsePlaces(text) {
+  const { delimiter, columns } = CONFIG.csv;
+  const lines = text.split(/\r?\n/);
+  const header = lines[0].replace(/^\uFEFF/, "").split(delimiter);
+  const idx = Object.fromEntries(Object.entries(columns).map(([k, col]) => {
+    const i = header.indexOf(col);
+    if (i < 0) throw new Error(`Spalte "${col}" fehlt in der CSV`);
+    return [k, i];
+  }));
+  const seen = new Set(), out = [];
+  for (let i = 1; i < lines.length; i++) {
+    if (!lines[i]) continue;
+    const p = lines[i].split(delimiter);
+    if (CONFIG.allowedKinds && !CONFIG.allowedKinds.includes(p[idx.kind])) continue;
+    const name = (p[idx.name] || "").trim();
+    const east = parseFloat(p[idx.east]), north = parseFloat(p[idx.north]);
+    if (!name || isNaN(east) || isNaN(north)) continue;
+    const key = `${name}|${Math.round(east / 1000)}|${Math.round(north / 1000)}`;
+    if (seen.has(key)) continue;
+    seen.add(key);
+    const [lon, lat] = utmToLonLat(east, north, CONFIG.utm);
+    out.push({ name, lon, lat, key: norm(name) });
+  }
+  return out;
+}
+
+/* ===== Zustand ===== */
+const state = { places: [], active: new Map(), project: null, colorIdx: 0 };
+
+const matches = (place, suffix) => place.key.endsWith(norm(suffix));
+const countFor = suffix => state.places.reduce((n, p) => n + matches(p, suffix), 0);
+
+/* ===== Projektion (einfache, auf die Kartengröße skalierte Mercator-Näherung) ===== */
+function makeProjection(features, w, h) {
+  const pts = [];
+  const walk = c => typeof c[0] === "number" ? pts.push(c) : c.forEach(walk);
+  features.forEach(f => walk(f.geometry.coordinates));
+  const lons = pts.map(p => p[0]), lats = pts.map(p => p[1]);
+  const [minLon, maxLon, minLat, maxLat] = [Math.min(...lons), Math.max(...lons), Math.min(...lats), Math.max(...lats)];
+  const midLat = (minLat + maxLat) / 2;
+  const kx = Math.cos(midLat * Math.PI / 180);
+  const spanX = (maxLon - minLon) * kx, spanY = maxLat - minLat;
+  const scale = Math.min(w / spanX, h / spanY) * 0.95;
+  const offX = (w - spanX * scale) / 2, offY = (h - spanY * scale) / 2;
+  return ([lon, lat]) => [offX + (lon - minLon) * kx * scale, offY + (maxLat - lat) * scale];
+}
+
+/* ===== Rendering ===== */
+function drawLand(features) {
+  const toPath = ring => "M" + ring.map(c => state.project(c).join(",")).join("L") + "Z";
+  const polys = g => g.type === "Polygon" ? [g.coordinates] : g.coordinates;
+  const d = features.flatMap(f => polys(f.geometry).flatMap(poly => poly.map(toPath))).join("");
+  $("land").innerHTML = `<path class="land" d="${d}"/>`;
+}
+
+function renderPlaces() {
+  const g = $("places");
+  g.replaceChildren();
+  const tip = $("tip");
+  state.active.forEach((color, suffix) => {
+    state.places.filter(p => matches(p, suffix)).forEach(p => {
+      const [x, y] = state.project([p.lon, p.lat]);
+      const c = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+      c.setAttribute("cx", x); c.setAttribute("cy", y);
+      c.setAttribute("r", CONFIG.dotRadius); c.setAttribute("fill", color);
+      c.setAttribute("class", "place");
+      c.addEventListener("mousemove", e => {
+        tip.style.display = "block";
+        tip.style.left = e.offsetX + 12 + "px"; tip.style.top = e.offsetY + 12 + "px";
+        tip.textContent = p.name;
+      });
+      c.addEventListener("mouseleave", () => tip.style.display = "none");
+      g.appendChild(c);
+    });
+  });
+}
+
+function toggle(suffix, on) {
+  if (on) {
+    state.active.set(suffix, CONFIG.palette[state.colorIdx++ % CONFIG.palette.length]);
+  } else {
+    state.active.delete(suffix);
+  }
+  renderPlaces(); renderList();
+}
+
+function renderList() {
+  const q = norm($("search").value.trim());
+  const custom = q ? ["-" + q] : [];
+  const all = [...new Set([...CONFIG.suffixes, ...state.active.keys(), ...custom])];
+  const rows = all.map(s => ({ s, n: countFor(s) }))
+    .filter(r => state.active.has(r.s) || r.s === "-" + q || (r.n >= CONFIG.minPlaces && norm(r.s).includes(q)))
+    .sort((a, b) => b.n - a.n);
+  $("list").replaceChildren(...rows.map(({ s, n }) => {
+    const d = document.createElement("label"); d.className = "item";
+    const on = state.active.has(s);
+    d.innerHTML = `<input type="checkbox" ${on ? "checked" : ""}>
+      <span class="dot" style="background:${on ? state.active.get(s) : "transparent"};border:1px solid var(--border)"></span>
+      <span>${s}</span><span class="count">${n}</span>`;
+    d.querySelector("input").addEventListener("change", e => toggle(s, e.target.checked));
+    return d;
+  }));
+}
+
+/* ===== Start ===== */
+async function init() {
+  try {
+    $("status").textContent = "Lade Daten …";
+    const [geo, csv] = await Promise.all([
+      loadText(CONFIG.sources.geo).then(JSON.parse),
+      loadText(CONFIG.sources.places)
+    ]);
+    state.places = parsePlaces(csv);
+    const box = $("map").getBoundingClientRect();
+    $("svg").setAttribute("viewBox", `0 0 ${box.width} ${box.height}`);
+    state.project = makeProjection(geo.features, box.width, box.height);
+    drawLand(geo.features);
+    $("status").textContent = `${state.places.length} Orte geladen`;
+    renderList();
+  } catch (e) {
+    $("status").textContent = "Fehler beim Laden: " + e.message;
+  }
+}
+
+$("search").addEventListener("input", renderList);
+$("clear").addEventListener("click", () => { state.active.clear(); renderPlaces(); renderList(); });
+init();
+</script>
+</body>
+</html>
