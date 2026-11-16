@@ -1,0 +1,609 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Das PROLOG-Gruselkabinett</title>
+
+  <style>
+    :root {
+      color-scheme: dark;
+      --panel: #1c1520;
+      --panel-light: #281e2c;
+      --red: #e04b52;
+      --gold: #e9c77b;
+      --text: #f2e9df;
+      --muted: #c3b4c0;
+      --green: #76d6a2;
+      --error: #ffb3a6;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background:
+        radial-gradient(ellipse at top, #382137 0, transparent 50%),
+        linear-gradient(160deg, #100c12, #17101b 55%, #0b090e);
+      color: var(--text);
+      font-family: Georgia, "Times New Roman", serif;
+      line-height: 1.6;
+    }
+
+    header {
+      padding: 44px 20px 32px;
+      text-align: center;
+      border-bottom: 1px solid #56343e;
+      background: linear-gradient(#160f19cc, #100c12ee);
+    }
+
+    header .symbol {
+      font-size: 2.5rem;
+      filter: drop-shadow(0 0 12px #e04b5288);
+    }
+
+    h1 {
+      margin: 8px 0;
+      color: var(--red);
+      font-size: clamp(2rem, 6vw, 3.5rem);
+      letter-spacing: 0.06em;
+      text-shadow: 0 0 22px #e04b5266;
+    }
+
+    header p {
+      max-width: 720px;
+      margin: 0 auto;
+      color: var(--muted);
+    }
+
+    main {
+      width: min(940px, calc(100% - 32px));
+      margin: 32px auto 64px;
+    }
+
+    .intro,
+    .challenge {
+      background: linear-gradient(145deg, var(--panel-light), var(--panel));
+      border: 1px solid #493341;
+      border-radius: 12px;
+      box-shadow: 0 12px 32px #0005;
+    }
+
+    .intro {
+      padding: 22px;
+      margin-bottom: 24px;
+    }
+
+    .database-comment {
+      display: block;
+      overflow-x: auto;
+      padding: 14px 16px;
+      border-left: 4px solid var(--gold);
+      border-radius: 4px;
+      background: #100d12;
+      color: var(--gold);
+      font: 1rem/1.5 "Courier New", monospace;
+      white-space: nowrap;
+    }
+
+    .notice {
+      color: var(--muted);
+      font-size: 0.95rem;
+    }
+
+    .challenge {
+      margin: 18px 0;
+      padding: 22px;
+    }
+
+    .challenge h2 {
+      margin: 0 0 8px;
+      color: var(--gold);
+      font-size: 1.3rem;
+    }
+
+    .task {
+      margin: 0 0 16px;
+    }
+
+    .predicate {
+      color: var(--gold);
+      font-family: "Courier New", monospace;
+    }
+
+    label {
+      display: block;
+      margin: 14px 0 6px;
+      color: var(--muted);
+      font-weight: bold;
+    }
+
+    textarea {
+      width: 100%;
+      min-height: 105px;
+      resize: vertical;
+      border: 1px solid #5c4557;
+      border-radius: 7px;
+      background: #100d12;
+      color: var(--text);
+      padding: 12px;
+      font: 0.95rem/1.5 "Courier New", monospace;
+    }
+
+    textarea:focus {
+      outline: 2px solid #e04b5288;
+      border-color: var(--red);
+    }
+
+    button {
+      margin-top: 16px;
+      padding: 10px 16px;
+      border: 0;
+      border-radius: 7px;
+      background: var(--red);
+      color: white;
+      font: bold 1rem Georgia, serif;
+      cursor: pointer;
+      transition: transform 0.15s, background 0.15s;
+    }
+
+    button:hover {
+      transform: translateY(-1px);
+      background: #f05b62;
+    }
+
+    button:disabled {
+      opacity: 0.65;
+      cursor: wait;
+      transform: none;
+    }
+
+    .feedback {
+      min-height: 1.6em;
+      margin: 12px 0 0;
+      white-space: pre-wrap;
+      font-weight: bold;
+    }
+
+    .success {
+      color: var(--green);
+    }
+
+    .try-again,
+    .error {
+      color: var(--error);
+    }
+
+    .muted {
+      color: var(--muted);
+    }
+
+    .progress {
+      position: sticky;
+      bottom: 12px;
+      width: fit-content;
+      margin: 24px auto 0;
+      padding: 10px 16px;
+      border: 1px solid #684650;
+      border-radius: 99px;
+      background: #171019ed;
+      box-shadow: 0 4px 20px #0008;
+      color: var(--gold);
+      font-weight: bold;
+    }
+
+    footer {
+      padding: 24px;
+      border-top: 1px solid #392a37;
+      color: var(--muted);
+      text-align: center;
+      font-size: 0.9rem;
+    }
+  </style>
+</head>
+
+<body>
+  <header>
+    <div class="symbol" aria-hidden="true">🕯️ 🦇 🕯️</div>
+    <h1>Das PROLOG-Gruselkabinett</h1>
+    <p>
+      Hinter jeder Tür wartet eine neue Aufgabe. Formuliere eine PROLOG-Regel,
+      lass sie ausführen und prüfe, ob ihr Resultset zur Beschreibung passt.
+    </p>
+  </header>
+
+  <main>
+    <section class="intro" aria-labelledby="database-title">
+      <h2 id="database-title">Die geheime Datenbank</h2>
+
+      <code class="database-comment">
+        % attraction(Name, Bereich, Mindestgroesse, Gruselstufe, Wartezeit).
+      </code>
+
+      <p class="notice">
+        Gib jeweils eine vollständige Regel mit dem angegebenen Prädikatsnamen ein.
+        Beispiel: <code>alle_attraktionen(Name) :- attraction(Name, _, _, _, _).</code>
+      </p>
+      <p class="notice">
+        Die Regel wird zunächst syntaktisch geprüft. Ist sie gültig, wird das
+        Resultset angezeigt. Ein Häkchen erhältst du, wenn das Resultset der
+        gesuchten Ausgabe entspricht.
+      </p>
+      <p class="notice">
+        In PROLOG bedeutet <code>=<</code> „kleiner oder gleich“.
+        Variablen beginnen mit einem Großbuchstaben oder Unterstrich,
+        Atome üblicherweise mit einem Kleinbuchstaben.
+      </p>
+    </section>
+<section class="intro" aria-labelledby="free-query-title">
+  <h2 id="free-query-title">Datenbank selbst abfragen</h2>
+  <p class="notice">
+    Stelle eine PROLOG-Abfrage direkt an die Datenbank. Zum Beispiel:
+    <code>attraction(Name, _, _, _, _).</code>
+    Eine gültige Abfrage zeigt alle gefundenen Lösungen.
+  </p>
+
+  <label for="free-query">Deine PROLOG-Abfrage</label>
+  <textarea
+    id="free-query"
+    spellcheck="false"
+    placeholder="attraction(Name, _, _, _, _)."
+  ></textarea>
+
+  <button type="button" id="run-free-query">Abfrage ausführen</button>
+  <p class="feedback" id="free-query-feedback" aria-live="polite"></p>
+</section>
+    <div id="challenges"></div>
+
+    <div class="progress" id="progress" aria-live="polite">
+      0 von 8 Aufgaben gelöst
+    </div>
+  </main>
+
+  <footer>
+    Möge dein Mut größer sein als deine Wartezeit!
+  </footer>
+
+  <!-- Tau Prolog: Der Interpreter läuft im Browser. -->
+  <script src="https://cdn.jsdelivr.net/npm/tau-prolog@0.3.4/modules/core.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/tau-prolog@0.3.4/modules/lists.js"></script>
+
+  <script>
+    const facts = `
+attraction(geisterbahn, gruselhaus, 120, 4, 25).
+attraction(riesenrad, fantasyland, 100, 1, 10).
+attraction(hoellenrutsche, abenteuerland, 140, 3, 35).
+attraction(spukschloss, gruselhaus, 130, 5, 40).
+attraction(zauberkarussell, fantasyland, 90, 1, 5).
+attraction(fledermausflug, abenteuerland, 110, 2, 15).
+attraction(nebelkeller, gruselhaus, 150, 5, 20).
+attraction(kurbisexpress, fantasyland, 100, 2, 30).
+`;
+
+    const challenges = [
+      {
+        title: "Tür 1 – Familienfreundlich",
+        predicate: "familienfreundlich",
+        description:
+          "Finde Attraktionen mit Gruselstufe höchstens 2 und Wartezeit höchstens 25 Minuten.",
+        expected: ["riesenrad", "zauberkarussell", "fledermausflug"]
+      },
+      {
+        title: "Tür 2 – Besonders gruselig",
+        predicate: "besonders_gruselig",
+        description:
+          "Finde alle Attraktionen mit Gruselstufe 4 oder höher.",
+        expected: ["geisterbahn", "spukschloss", "nebelkeller"]
+      },
+      {
+        title: "Tür 3 – Lange Wartezeit",
+        predicate: "lange_wartezeit",
+        description:
+          "Finde Attraktionen, bei denen die Wartezeit mehr als 30 Minuten beträgt.",
+        expected: ["hoellenrutsche", "spukschloss"]
+      },
+      {
+        title: "Tür 4 – Groß genug und mutig genug",
+        predicate: "geeignet",
+        description:
+          "Finde Attraktionen, für die eine Person mit 130 cm Körpergröße und Mutstufe 4 geeignet ist. Die Körpergröße muss mindestens der Mindestgröße entsprechen und die Mutstufe mindestens der Gruselstufe.",
+        expected: [
+          "geisterbahn",
+          "riesenrad",
+          "zauberkarussell",
+          "fledermausflug",
+          "kurbisexpress"
+        ]
+      },
+      {
+        title: "Tür 5 – Kurzer Grusel",
+        predicate: "kurz_und_gruselig",
+        description:
+          "Finde Attraktionen, die entweder mindestens Gruselstufe 4 und höchstens 30 Minuten Wartezeit haben oder mindestens Gruselstufe 3 und höchstens 10 Minuten warten.",
+        expected: ["geisterbahn", "nebelkeller"]
+      },
+      {
+        title: "Tür 6 – Für kleinere Kinder",
+        predicate: "fuer_kleinere_kinder",
+        description:
+          "Finde Attraktionen mit einer Mindestgröße von höchstens 110 cm und einer Gruselstufe von höchstens 2.",
+        expected: [
+          "riesenrad",
+          "zauberkarussell",
+          "fledermausflug",
+          "kurbisexpress"
+        ]
+      },
+      {
+        title: "Tür 7 – Anstrengender Besuch",
+        predicate: "anstrengend",
+        description:
+          "Finde Attraktionen, bei denen die Wartezeit mindestens 30 Minuten beträgt und die Gruselstufe mindestens 4 ist.",
+        expected: ["spukschloss"]
+      },
+      {
+        title: "Tür 8 – Spezialattraktionen",
+        predicate: "spezialattraktion",
+        description:
+          "Finde Attraktionen, die entweder eine Mindestgröße von mindestens 140 cm haben oder mindestens Gruselstufe 5 und eine Wartezeit unter 25 Minuten.",
+        expected: ["hoellenrutsche", "nebelkeller"]
+      }
+    ];
+
+    const solved = new Set();
+    const container = document.getElementById("challenges");
+
+    challenges.forEach((challenge, index) => {
+      const section = document.createElement("section");
+      section.className = "challenge";
+
+      section.innerHTML = `
+        <h2>${challenge.title}</h2>
+        <p class="task">${challenge.description}</p>
+        <p class="notice">
+          Verwende für den Kopf deiner Regel das Prädikat
+          <span class="predicate">${challenge.predicate}(Name)</span>.
+        </p>
+
+        <label for="rule-${index}">Deine PROLOG-Regel</label>
+        <textarea
+          id="rule-${index}"
+          spellcheck="false"
+          placeholder="${challenge.predicate}(Name) :- ..."
+        ></textarea>
+
+        <button type="button" data-index="${index}">
+          Regel prüfen
+        </button>
+
+        <p class="feedback" id="feedback-${index}" aria-live="polite"></p>
+      `;
+
+      container.appendChild(section);
+    });
+
+    function termToString(term) {
+      if (term === undefined || term === null) {
+        return "";
+      }
+
+      if (typeof term === "string") {
+        return term;
+      }
+
+      if (term.id !== undefined) {
+        return String(term.id);
+      }
+
+      return String(term);
+    }
+
+    function setsEqual(a, b) {
+      const left = [...new Set(a)].sort();
+      const right = [...new Set(b)].sort();
+      return JSON.stringify(left) === JSON.stringify(right);
+    }
+function runFreeQuery(queryText, feedback, button) {
+  const session = pl.create(1000);
+
+  session.consult(facts, {
+    success: () => {
+      session.query(queryText, {
+        success: () => {
+          const solutions = [];
+
+          function nextAnswer() {
+            session.answer({
+              success: answer => {
+                const bindings = answer.links || {};
+                const entries = Object.entries(bindings);
+
+                if (entries.length === 0) {
+                  solutions.push("true");
+                } else {
+                  solutions.push(
+                    entries
+                      .map(([variable, value]) =>
+                        `${variable} = ${termToString(value)}`
+                      )
+                      .join(", ")
+                  );
+                }
+
+                nextAnswer();
+              },
+
+              fail: () => {
+                feedback.textContent = solutions.length
+                  ? `Ergebnis:\n${solutions.join("\n")}`
+                  : "Keine Treffer.";
+                feedback.className = "feedback";
+                button.disabled = false;
+              },
+
+              error: error => {
+                feedback.textContent = "Fehler beim Ausführen der Abfrage: " + error;
+                feedback.className = "feedback error";
+                button.disabled = false;
+              }
+            });
+          }
+
+          nextAnswer();
+        },
+
+        error: error => {
+          feedback.textContent = "Syntaxfehler oder ungültige Abfrage: " + error;
+          feedback.className = "feedback error";
+          button.disabled = false;
+        }
+      });
+    },
+
+    error: error => {
+      feedback.textContent = "Fehler in der Datenbank: " + error;
+      feedback.className = "feedback error";
+      button.disabled = false;
+    }
+  });
+}
+    function updateProgress() {
+      document.getElementById("progress").textContent =
+        `${solved.size} von ${challenges.length} Aufgaben gelöst`;
+    }
+
+    function runRule(ruleText, challenge, feedback, button, index) {
+      const session = pl.create(1000);
+      const program = facts + "\n" + ruleText;
+
+      session.consult(program, {
+        success: () => {
+          const queryText = `${challenge.predicate}(Name).`;
+
+          session.query(queryText, {
+            success: () => {
+              const results = [];
+
+              function nextAnswer() {
+                session.answer({
+                  success: answer => {
+                    const value = answer.links && answer.links.Name;
+
+                    if (value !== undefined) {
+                      results.push(termToString(value));
+                    }
+
+                    nextAnswer();
+                  },
+
+                  fail: () => {
+                    showResults();
+                  },
+
+                  error: error => {
+                    showError("Fehler beim Ausführen der Regel: " + error);
+                  }
+                });
+              }
+
+              function showResults() {
+                const uniqueResults = [...new Set(results)].sort();
+                const displayedResults = uniqueResults.length
+                  ? uniqueResults.join(", ")
+                  : "Keine Treffer";
+
+                feedback.textContent = `Resultset: ${displayedResults}`;
+
+                if (setsEqual(uniqueResults, challenge.expected)) {
+                  feedback.textContent += "\n✓ Die Aufgabe ist korrekt gelöst.";
+                  feedback.className = "feedback success";
+                  solved.add(index);
+                } else {
+                  feedback.textContent +=
+                    "\nDie Regel ist syntaktisch korrekt, aber das Resultset passt noch nicht zur Aufgabe.";
+                  feedback.className = "feedback try-again";
+                  solved.delete(index);
+                }
+
+                button.disabled = false;
+                updateProgress();
+              }
+
+              function showError(message) {
+                feedback.textContent = message;
+                feedback.className = "feedback error";
+                button.disabled = false;
+                solved.delete(index);
+                updateProgress();
+              }
+
+              nextAnswer();
+            },
+
+            error: error => {
+              feedback.textContent = "Fehler in der Abfrage: " + error;
+              feedback.className = "feedback error";
+              button.disabled = false;
+              solved.delete(index);
+              updateProgress();
+            }
+          });
+        },
+
+        error: error => {
+          feedback.textContent =
+            "Syntaxfehler oder ungültige PROLOG-Regel: " + error;
+          feedback.className = "feedback error";
+          button.disabled = false;
+          solved.delete(index);
+          updateProgress();
+        }
+      });
+    }
+
+    container.addEventListener("click", event => {
+      const button = event.target.closest("button[data-index]");
+      if (!button) {
+        return;
+      }
+
+      const index = Number(button.dataset.index);
+      const challenge = challenges[index];
+      const ruleText = document.getElementById(`rule-${index}`).value.trim();
+      const feedback = document.getElementById(`feedback-${index}`);
+
+      if (!ruleText) {
+        feedback.textContent = "Bitte gib zuerst eine PROLOG-Regel ein.";
+        feedback.className = "feedback error";
+        return;
+      }
+
+      button.disabled = true;
+      feedback.textContent = "Regel wird geprüft und ausgeführt …";
+      feedback.className = "feedback muted";
+
+      runRule(ruleText, challenge, feedback, button, index);
+    });
+document.getElementById("run-free-query").addEventListener("click", event => {
+  const button = event.currentTarget;
+  const queryText = document.getElementById("free-query").value.trim();
+  const feedback = document.getElementById("free-query-feedback");
+
+  if (!queryText) {
+    feedback.textContent = "Bitte gib zuerst eine PROLOG-Abfrage ein.";
+    feedback.className = "feedback error";
+    return;
+  }
+
+  button.disabled = true;
+  feedback.textContent = "Abfrage wird ausgeführt …";
+  feedback.className = "feedback muted";
+
+  runFreeQuery(queryText, feedback, button);
+});
+  </script>
+</body>
+</html>
