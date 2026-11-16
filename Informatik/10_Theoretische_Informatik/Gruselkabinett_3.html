@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Das PROLOG-Gruselkabinett</title>
+
+  <style>
+    :root {
+      color-scheme: dark;
+      --panel: #1c1520;
+      --panel-light: #281e2c;
+      --red: #e04b52;
+      --gold: #e9c77b;
+      --text: #f2e9df;
+      --muted: #c3b4c0;
+      --green: #76d6a2;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background:
+        radial-gradient(ellipse at top, #382137 0, transparent 50%),
+        linear-gradient(160deg, #100c12, #17101b 55%, #0b090e);
+      color: var(--text);
+      font-family: Georgia, "Times New Roman", serif;
+      line-height: 1.6;
+    }
+
+    header {
+      padding: 52px 20px 36px;
+      text-align: center;
+      border-bottom: 1px solid #56343e;
+      background: linear-gradient(#160f19cc, #100c12ee);
+    }
+
+    header .symbol {
+      font-size: 2.6rem;
+      filter: drop-shadow(0 0 12px #e04b5288);
+    }
+
+    h1 {
+      margin: 8px 0;
+      color: var(--red);
+      font-size: clamp(2rem, 6vw, 3.5rem);
+      letter-spacing: 0.06em;
+      text-shadow: 0 0 22px #e04b5266;
+    }
+
+    header p {
+      max-width: 680px;
+      margin: 0 auto;
+      color: var(--muted);
+    }
+
+    main {
+      width: min(940px, calc(100% - 32px));
+      margin: 32px auto 64px;
+    }
+
+    .intro,
+    .challenge {
+      background: linear-gradient(145deg, var(--panel-light), var(--panel));
+      border: 1px solid #493341;
+      border-radius: 12px;
+      box-shadow: 0 12px 32px #0005;
+    }
+
+    .intro {
+      padding: 22px;
+      margin-bottom: 24px;
+    }
+
+    .database-comment {
+      display: block;
+      overflow-x: auto;
+      padding: 14px 16px;
+      border-left: 4px solid var(--gold);
+      border-radius: 4px;
+      background: #100d12;
+      color: var(--gold);
+      font: 1rem/1.5 "Courier New", monospace;
+      white-space: nowrap;
+    }
+
+    .notice {
+      color: var(--muted);
+      font-size: 0.95rem;
+    }
+
+    .challenge {
+      margin: 18px 0;
+      padding: 22px;
+    }
+
+    .challenge h2 {
+      margin: 0 0 8px;
+      color: var(--gold);
+      font-size: 1.3rem;
+    }
+
+    .task {
+      margin: 0 0 16px;
+    }
+
+    label {
+      display: block;
+      margin: 14px 0 6px;
+      color: var(--muted);
+      font-weight: bold;
+    }
+
+    textarea {
+      width: 100%;
+      min-height: 105px;
+      resize: vertical;
+      border: 1px solid #5c4557;
+      border-radius: 7px;
+      background: #100d12;
+      color: var(--text);
+      padding: 12px;
+      font: 0.95rem/1.5 "Courier New", monospace;
+    }
+
+    textarea:focus {
+      outline: 2px solid #e04b5288;
+      border-color: var(--red);
+    }
+
+    button {
+      margin-top: 16px;
+      padding: 10px 16px;
+      border: 0;
+      border-radius: 7px;
+      background: var(--red);
+      color: white;
+      font: bold 1rem Georgia, serif;
+      cursor: pointer;
+      transition: transform 0.15s, background 0.15s;
+    }
+
+    button:hover {
+      transform: translateY(-1px);
+      background: #f05b62;
+    }
+
+    .feedback {
+      min-height: 1.6em;
+      margin: 12px 0 0;
+      font-weight: bold;
+    }
+
+    .success {
+      color: var(--green);
+    }
+
+    .try-again {
+      color: #ffb3a6;
+    }
+
+    .progress {
+      position: sticky;
+      bottom: 12px;
+      width: fit-content;
+      margin: 24px auto 0;
+      padding: 10px 16px;
+      border: 1px solid #684650;
+      border-radius: 99px;
+      background: #171019ed;
+      box-shadow: 0 4px 20px #0008;
+      color: var(--gold);
+      font-weight: bold;
+    }
+
+    footer {
+      padding: 24px;
+      border-top: 1px solid #392a37;
+      color: var(--muted);
+      text-align: center;
+      font-size: 0.9rem;
+    }
+  </style>
+</head>
+
+<body>
+  <header>
+    <div class="symbol" aria-hidden="true">🕯️ 🦇 🕯️</div>
+    <h1>Das PROLOG-Gruselkabinett</h1>
+    <p>
+      Hinter jeder Tür wartet eine neue Regel. Formuliere sie in PROLOG
+      und finde heraus, welche Attraktionen zur Beschreibung passen.
+    </p>
+  </header>
+
+  <main>
+    <section class="intro" aria-labelledby="database-title">
+      <h2 id="database-title">Die geheime Datenbank</h2>
+
+      <code class="database-comment">% attraction(Name, Bereich, Mindestgroesse, Gruselstufe, Wartezeit).</code>
+
+      <p class="notice">
+        Schreibe für jede Aufgabe eine PROLOG-Regel. Das passende Resultset
+        wird im Hintergrund aus der Datenbank ermittelt.
+      </p>
+      <p class="notice">
+        Leerzeichen und Zeilenumbrüche sind nicht wichtig. Die Regel muss
+        aber inhaltlich mit der Musterregel übereinstimmen.
+      </p>
+    </section>
+
+    <div id="challenges"></div>
+
+    <div class="progress" id="progress" aria-live="polite">
+      0 von 9 Aufgaben gelöst
+    </div>
+  </main>
+
+  <footer>
+    Denk daran: In PROLOG bedeutet <code>=<</code> „kleiner oder gleich“.
+    Möge dein Mut größer sein als deine Wartezeit!
+  </footer>
+
+  <script>
+    /*
+      attraction(Name, Bereich, Mindestgroesse, Gruselstufe, Wartezeit).
+      Die Fakten werden den Lernenden nicht als Liste angezeigt.
+    */
+    const attraction = [
+      ["geisterbahn", "gruselhaus", 120, 4, 25],
+      ["riesenrad", "fantasyland", 100, 1, 10],
+      ["hoellenrutsche", "abenteuerland", 140, 3, 35],
+      ["spukschloss", "gruselhaus", 130, 5, 40],
+      ["zauberkarussell", "fantasyland", 90, 1, 5],
+      ["fledermausflug", "abenteuerland", 110, 2, 15],
+      ["nebelkeller", "gruselhaus", 150, 5, 20],
+      ["kürbisexpress", "fantasyland", 100, 2, 30]
+    ];
+
+    const challenges = [
+      {
+        title: "Abfrage 0 – Alle Attraktionen",
+        description:
+          "Formuliere eine Regel, die alle Attraktionen aus der Datenbank findet.",
+        rule:
+          "alle_attraktionen(Name) :- attraction(Name, _, _, _, _).",
+        result: row => true
+      },
+      {
+        title: "Tür 1 – Familienfreundlich",
+        description:
+          "Finde Attraktionen mit Gruselstufe höchstens 2 und Wartezeit höchstens 25 Minuten.",
+        rule:
+          "familienfreundlich(Name) :- attraction(Name, _, _, Grusel, Wartezeit), (Grusel =< 2, Wartezeit =< 25).",
+        result: row => row[3] <= 2 && row[4] <= 25
+      },
+      {
+        title: "Tür 2 – Besonders gruselig",
+        description:
+          "Finde alle Attraktionen mit Gruselstufe 4 oder höher.",
+        rule:
+          "besonders_gruselig(Name) :- attraction(Name, _, _, Grusel, _), Grusel >= 4.",
+        result: row => row[3] >= 4
+      },
+      {
+        title: "Tür 3 – Lange Wartezeit",
+        description:
+          "Finde Attraktionen, bei denen die Wartezeit mehr als 30 Minuten beträgt.",
+        rule:
+          "lange_wartezeit(Name) :- attraction(Name, _, _, _, Wartezeit), Wartezeit > 30.",
+        result: row => row[4] > 30
+      },
+      {
+        title: "Tür 4 – Groß genug und mutig genug",
+        description:
+          "Finde Attraktionen, für die eine Person mit 130 cm Körpergröße und Mutstufe 4 geeignet ist. Die Körpergröße muss mindestens der Mindestgröße entsprechen und die Mutstufe mindestens der Gruselstufe.",
+        rule:
+          "geeignet(Name) :- attraction(Name, _, Mindestgroesse, Grusel, _), (130 >= Mindestgroesse, 4 >= Grusel).",
+        result: row => 130 >= row[2] && 4 >= row[3]
+      },
+      {
+        title: "Tür 5 – Kurzer Grusel",
+        description:
+          "Finde Attraktionen, die entweder mindestens Gruselstufe 4 und höchstens 30 Minuten Wartezeit haben oder mindestens Gruselstufe 3 und höchstens 10 Minuten warten.",
+        rule:
+          "kurz_und_gruselig(Name) :- attraction(Name, _, _, Grusel, Wartezeit), ((Grusel >= 4, Wartezeit =< 30); (Grusel >= 3, Wartezeit =< 10)).",
+        result: row =>
+          (row[3] >= 4 && row[4] <= 30) ||
+          (row[3] >= 3 && row[4] <= 10)
+      },
+      {
+        title: "Tür 6 – Für kleinere Kinder",
+        description:
+          "Finde Attraktionen mit einer Mindestgröße von höchstens 110 cm und einer Gruselstufe von höchstens 2.",
+        rule:
+          "fuer_kleinere_kinder(Name) :- attraction(Name, _, Mindestgroesse, Grusel, _), (Mindestgroesse =< 110, Grusel =< 2).",
+        result: row => row[2] <= 110 && row[3] <= 2
+      },
+      {
+        title: "Tür 7 – Anstrengender Besuch",
+        description:
+          "Finde Attraktionen, bei denen die Wartezeit mindestens 30 Minuten beträgt und die Gruselstufe mindestens 4 ist.",
+        rule:
+          "anstrengend(Name) :- attraction(Name, _, _, Grusel, Wartezeit), (Wartezeit >= 30, Grusel >= 4).",
+        result: row => row[4] >= 30 && row[3] >= 4
+      },
+      {
+        title: "Tür 8 – Spezialattraktionen",
+        description:
+          "Finde Attraktionen, die entweder eine Mindestgröße von mindestens 140 cm haben oder mindestens Gruselstufe 5 und eine Wartezeit unter 25 Minuten.",
+        rule:
+          "spezialattraktion(Name) :- attraction(Name, _, Mindestgroesse, Grusel, Wartezeit), ((Mindestgroesse >= 140); (Grusel >= 5, Wartezeit < 25)).",
+        result: row =>
+          row[2] >= 140 ||
+          (row[3] >= 5 && row[4] < 25)
+      }
+    ];
+
+    const solved = new Set();
+    const container = document.getElementById("challenges");
+
+    function normalizeRule(rule) {
+      return rule
+        .toLowerCase()
+        .replace(/\s+/g, "")
+        .replace(/\.$/, "");
+    }
+
+    function getResultSet(challenge) {
+      return attraction
+        .filter(challenge.result)
+        .map(row => row[0])
+        .sort();
+    }
+
+    challenges.forEach((challenge, index) => {
+      const section = document.createElement("section");
+      section.className = "challenge";
+
+      section.innerHTML = `
+        <h2>${challenge.title}</h2>
+        <p class="task">${challenge.description}</p>
+
+        <label for="rule-${index}">Deine PROLOG-Regel</label>
+        <textarea
+          id="rule-${index}"
+          spellcheck="false"
+          placeholder="Schreibe hier deine Regel …"
+        ></textarea>
+
+        <button type="button" data-index="${index}">
+          Regel prüfen
+        </button>
+
+        <p class="feedback" id="feedback-${index}" aria-live="polite"></p>
+      `;
+
+      container.appendChild(section);
+    });
+
+    container.addEventListener("click", event => {
+      if (!event.target.matches("button[data-index]")) {
+        return;
+      }
+
+      const index = Number(event.target.dataset.index);
+      const challenge = challenges[index];
+      const enteredRule = document.getElementById(`rule-${index}`).value;
+      const feedback = document.getElementById(`feedback-${index}`);
+
+      const isCorrect =
+        normalizeRule(enteredRule) === normalizeRule(challenge.rule);
+
+      if (isCorrect) {
+        const resultSet = getResultSet(challenge);
+
+        feedback.textContent =
+          `✓ Richtig! Das Resultset lautet: ${resultSet.join(", ")}.`;
+        feedback.className = "feedback success";
+        solved.add(index);
+      } else {
+        feedback.textContent =
+          "✗ Noch nicht ganz. Überlege noch einmal, welche Bedingungen und Klammern du brauchst.";
+        feedback.className = "feedback try-again";
+        solved.delete(index);
+      }
+
+      document.getElementById("progress").textContent =
+        `${solved.size} von ${challenges.length} Aufgaben gelöst`;
+    });
+  </script>
+</body>
+</html>
